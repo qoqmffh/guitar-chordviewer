@@ -20,26 +20,110 @@
     --bg-danger: #fcebeb;
     --radius: 8px;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    /* 재질(유리) 레이어 — 사이드바는 무거운/구조적 재질, 카드는 가벼운/상호작용 재질 */
+    --glass-heavy: rgba(255, 255, 255, 0.45);
+    --glass-light: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.6);
   }
   * { box-sizing: border-box; }
+  html { font-size: 100%; } /* 사용자 브라우저 글자크기 설정 존중 (rem 기준) */
   body {
     font-family: var(--font-sans);
+    font-size: 0.8125rem;
     color: var(--text-primary);
-    background: var(--surface-1);
+    /* 블러가 비칠 은은한 배경 — 완전 평면이 아니라 재질이 뜰 표면을 만든다 */
+    background: linear-gradient(160deg, #eef2f6 0%, #f6f4ef 55%, #eef1ec 100%);
     margin: 0;
     padding: 24px 16px 60px;
   }
-  #app {
-    max-width: 760px;
+  #page-shell {
+    max-width: 1280px;
     margin: 0 auto;
-    background: var(--surface-2);
-    border: 0.5px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
   }
-  h1 {
-    font-size: 18px;
+  #sidebar {
+    flex: 0 0 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: sticky;
+    top: 24px;
+    background: var(--glass-heavy);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 8px;
+  }
+  .nav-btn {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 0.8125rem;
     font-weight: 500;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-btn:hover { background: var(--surface-1); }
+  }
+  .nav-btn.active {
+    background: var(--bg-accent);
+    color: var(--text-accent);
+    border-color: var(--border-accent);
+  }
+  #page-content { flex: 1 1 auto; min-width: 0; }
+  #app, #app-progression {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--glass-light);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-top-color: rgba(255, 255, 255, 0.85); /* 빛을 받는 위쪽 모서리 */
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: 0 12px 32px -16px rgba(30, 30, 20, 0.18);
+  }
+  .prog-slot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 6px 8px;
+  }
+  .prog-select {
+    font-size: 0.8125rem;
+    padding: 4px 6px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface-2);
+    transition: border-color 150ms ease;
+  }
+  .prog-select:hover { border-color: var(--border-accent); }
+  .prog-remove {
+    border: none;
+    background: none;
+    color: var(--text-danger);
+    cursor: pointer;
+    font-size: 0.875rem;
+    padding: 0 2px;
+    transition: opacity 150ms ease;
+    opacity: 0.7;
+  }
+  .prog-remove:hover { opacity: 1; }
+  h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
     margin: 0 0 20px;
   }
   .sr-only {
@@ -48,13 +132,16 @@
   }
   .gt-btn {
     padding: 6px 10px;
-    font-size: 12px;
+    font-size: 0.8125rem;
     border-radius: var(--radius);
     border: 0.5px solid var(--border-strong);
     background: var(--surface-2);
     cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
   }
-  .gt-btn:hover { background: var(--surface-1); }
+  @media (hover: hover) and (pointer: fine) {
+    .gt-btn:hover { background: var(--surface-1); }
+  }
   .gt-btn.active {
     background: var(--bg-accent);
     color: var(--text-accent);
@@ -64,19 +151,19 @@
     background: var(--surface-1);
     border-radius: var(--radius);
     padding: 12px;
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
-  .gt-grip-title { font-size: 13px; font-weight: 500; margin: 0 0 6px; }
+  .gt-grip-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.005em; margin: 0 0 6px; }
   .gt-row { display: flex; justify-content: space-between; color: var(--text-secondary); padding: 2px 0; }
-  .gt-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-  .ts { font-size: 12px; fill: var(--text-secondary); font-family: var(--font-sans); }
+  .gt-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 6px; }
+  .ts { font-size: 0.6875rem; letter-spacing: 0.01em; fill: var(--text-secondary); font-family: var(--font-sans); }
   #gt-error {
     display: none;
     background: var(--bg-danger);
     color: var(--text-danger);
     padding: 8px 12px;
     border-radius: var(--radius);
-    font-size: 12px;
+    font-size: 0.8125rem;
     margin-bottom: 10px;
   }
   #gt-grips {
@@ -85,12 +172,53 @@
     gap: 10px;
   }
   .gt-flex { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* 재질(반투명/블러)을 지원하지 않거나 원치 않는 환경 — 불투명 표면으로 대체 */
+  @media (prefers-reduced-transparency: reduce) {
+    #sidebar, #app, #app-progression {
+      background: var(--surface-2);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+  @media (prefers-contrast: more) {
+    #sidebar, #app, #app-progression {
+      background: var(--surface-2);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: 1px solid var(--text-primary);
+    }
+    .gt-btn, .nav-btn { border-color: var(--text-primary); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gt-btn, .nav-btn, .prog-remove { transition: background 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
+  }
+
+  /* 좁은 화면: 사이드바를 위쪽 가로 탭 바로 전환 */
+  @media (max-width: 720px) {
+    body { padding: 16px 10px 40px; }
+    #page-shell { flex-direction: column; gap: 12px; }
+    #sidebar {
+      flex-direction: row;
+      width: 100%;
+      position: static;
+      overflow-x: auto;
+    }
+    .nav-btn { flex: 1 1 0; text-align: center; white-space: nowrap; }
+    #app, #app-progression { padding: 18px 16px; border-radius: 12px; }
+  }
 </style>
 </head>
 <body>
+<div id="page-shell">
+  <nav id="sidebar">
+    <button id="nav-code" class="nav-btn active">코드</button>
+    <button id="nav-progression" class="nav-btn">코드진행</button>
+  </nav>
+  <div id="page-content">
 <div id="app">
   <h1>기타 코드 지판 뷰어</h1>
-  <h2 class="sr-only">기타 지판 위 트라이어드/4화음 위치와 탑노트 기준, 포지션 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
+  <h2 class="sr-only">기타 지판 위 트라이어드/4화음 위치와 멜로디 보이싱, 오픈 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
 
   <div id="gt-error"></div>
 
@@ -99,39 +227,138 @@
     <div id="gt-modes" class="gt-flex"></div>
   </div>
 
-  <div style="margin-bottom:12px;">
-    <div class="gt-label">루트음 / 탑노트</div>
-    <div id="gt-roots" class="gt-flex"></div>
+  <div id="gt-standard-controls">
+    <div style="margin-bottom:12px;">
+      <div class="gt-label">루트음 / 탑노트</div>
+      <div id="gt-roots" class="gt-flex"></div>
+    </div>
+
+    <div id="gt-topstring-wrap" style="margin-bottom:12px;">
+      <div class="gt-label">탑노트가 있는 줄</div>
+      <div id="gt-topstrings" class="gt-flex"></div>
+    </div>
+
+    <div id="gt-fretgroup-wrap" style="margin-bottom:12px;">
+      <div class="gt-label">프렛 묶기</div>
+      <div id="gt-fretgroup" class="gt-flex"></div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div class="gt-label">코드 종류</div>
+      <div id="gt-qualities" class="gt-flex"></div>
+    </div>
   </div>
 
-  <div id="gt-topstring-wrap" style="margin-bottom:12px;">
-    <div class="gt-label">탑노트가 있는 줄</div>
-    <div id="gt-topstrings" class="gt-flex"></div>
-  </div>
-
-  <div id="gt-position-wrap" style="margin-bottom:12px;">
-    <div class="gt-label">포지션 폭</div>
-    <div id="gt-posw" class="gt-flex" style="margin-bottom:8px;"></div>
-    <div class="gt-label">포지션 선택</div>
-    <div id="gt-positions" class="gt-flex"></div>
-  </div>
-
-  <div style="margin-bottom:16px;">
-    <div class="gt-label">코드 종류</div>
-    <div id="gt-qualities" class="gt-flex"></div>
+  <div id="gt-open-controls" style="display:none;">
+    <div style="margin-bottom:12px;">
+      <div class="gt-label">조성 (키)</div>
+      <div id="gt-openkeys" class="gt-flex"></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div class="gt-label">다이아토닉 코드</div>
+      <div id="gt-opendegrees" class="gt-flex"></div>
+    </div>
+    <div id="gt-openquality-wrap" style="margin-bottom:16px; display:none;">
+      <div class="gt-label">코드 종류 (선택한 다이아토닉 코드의 루트 기준)</div>
+      <div id="gt-openqualities" class="gt-flex"></div>
+    </div>
   </div>
 
   <div id="gt-fretboard"></div>
 
   <div id="gt-legend" class="gt-flex" style="margin:10px 0 16px; font-size:12px;"></div>
 
-  <div id="gt-grips-title" style="font-size:13px; font-weight:500; margin-bottom:8px;">추천 그립</div>
+  <div id="gt-grips-title" style="font-size:1rem; font-weight:600; letter-spacing:-0.005em; margin-bottom:8px;">추천 그립</div>
   <div id="gt-grips"></div>
+</div>
+
+<div id="app-progression" style="display:none;">
+  <h1>코드 진행</h1>
+
+  <div style="margin-bottom:12px;">
+    <div class="gt-label">코드 진행</div>
+    <div id="prog-chords" class="gt-flex" style="margin-bottom:8px;"></div>
+    <button id="prog-add-btn" class="gt-btn">+ 코드 추가</button>
+  </div>
+
+  <div style="margin-bottom:12px;">
+    <div class="gt-label">프렛 범위 (개방현은 항상 허용)</div>
+    <div id="prog-range" class="gt-flex"></div>
+  </div>
+
+  <div style="margin-bottom:16px;">
+    <div class="gt-label">보이싱 방식</div>
+    <div id="prog-voicing-mode" class="gt-flex"></div>
+  </div>
+
+  <div id="prog-results"></div>
+</div>
+
+  </div>
 </div>
 
 <script>
 try {
 (function () {
+
+  // ---------------------------------------------------------------
+  // 0. 스프링 기반 프레스 피드백 (애플 디자인: 고정 시간 트랜지션 대신
+  //    감쇠비/응답 기반 스프링 — 연타해도 매번 현재 값에서 자연스럽게
+  //    이어짐). CSS :active 대신 pointerdown/up에서 transform을 직접 구동.
+  // ---------------------------------------------------------------
+  (function setupSpringPress() {
+    var DAMPING = 1.0;   // 1.0 = 임계감쇠, 오버슈트 없이 깔끔하게 정착
+    var RESPONSE = 0.25; // 초 단위, 낮을수록 스냅감 있음 (버튼 탭 기준)
+
+    function reducedMotion() {
+      return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function animateScale(el, target) {
+      if (reducedMotion()) { el.style.transform = ''; return; }
+      var stiffness = Math.pow((2 * Math.PI) / RESPONSE, 2);
+      var dampCoef = DAMPING * 2 * Math.sqrt(stiffness);
+      var state = el.__springState || { value: 1, velocity: 0 };
+      if (el.__springRAF) { cancelAnimationFrame(el.__springRAF); }
+      var lastTime = null;
+      function step(now) {
+        if (lastTime === null) { lastTime = now; }
+        var dt = Math.min((now - lastTime) / 1000, 0.032);
+        lastTime = now;
+        var accel = -stiffness * (state.value - target) - dampCoef * state.velocity;
+        state.velocity += accel * dt;
+        state.value += state.velocity * dt;
+        el.style.transform = 'scale(' + state.value.toFixed(4) + ')';
+        if (Math.abs(state.value - target) < 0.002 && Math.abs(state.velocity) < 0.002) {
+          state.value = target;
+          el.style.transform = target === 1 ? '' : 'scale(' + target + ')';
+          el.__springState = state;
+          el.__springRAF = null;
+          return;
+        }
+        el.__springRAF = requestAnimationFrame(step);
+      }
+      el.__springState = state;
+      el.__springRAF = requestAnimationFrame(step);
+    }
+
+    function pressTarget(node) {
+      return node && node.closest && node.closest('.gt-btn, .nav-btn, .prog-remove');
+    }
+
+    document.addEventListener('pointerdown', function (e) {
+      var t = pressTarget(e.target);
+      if (t) { animateScale(t, 0.97); }
+    });
+    document.addEventListener('pointerup', function (e) {
+      var t = pressTarget(e.target);
+      if (t) { animateScale(t, 1); }
+    });
+    document.addEventListener('pointercancel', function (e) {
+      var t = pressTarget(e.target);
+      if (t) { animateScale(t, 1); }
+    });
+  })();
 
   // ---------------------------------------------------------------
   // 1. 상수 / 데이터
@@ -152,21 +379,37 @@ try {
   // 코드 종류 정의: intervals = [반음 오프셋, 표시 라벨] 목록
   // type: 'triad'  -> 인접 3현 보이싱에 사용 (STRING_SETS.triad)
   //       'chord4' -> 인접 4현 보이싱에 사용 (STRING_SETS.chord4)
+  // required: 오픈 보이싱에서 반드시 커버돼야 하는(생략 불가) 라벨 목록.
+  // 순정 5도·(대개의) 7도는 있으면 좋지만 없어도 무방해서 required에서 뺀다.
   var QUALITIES = {
-    major:    { label: '메이저 트라이어드',        intervals: [[0,'R'],[4,'3'],[7,'5']],                 type: 'triad'  },
-    minor:    { label: '마이너 트라이어드',        intervals: [[0,'R'],[3,'b3'],[7,'5']],                type: 'triad'  },
-    dom7:     { label: '도미넌트7 1-3-5-b7',       intervals: [[0,'R'],[4,'3'],[7,'5'],[10,'b7']],       type: 'chord4' },
-    maj7:     { label: '메이저7 1-3-5-7',          intervals: [[0,'R'],[4,'3'],[7,'5'],[11,'7']],        type: 'chord4' },
-    min7:     { label: '마이너7 1-b3-5-b7',        intervals: [[0,'R'],[3,'b3'],[7,'5'],[10,'b7']],      type: 'chord4' },
-    halfdim7: { label: '하프디미니쉬7 1-b3-b5-b7', intervals: [[0,'R'],[3,'b3'],[6,'b5'],[10,'b7']],     type: 'chord4' },
-    dim7:     { label: '디미니쉬7 1-b3-b5-bb7',    intervals: [[0,'R'],[3,'b3'],[6,'b5'],[9,'bb7']],     type: 'chord4' },
-    aug7:     { label: '어그먼트7 1-3-#5-7',       intervals: [[0,'R'],[4,'3'],[8,'#5'],[11,'7']],       type: 'chord4' }
+    major:    { label: '메이저 트라이어드',        intervals: [[0,'R'],[4,'3'],[7,'5']],                 type: 'triad',  required: ['R','3'] },
+    minor:    { label: '마이너 트라이어드',        intervals: [[0,'R'],[3,'b3'],[7,'5']],                type: 'triad',  required: ['R','b3'] },
+    dom7:     { label: '도미넌트7 1-3-5-b7',       intervals: [[0,'R'],[4,'3'],[7,'5'],[10,'b7']],       type: 'chord4', required: ['R','3'] },
+    maj7:     { label: '메이저7 1-3-5-7',          intervals: [[0,'R'],[4,'3'],[7,'5'],[11,'7']],        type: 'chord4', required: ['R','3'] },
+    min7:     { label: '마이너7 1-b3-5-b7',        intervals: [[0,'R'],[3,'b3'],[7,'5'],[10,'b7']],      type: 'chord4', required: ['R','b3'] },
+    halfdim7: { label: '하프디미니쉬7 1-b3-b5-b7', intervals: [[0,'R'],[3,'b3'],[6,'b5'],[10,'b7']],     type: 'chord4', required: ['R','b3','b5'] },
+    dim7:     { label: '디미니쉬7 1-b3-b5-bb7',    intervals: [[0,'R'],[3,'b3'],[6,'b5'],[9,'bb7']],     type: 'chord4', required: ['R','b3','b5'] },
+    aug7:     { label: '어그먼트7 1-3-#5-7',       intervals: [[0,'R'],[4,'3'],[8,'#5'],[11,'7']],       type: 'chord4', required: ['R','3','#5'] }
+  };
+
+  // 오픈 보이싱 전용 추가 코드 종류(다이아토닉 아래 별도 섹션). 조성의 으뜸음을
+  // 루트로 삼아 계산한다. 여기 등장하는 확장음(2,9,4)은 그 코드의 정체성 그
+  // 자체라서 required에 포함 — 생략하면 다른 코드가 돼버리기 때문.
+  var EXTRA_OPEN_QUALITIES = {
+    add2: { label: 'add2', intervals: [[0,'R'],[4,'3'],[7,'5'],[2,'2']],            required: ['R','3','2'] },
+    add9: { label: 'add9', intervals: [[0,'R'],[4,'3'],[7,'5'],[2,'9']],            required: ['R','3','9'] },
+    dom9: { label: '9',    intervals: [[0,'R'],[4,'3'],[7,'5'],[10,'b7'],[2,'9']],  required: ['R','3','b7','9'] },
+    m9:   { label: 'm9',   intervals: [[0,'R'],[3,'b3'],[7,'5'],[10,'b7'],[2,'9']], required: ['R','b3','b7','9'] },
+    M9:   { label: 'M9',   intervals: [[0,'R'],[4,'3'],[7,'5'],[11,'7'],[2,'9']],   required: ['R','3','7','9'] },
+    sus2: { label: 'sus2', intervals: [[0,'R'],[2,'2'],[7,'5']],                    required: ['R','2'] },
+    sus4: { label: 'sus4', intervals: [[0,'R'],[5,'4'],[7,'5']],                    required: ['R','4'] }
   };
 
   // 인터벌 라벨별 색상 (지판 위 점 색상)
   var LABEL_COLOR = {
     R: '#A32D2D', '3': '#185FA5', b3: '#0F6E56', '5': '#3B6D11',
-    b5: '#854F0B', '#5': '#534AB7', '7': '#993556', b7: '#5F5E5A', bb7: '#993C1D'
+    b5: '#854F0B', '#5': '#534AB7', '7': '#993556', b7: '#5F5E5A', bb7: '#993C1D',
+    '2': '#8A6D00', '9': '#2C7DA0', '4': '#8C4B9E'
   };
 
   // 3현/4현 세트 정의 (인덱스는 OPEN 배열 인덱스, 즉 0=6번줄 ... 5=1번줄)
@@ -185,16 +428,36 @@ try {
     chord4: { 1: 2, 2: 1, 3: 0 }
   };
 
+  // 오픈 보이싱 모드: 메이저 조성의 다이아토닉 7th 코드 7개.
+  // OFFSET = 조성 루트로부터의 반음 오프셋(메이저 스케일), QUAL = QUALITIES 키
+  var DIATONIC_DEGREES = [
+    { label: 'I',    offset: 0,  qual: 'maj7' },
+    { label: 'ii',   offset: 2,  qual: 'min7' },
+    { label: 'iii',  offset: 4,  qual: 'min7' },
+    { label: 'IV',   offset: 5,  qual: 'maj7' },
+    { label: 'V',    offset: 7,  qual: 'dom7' },
+    { label: 'vi',   offset: 9,  qual: 'min7' },
+    { label: 'vii°', offset: 11, qual: 'halfdim7' }
+  ];
+
   // ---------------------------------------------------------------
   // 2. 상태
   // ---------------------------------------------------------------
   var state = {
-    mode: 'root',       // 'root' | 'top' | 'position'
+    mode: 'root',       // 'root' | 'top' | 'open'
     root: 0,             // 0~11 (C=0)
     quality: 'major',    // QUALITIES 키
     topString: 1,        // 탑노트 기준 모드에서 선택한 줄 번호
-    posWindow: 4,        // 포지션 묶기 모드: 프렛 폭 (4 또는 5)
-    posStart: null        // 포지션 묶기 모드: 선택된 시작 프렛
+    fretGroup: false,     // 탑노트 기준 모드에서 프렛 묶기 켜짐/꺼짐
+    openKey: 0,           // 오픈 보이싱 모드: 조성(키), 0~11 (C=0)
+    openDegree: null,     // 오픈 보이싱 모드: 선택한 다이아토닉 코드 인덱스 (0~6)
+    openQualityOverride: null, // 선택한 다이아토닉 코드의 루트를 그대로 쓰되, 코드 종류만
+                               // 다이아토닉 기본형 대신 EXTRA_OPEN_QUALITIES 키로 바꿔치기
+    activeView: 'code',   // 'code' | 'progression' (왼쪽 메뉴)
+    progression: [{ root: 0, quality: 'major' }], // 코드진행: 코드 슬롯 목록
+    progFretMin: 4,       // 코드진행: 프렛 범위 시작
+    progFretMax: 7,       // 코드진행: 프렛 범위 끝
+    progVoicingMode: 'closed' // 코드진행 보이싱 방식: 'closed'(트라이어드/4화음) | 'open'(오픈 보이싱)
   };
 
   // ---------------------------------------------------------------
@@ -256,6 +519,46 @@ try {
     return best;
   }
 
+  // bestGrip과 같지만, 모든 현이 [fretMin, fretMax] 범위 안의 프렛만 쓰도록
+  // 제한한다 (코드진행에서 "이 프렛 구간 안에서만" 보고 싶을 때 사용).
+  // 그 범위 안에 구성음이 하나도 안 나오는 현이 있으면 null.
+  function bestGripInRange(strings, intervals, root, fretMin, fretMax) {
+    var best = null;
+    var perms = permuteAll(intervals);
+    for (var qi = 0; qi < perms.length; qi++) {
+      var perm = perms[qi];
+      var opts = [];
+      var ok = true;
+      for (var si = 0; si < strings.length; si++) {
+        var s = strings[si];
+        var offset = perm[si][0];
+        var open = OPEN[s];
+        var target = ((root + offset) % 12 + 12) % 12;
+        var arr = [];
+        for (var f = fretMin; f <= fretMax; f++) {
+          if ((open + f) % 12 === target) { arr.push(f); }
+        }
+        if (arr.length === 0) { ok = false; break; }
+        opts.push(arr);
+      }
+      if (!ok) { continue; }
+      (function rec(idx, cur) {
+        if (idx === opts.length) {
+          var span = Math.max.apply(null, cur) - Math.min.apply(null, cur);
+          var minF = Math.min.apply(null, cur);
+          if (!best || span < best.span || (span === best.span && minF < best.minF)) {
+            best = { frets: cur.slice(), perm: perm, span: span, minF: minF };
+          }
+          return;
+        }
+        for (var oi = 0; oi < opts[idx].length; oi++) {
+          rec(idx + 1, cur.concat([opts[idx][oi]]));
+        }
+      })(0, []);
+    }
+    return best;
+  }
+
   function noteName(i) { return NOTES[((i % 12) + 12) % 12]; }
   function currentType() { return QUALITIES[state.quality].type; }
 
@@ -274,42 +577,225 @@ try {
     if (!found) { state.topString = opts[opts.length - 1]; }
   }
 
-  // 포지션 묶기: posWindow 폭의 프렛 구간 중, 코드 구성음이 전부 등장하는
-  // 구간의 시작 프렛 목록을 찾는다 (최대 8개, 서로 2프렛 이상 떨어진 것만).
-  function computeValidPositions() {
-    var ws = state.posWindow;
+  // 탑노트 기준 모드에서 쓸 현 조합 + 그 조합에 대한 "가장 좁은 그립"을 계산.
+  // 탑노트(맨 위 현)에는 반드시 루트가 오도록 고정하고(perm 필터),
+  // bestGrip()이 나머지 구성음을 인접한 현들에 중복 없이 하나씩 배치한다.
+  // 즉 1)탑노트 포함 2)주변 구성음 포함 3)구성음 중복 불가 4)현당 1개씩 이라는
+  // 조건이 자동으로 만족된다 (기타는 한 현에서 한 번에 한 음만 낼 수 있으므로).
+  function computeTopGrip() {
+    var type = currentType();
+    var strings = STRING_SETS[type][TOPSTRING_TO_SETIDX[type][state.topString]];
+    var topPos = strings.length - 1;
     var q = QUALITIES[state.quality];
-    var map = {};
-    for (var i = 0; i < q.intervals.length; i++) { map[q.intervals[i][0]] = q.intervals[i][1]; }
-    var required = [];
-    for (var i2 = 0; i2 < q.intervals.length; i2++) { required.push(q.intervals[i2][1]); }
-    var maxFret = 12;
-    var valid = [];
-    for (var s = 1; s <= maxFret - ws + 1; s++) {
-      var present = {};
-      for (var st = 0; st < 6; st++) {
-        for (var f = s; f <= s + ws - 1; f++) {
-          var note = (OPEN[st] + f) % 12;
-          var offset = ((note - state.root) % 12 + 12) % 12;
-          if (map[offset] !== undefined) { present[map[offset]] = true; }
-        }
-      }
-      var ok = true;
-      for (var r = 0; r < required.length; r++) { if (!present[required[r]]) { ok = false; break; } }
-      if (ok) { valid.push(s); }
-    }
-    var picked = [];
-    for (var v = 0; v < valid.length; v++) {
-      if (picked.length === 0 || valid[v] - picked[picked.length - 1] >= 2) { picked.push(valid[v]); }
-    }
-    return picked.slice(0, 8);
+    var best = bestGrip(strings, q.intervals, state.root, function (perm) { return perm[topPos][0] === 0; });
+    return { strings: strings, topPos: topPos, best: best };
   }
 
-  function ensureValidPosition() {
-    var opts = computeValidPositions();
-    var found = false;
-    for (var i = 0; i < opts.length; i++) { if (opts[i] === state.posStart) { found = true; } }
-    if (!found) { state.posStart = opts.length ? opts[0] : null; }
+  // 프렛 묶기: 탑노트 줄에는 루트뿐 아니라 코드 구성음 전부(R,3,5,(7))가
+  // 각자 다른 프렛에 존재한다. 그 각각을 탑노트로 삼는 그립을 전부 계산해서
+  // 반환한다 (트라이어드=3개, 4화음=4개). 여전히 1)탑노트 포함 2)인접 구성음
+  // 포함 3)중복 불가 4)현당 1개 조건은 bestGrip()이 그대로 보장한다.
+  function computeGroupedGrips() {
+    var type = currentType();
+    var strings = STRING_SETS[type][TOPSTRING_TO_SETIDX[type][state.topString]];
+    var topPos = strings.length - 1;
+    var q = QUALITIES[state.quality];
+    var results = [];
+    for (var k = 0; k < q.intervals.length; k++) {
+      var targetOffset = q.intervals[k][0];
+      var targetLabel = q.intervals[k][1];
+      (function (offset, label) {
+        var best = bestGrip(strings, q.intervals, state.root, function (perm) { return perm[topPos][0] === offset; });
+        results.push({ strings: strings, topPos: topPos, best: best, topLabel: label });
+      })(targetOffset, targetLabel);
+    }
+    return results;
+  }
+
+  // 사람이 한 번에 누를 수 있는 최대 프렛 간격(눌리는 현들 중 최고~최저 프렛),
+  // 그리고 동시에 누를 수 있는 손가락(=프렛 짚는 현) 최대 개수.
+  var MAX_PLAYABLE_SPAN = 4;
+  var MAX_FRETTED_STRINGS = 4;
+
+  // 왼손 4개 손가락으로 구조적으로 누를 수 있는 모양인지 판정 (검토/표시용).
+  // 개방현(또는 뮤트) 구간이 양쪽 다 눌린 현으로 막혀 있을 때, 다음 중 하나면
+  // 가능:
+  // 1) 그 구간 양쪽에서 누르는 프렛이 전부 똑같은 숫자 — 손가락 하나를 그
+  //    프렛에 평평하게 대고 중간(개방현)만 살짝 띄우는 "아치" 주법으로 커버
+  //    가능 (예: Csus2 5번줄 베이스 — 5·2·1번줄이 전부 3프렛, 4·3번줄만 개방).
+  // 2) 저음 쪽(번호가 작은 현)에 손가락이 2개 이상 뭉쳐 "기반"을 잡고, 고음
+  //    쪽(1번줄 방향)이 손가락 1개로 독립적으로 뻗는 경우 (약지/새끼가 고음현
+  //    하나를 따로 짚는 흔한 테크닉 — G메이저 320003이 이 모양).
+  // 그 외(저음 쪽이 손가락 1개만 고립된 채 다른 프렛의 고음 쪽을 눌러야 하거나,
+  // 양쪽 다 서로 다른 프렛의 뭉치인 경우, 예: 340034)는 불가로 본다.
+  function isStructurallyPlayable(shape) {
+    var pressed = new Array(6).fill(false); // 뮤트/개방현은 전부 false (손가락 불필요)
+    var fretOf = new Array(6).fill(null);
+    for (var i = 0; i < shape.strings.length; i++) {
+      if (shape.strings[i].fret > 0) {
+        pressed[shape.strings[i].idx] = true;
+        fretOf[shape.strings[i].idx] = shape.strings[i].fret;
+      }
+    }
+
+    var idx = 0;
+    while (idx < 6) {
+      if (pressed[idx]) { idx++; continue; }
+      var gapStart = idx;
+      while (idx < 6 && !pressed[idx]) { idx++; }
+      // idx는 이제 구간 다음의 첫 눌린 현(없으면 6)
+      if (gapStart > 0 && idx < 6) {
+        var leftSize = 0, li = gapStart - 1;
+        while (li >= 0 && pressed[li]) { leftSize++; li--; }
+        var rightSize = 0, ri = idx;
+        while (ri <= 5 && pressed[ri]) { rightSize++; ri++; }
+
+        // 양쪽에서 누르는 프렛이 전부 같은 숫자인지 확인 (아치 주법 가능 여부)
+        var uniformFret = fretOf[gapStart - 1];
+        var allSame = true;
+        for (var ui = gapStart - leftSize; ui < gapStart; ui++) { if (fretOf[ui] !== uniformFret) { allSame = false; } }
+        for (var uj = idx; uj < idx + rightSize; uj++) { if (fretOf[uj] !== uniformFret) { allSame = false; } }
+
+        if (!allSame && !(leftSize >= 2 && rightSize === 1)) { return false; }
+      }
+    }
+    return true;
+  }
+
+  // 오픈 보이싱: bassString(0=6번줄, 1=5번줄)에 루트를 짚고, 나머지 현은
+  // 전부 소리 낸다 (뮤트 없음 — 단, 베이스가 5번줄이면 6번줄만 예외로 생략 가능).
+  // 개방현이 코드음이면 그대로 열고, 아니면 코드음이 나는 프렛을 짚는다.
+  // 사람이 실제로 칠 수 있어야 하므로: 눌리는(0프렛이 아닌) 현들끼리는
+  // MAX_PLAYABLE_SPAN 프렛 이내여야 하고, 눌리는 현 개수도 MAX_FRETTED_STRINGS
+  // 이하여야 한다. 조건: 1)루트/3도(+변화된 5도) 필수 커버 2)나머지 현 중
+  // 최소 하나는 진짜 개방현이어야 함. 만족하는 조합을 전부 탐색해 가장 치기
+  // 쉬운(눌리는 현이 적고, 간격이 좁고, 낮은 포지션인) 것을 고른다.
+  // fretRange: null(제한 없음) 또는 [min,max] — 개방현(0프렛)은 항상 허용하고,
+  // 그 외 눌리는 프렛은 이 범위 안에서만 찾는다 (코드진행 "이 구간 안에서만
+  // 보기" 기능용).
+  function computeOpenVoicing(rootPC, qualityKey, bassString, fretRange) {
+    var q = QUALITIES[qualityKey] || EXTRA_OPEN_QUALITIES[qualityKey];
+    var toneLabel = {};   // pitch class -> label
+    var required = {};    // label -> true (커버해야 하는 라벨), 코드 정의의 required 배열 그대로 사용
+    for (var i = 0; i < q.intervals.length; i++) {
+      var offset = q.intervals[i][0], label = q.intervals[i][1];
+      toneLabel[(rootPC + offset) % 12] = label;
+    }
+    for (var ri = 0; ri < q.required.length; ri++) { required[q.required[ri]] = true; }
+
+    function inRange(f) { return f === 0 || !fretRange || (f >= fretRange[0] && f <= fretRange[1]); }
+
+    // 베이스 프렛: 범위 안에서(또는 개방현으로) 루트를 짚을 수 있는 가장 낮은 프렛
+    var bassFret = -1;
+    for (var f = 0; f <= 11; f++) {
+      if ((OPEN[bassString] + f) % 12 === rootPC && inRange(f)) { bassFret = f; break; }
+    }
+    if (bassFret === -1) { return null; } // 이 범위에서는 이 현으로 베이스를 못 짚음
+
+    // 어떤 현이든 코드음이 나오는 후보 프렛 전부(0~15, 개방현 포함, 범위 제한 적용)를 구한다.
+    function candidatesFor(s) {
+      var arr = [];
+      for (var f = 0; f <= 15; f++) {
+        if (!inRange(f)) { continue; }
+        var pc = (OPEN[s] + f) % 12;
+        if (toneLabel[pc] !== undefined) { arr.push({ fret: f, label: toneLabel[pc] }); }
+      }
+      return arr;
+    }
+
+    var mandatory = bassString === 0 ? [1, 2, 3, 4, 5] : [2, 3, 4, 5];
+    var candList = [];
+    for (var mi = 0; mi < mandatory.length; mi++) { candList.push(candidatesFor(mandatory[mi])); }
+
+    var sixOptions = null; // 베이스=5번줄일 때만: [{개방현으로 포함}, null(생략)]
+    if (bassString === 1) {
+      var pc0 = OPEN[0];
+      sixOptions = toneLabel[pc0] !== undefined ? [{ fret: 0, label: toneLabel[pc0] }, null] : [null];
+    }
+
+    var best = null; // {score:[...], strings:[...]}
+
+    function evaluate(mandChoices, sixChoice) {
+      var list = [{ idx: bassString, fret: bassFret, label: toneLabel[rootPC] }];
+      for (var i2 = 0; i2 < mandatory.length; i2++) {
+        list.push({ idx: mandatory[i2], fret: mandChoices[i2].fret, label: mandChoices[i2].label });
+      }
+      if (sixChoice) { list.push({ idx: 0, fret: sixChoice.fret, label: sixChoice.label }); }
+
+      var pressedFrets = [];
+      var hasOpen = false;
+      for (var i3 = 0; i3 < list.length; i3++) {
+        if (list[i3].fret === 0) { hasOpen = true; } else { pressedFrets.push(list[i3].fret); }
+      }
+      if (!hasOpen) { return; }                                  // 개방현이 하나도 없으면 오픈 보이싱 아님
+      if (pressedFrets.length > MAX_FRETTED_STRINGS) { return; }  // 손가락 개수 초과
+
+      // 1번줄과 6번줄을 동시에 누르면서 다른 현도 누르는 건 불가능 (손가락이 안 닿음)
+      var pressed6 = false, pressed1 = false, pressedOther = false;
+      for (var pi = 0; pi < list.length; pi++) {
+        if (list[pi].fret === 0) { continue; }
+        if (list[pi].idx === 0) { pressed6 = true; }
+        else if (list[pi].idx === 5) { pressed1 = true; }
+        else { pressedOther = true; }
+      }
+      if (pressed6 && pressed1 && pressedOther) { return; }
+
+      var span = 0, maxFret = 0;
+      if (pressedFrets.length) {
+        var lo = Math.min.apply(null, pressedFrets), hi = Math.max.apply(null, pressedFrets);
+        span = hi - lo; maxFret = hi;
+        if (span > MAX_PLAYABLE_SPAN) { return; }                // 손 안 닿는 간격
+      }
+
+      var covered = {};
+      for (var i4 = 0; i4 < list.length; i4++) { covered[list[i4].label] = true; }
+      for (var reqLabel in required) { if (!covered[reqLabel]) { return; } } // 필수음 누락
+
+      // 손가락으로 실제로 되는 조합을 최우선으로 고른다 (안 되면 후보에서
+      // 완전히 빼지는 않고, 차선책으로만 남겨서 검토용 빨간 표시가 뜨게 함).
+      var unplayablePenalty = isStructurallyPlayable({ strings: list }) ? 0 : 1;
+      var score = [unplayablePenalty, pressedFrets.length, span, maxFret];
+      if (!best || better(score, best.score)) {
+        list.sort(function (a, b) { return a.idx - b.idx; });
+        best = { score: score, strings: list };
+      }
+    }
+
+    function better(a, b) {
+      for (var i5 = 0; i5 < a.length; i5++) { if (a[i5] !== b[i5]) { return a[i5] < b[i5]; } }
+      return false;
+    }
+
+    (function search(idx, chosen) {
+      if (idx === candList.length) {
+        var sixList = sixOptions || [undefined];
+        for (var si = 0; si < sixList.length; si++) { evaluate(chosen, sixList[si]); }
+        return;
+      }
+      var opts = candList[idx];
+      for (var oi = 0; oi < opts.length; oi++) { search(idx + 1, chosen.concat([opts[oi]])); }
+    })(0, []);
+
+    if (!best) { return null; }
+    return { bassString: bassString, strings: best.strings };
+  }
+
+  // 루트음+코드 종류에 대해 가능한 오픈 보이싱을 6번/5번 베이스 각각
+  // 계산해서, 성립하는 것만 반환한다 (최대 2개).
+  function computeOpenVoicingsForQuality(rootPC, qualityKey, fretRange) {
+    var results = [];
+    var v6 = computeOpenVoicing(rootPC, qualityKey, 0, fretRange);
+    if (v6) { results.push(v6); }
+    var v5 = computeOpenVoicing(rootPC, qualityKey, 1, fretRange);
+    if (v5) { results.push(v5); }
+    return results;
+  }
+
+  // 조성(key)에서 다이아토닉 코드 하나(degreeIdx)에 대해 계산.
+  function computeOpenVoicingsForDegree(key, degreeIdx) {
+    var deg = DIATONIC_DEGREES[degreeIdx];
+    var rootPC = (key + deg.offset) % 12;
+    return computeOpenVoicingsForQuality(rootPC, deg.qual);
   }
 
   // ---------------------------------------------------------------
@@ -319,7 +805,7 @@ try {
   function renderModes() {
     var el = document.getElementById('gt-modes');
     el.innerHTML = '';
-    var modes = [['root', '전체 지판'], ['top', '탑노트 기준'], ['position', '포지션 묶기']];
+    var modes = [['root', '전체 지판'], ['top', '멜로디 보이싱'], ['open', '오픈 보이싱']];
     for (var i = 0; i < modes.length; i++) {
       (function (m) {
         var b = document.createElement('button');
@@ -328,7 +814,6 @@ try {
         b.onclick = function () {
           state.mode = m[0];
           ensureValidTopString();
-          if (state.mode === 'position') { ensureValidPosition(); }
           render();
         };
         el.appendChild(b);
@@ -346,7 +831,6 @@ try {
         b.textContent = n;
         b.onclick = function () {
           state.root = idx;
-          if (state.mode === 'position') { ensureValidPosition(); }
           render();
         };
         el.appendChild(b);
@@ -371,43 +855,112 @@ try {
     }
   }
 
-  function renderPositionControls() {
-    var wrap = document.getElementById('gt-position-wrap');
-    wrap.style.display = state.mode === 'position' ? 'block' : 'none';
+  function renderFretGroupToggle() {
+    var wrap = document.getElementById('gt-fretgroup-wrap');
+    wrap.style.display = state.mode === 'top' ? 'block' : 'none';
 
-    var wEl = document.getElementById('gt-posw');
-    wEl.innerHTML = '';
-    var widths = [4, 5];
-    for (var i = 0; i < widths.length; i++) {
-      (function (w) {
+    var el = document.getElementById('gt-fretgroup');
+    el.innerHTML = '';
+    var b = document.createElement('button');
+    b.className = 'gt-btn' + (state.fretGroup ? ' active' : '');
+    b.textContent = state.fretGroup ? '켜짐 (탑노트 주변만 표시)' : '꺼짐 (전체 프렛 표시)';
+    b.onclick = function () { state.fretGroup = !state.fretGroup; render(); };
+    el.appendChild(b);
+  }
+
+  var QUALITY_SHORT = { maj7: 'maj7', min7: 'm7', dom7: '7', halfdim7: 'm7♭5' };
+
+  function renderOpenKeys() {
+    var el = document.getElementById('gt-openkeys');
+    el.innerHTML = '';
+    for (var i = 0; i < NOTES.length; i++) {
+      (function (idx) {
         var b = document.createElement('button');
-        b.className = 'gt-btn' + (state.posWindow === w ? ' active' : '');
-        b.textContent = w + '프렛';
-        b.onclick = function () { state.posWindow = w; ensureValidPosition(); render(); };
-        wEl.appendChild(b);
-      })(widths[i]);
+        b.className = 'gt-btn' + (state.openKey === idx ? ' active' : '');
+        b.textContent = NOTES[idx];
+        b.onclick = function () { state.openKey = idx; state.openDegree = null; state.openQualityOverride = null; render(); };
+        el.appendChild(b);
+      })(i);
     }
+  }
 
-    var pEl = document.getElementById('gt-positions');
-    pEl.innerHTML = '';
-    var opts = computeValidPositions();
-    if (opts.length === 0) {
+  function renderOpenDegrees() {
+    var el = document.getElementById('gt-opendegrees');
+    el.innerHTML = '';
+    var any = false;
+    for (var i = 0; i < DIATONIC_DEGREES.length; i++) {
+      var voicings = computeOpenVoicingsForDegree(state.openKey, i);
+      if (voicings.length === 0) { continue; }
+      any = true;
+      (function (idx, deg) {
+        var rootPC = (state.openKey + deg.offset) % 12;
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.openDegree === idx ? ' active' : '');
+        b.textContent = deg.label + ' (' + NOTES[rootPC] + QUALITY_SHORT[deg.qual] + ')';
+        b.onclick = function () { state.openDegree = idx; state.openQualityOverride = null; render(); };
+        el.appendChild(b);
+      })(i, DIATONIC_DEGREES[i]);
+    }
+    if (!any) {
       var span = document.createElement('span');
       span.style.fontSize = '12px';
       span.style.color = 'var(--text-secondary)';
-      span.textContent = '이 폭에서는 모든 구성음이 한 포지션에 들어오지 않아요. 폭을 늘려보세요.';
-      pEl.appendChild(span);
-      return;
+      span.textContent = '이 조성에서는 오픈 보이싱이 가능한 다이아토닉 코드가 없어요.';
+      el.appendChild(span);
     }
-    for (var j = 0; j < opts.length; j++) {
-      (function (s, idx) {
+  }
+
+  // 선택된 다이아토닉 코드의 루트를 그대로 쓰고, 코드 종류만 기본형 또는
+  // 추가 코드(add2/add9/9/m9/M9/sus2/sus4) 중 하나로 바꿔서 보여준다.
+  function renderOpenQualityOverrides() {
+    var wrap = document.getElementById('gt-openquality-wrap');
+    if (state.openDegree === null) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+
+    var deg = DIATONIC_DEGREES[state.openDegree];
+    var rootPC = (state.openKey + deg.offset) % 12;
+    var el = document.getElementById('gt-openqualities');
+    el.innerHTML = '';
+
+    var defaultBtn = document.createElement('button');
+    defaultBtn.className = 'gt-btn' + (state.openQualityOverride === null ? ' active' : '');
+    defaultBtn.textContent = '기본형 (' + NOTES[rootPC] + QUALITY_SHORT[deg.qual] + ')';
+    defaultBtn.onclick = function () { state.openQualityOverride = null; render(); };
+    el.appendChild(defaultBtn);
+
+    var keys = Object.keys(EXTRA_OPEN_QUALITIES);
+    for (var i = 0; i < keys.length; i++) {
+      var voicings = computeOpenVoicingsForQuality(rootPC, keys[i]);
+      if (voicings.length === 0) { continue; }
+      (function (qk) {
         var b = document.createElement('button');
-        b.className = 'gt-btn' + (state.posStart === s ? ' active' : '');
-        b.textContent = '포지션' + (idx + 1) + ' (' + s + '~' + (s + state.posWindow - 1) + '프렛)';
-        b.onclick = function () { state.posStart = s; render(); };
-        pEl.appendChild(b);
-      })(opts[j], j);
+        b.className = 'gt-btn' + (state.openQualityOverride === qk ? ' active' : '');
+        b.textContent = NOTES[rootPC] + EXTRA_OPEN_QUALITIES[qk].label;
+        b.onclick = function () { state.openQualityOverride = qk; render(); };
+        el.appendChild(b);
+      })(keys[i]);
     }
+  }
+
+  function ensureValidOpenDegree() {
+    if (state.openDegree === null) { return; }
+    var voicings = computeOpenVoicingsForDegree(state.openKey, state.openDegree);
+    if (voicings.length === 0) { state.openDegree = null; state.openQualityOverride = null; return; }
+    if (state.openQualityOverride !== null) {
+      var deg = DIATONIC_DEGREES[state.openDegree];
+      var rootPC = (state.openKey + deg.offset) % 12;
+      var voicings2 = computeOpenVoicingsForQuality(rootPC, state.openQualityOverride);
+      if (voicings2.length === 0) { state.openQualityOverride = null; }
+    }
+  }
+
+  // 현재 선택(다이아토닉 코드 + 코드 종류 오버라이드)에 해당하는 오픈 보이싱들
+  function currentOpenVoicings() {
+    if (state.openDegree === null) { return []; }
+    var deg = DIATONIC_DEGREES[state.openDegree];
+    var rootPC = (state.openKey + deg.offset) % 12;
+    var qualityKey = state.openQualityOverride !== null ? state.openQualityOverride : deg.qual;
+    return computeOpenVoicingsForQuality(rootPC, qualityKey);
   }
 
   function renderQualities() {
@@ -422,7 +975,6 @@ try {
         b.onclick = function () {
           state.quality = k;
           if (state.mode === 'top') { ensureValidTopString(); }
-          if (state.mode === 'position') { ensureValidPosition(); }
           render();
         };
         el.appendChild(b);
@@ -436,23 +988,27 @@ try {
     return STRING_SETS[type][TOPSTRING_TO_SETIDX[type][state.topString]];
   }
 
-  function renderFretboard() {
-    var maxFret = 12, x0 = 110, dx = 42, y0 = 40, dy = 40;
-    var relevant = getRelevantStrings();
-    var posWin = null;
-    if (state.mode === 'position' && state.posStart) {
-      posWin = [state.posStart, state.posStart + state.posWindow - 1];
-    }
+  // 지판 SVG 하나를 그린다. relevant 현들 위의 구성음(R,3,5,(7))은 프렛 묶기
+  // 켜짐 여부와 상관없이 전체 프렛에 걸쳐 항상 다 표시한다.
+  // boxes: null이면 그룹 박스 없음. 배열이면 각 항목({start,end,label,color})만큼
+  // 하나의 지판 위에 그립 구간을 박스로 겹쳐 그린다 (트라이어드=3개, 4화음=4개).
+  function buildFretboardSVG(relevant, boxes) {
+    var maxFret = 15, x0 = 110, dx = 68, y0 = 40, dy = 30;
 
-    var svg = '<svg width="100%" viewBox="0 0 680 290" role="img">' +
+    var svg = '<svg width="100%" viewBox="0 0 1164 240" role="img">' +
       '<title>프렛보드 다이어그램</title>' +
-      '<desc>선택한 루트음, 탑노트 또는 포지션 구간에 맞는 음정 위치를 표시</desc>';
+      '<desc>선택한 루트음과 탑노트에 맞는 음정 위치, 프렛 묶기 켜짐 시 그립 구간 박스를 표시</desc>';
 
-    if (posWin) {
-      var bx1 = x0 + (posWin[0] - 1) * dx;
-      var bx2 = x0 + posWin[1] * dx;
-      svg += '<rect x="' + bx1 + '" y="' + (y0 - 14) + '" width="' + (bx2 - bx1) +
-        '" height="' + (dy * 5 + 28) + '" rx="10" fill="var(--bg-accent)" opacity="0.5"/>';
+    if (boxes) {
+      for (var bi = 0; bi < boxes.length; bi++) {
+        var b = boxes[bi];
+        var bx1 = x0 + (b.start - 1) * dx;
+        var bx2 = x0 + b.end * dx;
+        svg += '<rect x="' + bx1 + '" y="' + (y0 - 14) + '" width="' + (bx2 - bx1) +
+          '" height="' + (dy * 5 + 28) + '" rx="10" fill="' + b.color + '" opacity="0.16" stroke="' + b.color + '" stroke-width="1.5"/>';
+        var lx = (bx1 + bx2) / 2;
+        svg += '<text x="' + lx + '" y="' + (y0 - 22) + '" text-anchor="middle" font-size="12" font-weight="600" fill="' + b.color + '" style="font-family:var(--font-sans)">' + b.label + '</text>';
+      }
     }
 
     svg += '<rect x="' + x0 + '" y="' + (y0 - 2) + '" width="4" height="' + (dy * 5 + 4) +
@@ -460,9 +1016,8 @@ try {
 
     for (var f = 1; f <= maxFret; f++) {
       var x = x0 + f * dx;
-      var fdim = posWin && (f < posWin[0] || f > posWin[1]);
       svg += '<line x1="' + x + '" y1="' + y0 + '" x2="' + x + '" y2="' + (y0 + dy * 5) +
-        '" stroke="var(--border-strong)" stroke-width="0.5" opacity="' + (fdim ? '0.3' : '1') + '"/>';
+        '" stroke="var(--border-strong)" stroke-width="0.5"/>';
     }
 
     for (var i = 0; i < 6; i++) {
@@ -475,13 +1030,20 @@ try {
         (dim ? '0.4' : '1') + '">' + STRING_NAMES[s] + '</text>';
     }
 
-    var markers = [3, 5, 7, 9, 12];
+    var markers = [3, 5, 7, 9, 12, 15];
+    var dotY = y0 + dy * 5 + 10;
+    var labelY = dotY + 18;
     for (var mi = 0; mi < markers.length; mi++) {
       var f5 = markers[mi];
       var cx = x0 + (f5 - 1) * dx + dx / 2;
-      var fy = y0 + dy * 5 + 16;
-      svg += '<circle cx="' + cx + '" cy="' + fy + '" r="3" fill="var(--text-muted)"/>';
-      svg += '<text class="ts" x="' + cx + '" y="' + fy + '" text-anchor="middle" dominant-baseline="central" fill="var(--text-muted)">' + f5 + '</text>';
+      if (f5 === 12) {
+        // 12프렛은 통상적인 기타 인레이처럼 점 2개로 표기
+        svg += '<circle cx="' + cx + '" cy="' + (dotY - 5) + '" r="2.5" fill="var(--text-muted)"/>';
+        svg += '<circle cx="' + cx + '" cy="' + (dotY + 5) + '" r="2.5" fill="var(--text-muted)"/>';
+      } else {
+        svg += '<circle cx="' + cx + '" cy="' + dotY + '" r="3" fill="var(--text-muted)"/>';
+      }
+      svg += '<text class="ts" x="' + cx + '" y="' + labelY + '" text-anchor="middle" dominant-baseline="central" fill="var(--text-muted)">' + f5 + '</text>';
     }
 
     var q = QUALITIES[state.quality];
@@ -492,23 +1054,151 @@ try {
       var s2 = DISPLAY_ORDER[row];
       if (relevant !== null && relevant.indexOf(s2) === -1) { continue; }
       var y2 = y0 + row * dy;
+
       for (var f2 = 0; f2 <= maxFret; f2++) {
-        if (posWin && (f2 < posWin[0] || f2 > posWin[1])) { continue; }
         var note = (OPEN[s2] + f2) % 12;
         var offset = ((note - state.root) % 12 + 12) % 12;
         if (map[offset] !== undefined) {
           var label = map[offset];
           var cx2 = f2 === 0 ? x0 - 24 : x0 + (f2 - 1) * dx + dx / 2;
           var color = LABEL_COLOR[label];
-          svg += '<circle cx="' + cx2 + '" cy="' + y2 + '" r="13" fill="' + color +
+          svg += '<circle cx="' + cx2 + '" cy="' + y2 + '" r="11" fill="' + color +
             '" stroke="var(--surface-2)" stroke-width="1.5"/>';
-          svg += '<text x="' + cx2 + '" y="' + y2 + '" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#fff" style="font-family:var(--font-sans)">' + label + '</text>';
+          svg += '<text x="' + cx2 + '" y="' + y2 + '" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#fff" style="font-family:var(--font-sans)">' + label + '</text>';
         }
       }
     }
 
     svg += '</svg>';
-    document.getElementById('gt-fretboard').innerHTML = svg;
+    return svg;
+  }
+
+  // 오픈 보이싱 그립 하나를 다른 지판 다이어그램과 같은 방향(가로, 6번줄이
+  // 아래쪽/남쪽, 1번줄이 위쪽, 너트가 왼쪽)으로 그린다.
+  // shape.strings: [{idx(0~5, 0=6번줄), fret, label}], idx 오름차순 정렬됨
+  function buildOpenVoicingBoardSVG(shape) {
+    var maxFret = 15, x0 = 110, dx = 68, y0 = 40, dy = 30;
+    var used = {};
+    var pressedFrets = [];
+    for (var i = 0; i < shape.strings.length; i++) {
+      used[shape.strings[i].idx] = shape.strings[i];
+      if (shape.strings[i].fret > 0) { pressedFrets.push(shape.strings[i].fret); }
+    }
+    var playable = isStructurallyPlayable(shape);
+
+    var svg = '<svg width="100%" viewBox="0 0 1164 240" role="img">' +
+      '<title>오픈 보이싱 다이어그램</title>' +
+      '<desc>선택한 오픈 보이싱 그립 하나를 표시 (개방현/뮤트 포함)</desc>';
+
+    if (!playable) {
+      svg += '<text x="' + x0 + '" y="14" font-size="13" font-weight="600" fill="var(--text-danger)" style="font-family:var(--font-sans)">⚠ 왼손 4개 손가락으로 구조상 누를 수 없는 모양 (검토용, 아직 삭제 안 함)</text>';
+    }
+
+    if (pressedFrets.length) {
+      var minF = Math.min.apply(null, pressedFrets), maxF = Math.max.apply(null, pressedFrets);
+      var bx1 = x0 + (minF - 1) * dx, bx2 = x0 + maxF * dx;
+      svg += '<rect x="' + bx1 + '" y="' + (y0 - 14) + '" width="' + (bx2 - bx1) +
+        '" height="' + (dy * 5 + 28) + '" rx="10" fill="' + (playable ? 'var(--bg-accent)' : 'var(--bg-danger)') + '" opacity="' + (playable ? '0.35' : '0.5') + '"/>';
+    }
+
+    svg += '<rect x="' + x0 + '" y="' + (y0 - 2) + '" width="4" height="' + (dy * 5 + 4) +
+      '" fill="var(--text-primary)" opacity="0.6"/>';
+
+    for (var f = 1; f <= maxFret; f++) {
+      var x = x0 + f * dx;
+      svg += '<line x1="' + x + '" y1="' + y0 + '" x2="' + x + '" y2="' + (y0 + dy * 5) +
+        '" stroke="var(--border-strong)" stroke-width="0.5"/>';
+    }
+
+    for (var row = 0; row < 6; row++) {
+      var s = DISPLAY_ORDER[row]; // row0=1번줄(위) ... row5=6번줄(아래/남쪽)
+      var y = y0 + row * dy;
+      var info = used[s];
+      var muted = !info;
+      svg += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + maxFret * dx) + '" y2="' + y +
+        '" stroke="var(--border-strong)" stroke-width="1" opacity="' + (muted ? '0.3' : '1') + '"/>';
+      svg += '<text class="ts" x="45" y="' + y + '" text-anchor="end" dominant-baseline="central" opacity="' +
+        (muted ? '0.4' : '1') + '">' + STRING_NAMES[s] + '</text>';
+      if (muted) {
+        svg += '<text x="' + (x0 - 24) + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text-muted)" style="font-family:var(--font-sans)">X</text>';
+      } else {
+        var cx = info.fret === 0 ? x0 - 24 : x0 + (info.fret - 1) * dx + dx / 2;
+        var color = playable ? LABEL_COLOR[info.label] : 'var(--text-danger)';
+        if (info.fret === 0) {
+          svg += '<circle cx="' + cx + '" cy="' + y + '" r="11" fill="none" stroke="' + color + '" stroke-width="2"/>';
+        } else {
+          svg += '<circle cx="' + cx + '" cy="' + y + '" r="11" fill="' + color + '" stroke="var(--surface-2)" stroke-width="1.5"/>';
+        }
+        svg += '<text x="' + cx + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="10" fill="' + (info.fret === 0 ? color : '#fff') + '" style="font-family:var(--font-sans)">' + info.label + '</text>';
+      }
+    }
+
+    var markers = [3, 5, 7, 9, 12, 15];
+    var dotY = y0 + dy * 5 + 10, labelY = dotY + 18;
+    for (var mi = 0; mi < markers.length; mi++) {
+      var f5 = markers[mi];
+      var mcx = x0 + (f5 - 1) * dx + dx / 2;
+      if (f5 === 12) {
+        svg += '<circle cx="' + mcx + '" cy="' + (dotY - 5) + '" r="2.5" fill="var(--text-muted)"/>';
+        svg += '<circle cx="' + mcx + '" cy="' + (dotY + 5) + '" r="2.5" fill="var(--text-muted)"/>';
+      } else {
+        svg += '<circle cx="' + mcx + '" cy="' + dotY + '" r="3" fill="var(--text-muted)"/>';
+      }
+      svg += '<text class="ts" x="' + mcx + '" y="' + labelY + '" text-anchor="middle" dominant-baseline="central" fill="var(--text-muted)">' + f5 + '</text>';
+    }
+
+    svg += '</svg>';
+    return svg;
+  }
+
+  function renderFretboard() {
+    var container = document.getElementById('gt-fretboard');
+
+    if (state.mode === 'open') {
+      container.innerHTML = '';
+      if (state.openDegree === null) {
+        var msg = document.createElement('div');
+        msg.className = 'gt-label';
+        msg.textContent = '위에서 조성과 다이아토닉 코드를 선택하세요.';
+        container.appendChild(msg);
+        return;
+      }
+      var voicings = currentOpenVoicings();
+      for (var i = 0; i < voicings.length; i++) {
+        var v = voicings[i];
+        var col = document.createElement('div');
+        col.style.marginBottom = '18px';
+        var label = document.createElement('div');
+        label.className = 'gt-label';
+        label.textContent = (v.bassString === 0 ? '6번줄 베이스' : '5번줄 베이스');
+        col.appendChild(label);
+        var holder = document.createElement('div');
+        holder.innerHTML = buildOpenVoicingBoardSVG(v);
+        col.appendChild(holder);
+        container.appendChild(col);
+      }
+      return;
+    }
+
+    var boxes = null;
+    if (state.mode === 'top' && state.fretGroup) {
+      // 프렛 묶기 켜짐: 탑노트 줄에 올 수 있는 구성음(R,3,5,(7))별 그립 구간을
+      // 계산해서, 하나의 지판 위에 박스로 겹쳐 표시할 목록을 만든다.
+      var grips = computeGroupedGrips();
+      boxes = [];
+      for (var gi = 0; gi < grips.length; gi++) {
+        var g = grips[gi];
+        var minF = Math.min.apply(null, g.best.frets);
+        var maxF = Math.max.apply(null, g.best.frets);
+        boxes.push({
+          start: Math.max(1, minF),
+          end: Math.max(1, maxF),
+          label: state.topString + '번줄=' + g.topLabel,
+          color: LABEL_COLOR[g.topLabel]
+        });
+      }
+    }
+    container.innerHTML = buildFretboardSVG(getRelevantStrings(), boxes);
   }
 
   function renderLegend() {
@@ -531,68 +1221,85 @@ try {
     }
   }
 
+  function buildGripCard(strings, best, topPos, titleText) {
+    var card = document.createElement('div');
+    card.className = 'gt-grip';
+    var title = document.createElement('div');
+    title.className = 'gt-grip-title';
+    title.textContent = titleText;
+    card.appendChild(title);
+    for (var i = 0; i < strings.length; i++) {
+      var s = strings[i];
+      var fret = best.frets[i];
+      var label = best.perm[i][1];
+      var note = noteName(OPEN[s] + fret);
+      var row = document.createElement('div');
+      row.className = 'gt-row';
+      row.innerHTML = '<span>' + STRING_NAMES[s] + '번줄' + (i === topPos ? ' (탑)' : '') +
+        '</span><span>' + fret + '프렛 (' + label + ', ' + note + ')</span>';
+      card.appendChild(row);
+    }
+    return card;
+  }
+
   function renderGrips() {
     var el = document.getElementById('gt-grips');
     var titleEl = document.getElementById('gt-grips-title');
     el.innerHTML = '';
     var q = QUALITIES[state.quality];
 
-    if (state.mode === 'top') {
-      titleEl.textContent = '탑노트 고정 그립 (' + state.topString + '번줄 최상단 = 루트)';
+    if (state.mode === 'top' && state.fretGroup) {
+      titleEl.textContent = '프렛 묶기: ' + state.topString + '번줄에 올 수 있는 구성음별 그립 (' + q.intervals.length + '개)';
+      var grips = computeGroupedGrips();
+      for (var k = 0; k < grips.length; k++) {
+        var g = grips[k];
+        var titleText = NOTES[state.root] + ' ' + q.label + ' — ' + state.topString + '번줄 = ' + g.topLabel;
+        el.appendChild(buildGripCard(g.strings, g.best, g.topPos, titleText));
+      }
+
+    } else if (state.mode === 'top') {
+      titleEl.textContent = '멜로디 보이싱 고정 그립 (' + state.topString + '번줄 최상단 = 루트)';
       var strings = getRelevantStrings();
       var topPos = strings.length - 1;
       var best = bestGrip(strings, q.intervals, state.root, function (perm) { return perm[topPos][0] === 0; });
-      var card = document.createElement('div');
-      card.className = 'gt-grip';
-      var title = document.createElement('div');
-      title.className = 'gt-grip-title';
-      title.textContent = NOTES[state.root] + ' ' + q.label;
-      card.appendChild(title);
-      for (var i = 0; i < strings.length; i++) {
-        var s = strings[i];
-        var fret = best.frets[i];
-        var label = best.perm[i][1];
-        var note = noteName(OPEN[s] + fret);
-        var row = document.createElement('div');
-        row.className = 'gt-row';
-        row.innerHTML = '<span>' + STRING_NAMES[s] + '번줄' + (i === topPos ? ' (탑)' : '') +
-          '</span><span>' + fret + '프렛 (' + label + ', ' + note + ')</span>';
-        card.appendChild(row);
-      }
-      el.appendChild(card);
+      el.appendChild(buildGripCard(strings, best, topPos, NOTES[state.root] + ' ' + q.label));
 
-    } else if (state.mode === 'position') {
-      if (!state.posStart) {
-        titleEl.textContent = '포지션 구성음';
-        var card0 = document.createElement('div');
-        card0.className = 'gt-grip';
-        card0.textContent = '유효한 포지션이 없어요. 폭을 늘려보세요.';
-        el.appendChild(card0);
-        return;
-      }
-      titleEl.textContent = '포지션 구성음 (' + state.posStart + '~' + (state.posStart + state.posWindow - 1) + '프렛)';
-      var map2 = {};
-      for (var mi2 = 0; mi2 < q.intervals.length; mi2++) { map2[q.intervals[mi2][0]] = q.intervals[mi2][1]; }
-      var card = document.createElement('div');
-      card.className = 'gt-grip';
-      var title2 = document.createElement('div');
-      title2.className = 'gt-grip-title';
-      title2.textContent = NOTES[state.root] + ' ' + q.label;
-      card.appendChild(title2);
-      for (var i2 = 0; i2 < 6; i2++) {
-        var s3 = DISPLAY_ORDER[i2];
-        var hits = [];
-        for (var f3 = state.posStart; f3 <= state.posStart + state.posWindow - 1; f3++) {
-          var note2 = (OPEN[s3] + f3) % 12;
-          var offset2 = ((note2 - state.root) % 12 + 12) % 12;
-          if (map2[offset2] !== undefined) { hits.push(f3 + '프렛(' + map2[offset2] + ')'); }
+    } else if (state.mode === 'open') {
+      if (state.openDegree === null) {
+        titleEl.textContent = '오픈 보이싱';
+      } else {
+        var deg = DIATONIC_DEGREES[state.openDegree];
+        var rootPC2 = (state.openKey + deg.offset) % 12;
+        var qualLabel = state.openQualityOverride !== null
+          ? EXTRA_OPEN_QUALITIES[state.openQualityOverride].label
+          : QUALITY_SHORT[deg.qual];
+        titleEl.textContent = NOTES[state.openKey] + ' 조성 — ' + deg.label + ' (' + NOTES[rootPC2] + qualLabel + ')';
+        var voicings = currentOpenVoicings();
+        for (var vi = 0; vi < voicings.length; vi++) {
+          var v = voicings[vi];
+          var playable = isStructurallyPlayable(v);
+          var card = document.createElement('div');
+          card.className = 'gt-grip';
+          if (!playable) { card.style.background = 'var(--bg-danger)'; }
+          var title = document.createElement('div');
+          title.className = 'gt-grip-title';
+          if (!playable) { title.style.color = 'var(--text-danger)'; }
+          title.textContent = (v.bassString === 0 ? '6번줄 베이스' : '5번줄 베이스') +
+            (playable ? '' : ' — ⚠ 손가락 구조상 불가 (검토용)');
+          card.appendChild(title);
+          for (var si = 0; si < v.strings.length; si++) {
+            var st = v.strings[si];
+            var note = noteName(OPEN[st.idx] + st.fret);
+            var row = document.createElement('div');
+            row.className = 'gt-row';
+            if (!playable) { row.style.color = 'var(--text-danger)'; }
+            row.innerHTML = '<span>' + STRING_NAMES[st.idx] + '번줄</span><span>' +
+              (st.fret === 0 ? '개방현' : st.fret + '프렛') + ' (' + st.label + ', ' + note + ')</span>';
+            card.appendChild(row);
+          }
+          el.appendChild(card);
         }
-        var row = document.createElement('div');
-        row.className = 'gt-row';
-        row.innerHTML = '<span>' + STRING_NAMES[s3] + '번줄</span><span>' + (hits.length ? hits.join(', ') : '-') + '</span>';
-        card.appendChild(row);
       }
-      el.appendChild(card);
 
     } else {
       titleEl.textContent = '추천 그립 (가장 좁은 위치)';
@@ -623,17 +1330,230 @@ try {
   }
 
   function render() {
+    document.getElementById('gt-standard-controls').style.display = state.mode === 'open' ? 'none' : 'block';
+    document.getElementById('gt-open-controls').style.display = state.mode === 'open' ? 'block' : 'none';
+
     renderModes();
-    renderRoots();
-    renderTopStrings();
-    renderPositionControls();
-    renderQualities();
+    if (state.mode === 'open') {
+      ensureValidOpenDegree();
+      renderOpenKeys();
+      renderOpenDegrees();
+      renderOpenQualityOverrides();
+      document.getElementById('gt-legend').innerHTML = '';
+    } else {
+      renderRoots();
+      renderTopStrings();
+      renderFretGroupToggle();
+      renderQualities();
+      renderLegend();
+    }
     renderFretboard();
-    renderLegend();
     renderGrips();
   }
 
-  render();
+  // ---------------------------------------------------------------
+  // 5. 코드진행 (왼쪽 메뉴 "코드진행")
+  // ---------------------------------------------------------------
+
+  function renderProgChords() {
+    var el = document.getElementById('prog-chords');
+    el.innerHTML = '';
+    state.progression.forEach(function (chord, i) {
+      var slot = document.createElement('div');
+      slot.className = 'prog-slot';
+
+      var rootSel = document.createElement('select');
+      rootSel.className = 'prog-select';
+      for (var ni = 0; ni < NOTES.length; ni++) {
+        var opt = document.createElement('option');
+        opt.value = ni; opt.textContent = NOTES[ni];
+        if (ni === chord.root) { opt.selected = true; }
+        rootSel.appendChild(opt);
+      }
+      rootSel.onchange = function () { chord.root = Number(rootSel.value); renderProgression(); };
+
+      var qualSel = document.createElement('select');
+      qualSel.className = 'prog-select';
+      var qkeys = Object.keys(QUALITIES);
+      for (var qi = 0; qi < qkeys.length; qi++) {
+        var qopt = document.createElement('option');
+        qopt.value = qkeys[qi]; qopt.textContent = QUALITIES[qkeys[qi]].label;
+        if (qkeys[qi] === chord.quality) { qopt.selected = true; }
+        qualSel.appendChild(qopt);
+      }
+      qualSel.onchange = function () { chord.quality = qualSel.value; renderProgression(); };
+
+      var removeBtn = document.createElement('button');
+      removeBtn.className = 'prog-remove';
+      removeBtn.textContent = '✕';
+      removeBtn.title = '이 코드 삭제';
+      removeBtn.onclick = function () { state.progression.splice(i, 1); renderProgression(); };
+
+      slot.appendChild(rootSel);
+      slot.appendChild(qualSel);
+      slot.appendChild(removeBtn);
+      el.appendChild(slot);
+    });
+  }
+
+  function renderProgRange() {
+    var el = document.getElementById('prog-range');
+    el.innerHTML = '';
+    var minSel = document.createElement('select');
+    minSel.className = 'prog-select';
+    var maxSel = document.createElement('select');
+    maxSel.className = 'prog-select';
+    for (var f = 0; f <= 15; f++) {
+      var o1 = document.createElement('option');
+      o1.value = f; o1.textContent = f + '프렛';
+      if (f === state.progFretMin) { o1.selected = true; }
+      minSel.appendChild(o1);
+      var o2 = document.createElement('option');
+      o2.value = f; o2.textContent = f + '프렛';
+      if (f === state.progFretMax) { o2.selected = true; }
+      maxSel.appendChild(o2);
+    }
+    minSel.onchange = function () {
+      state.progFretMin = Number(minSel.value);
+      if (state.progFretMin > state.progFretMax) { state.progFretMax = state.progFretMin; }
+      renderProgression();
+    };
+    maxSel.onchange = function () {
+      state.progFretMax = Number(maxSel.value);
+      if (state.progFretMax < state.progFretMin) { state.progFretMin = state.progFretMax; }
+      renderProgression();
+    };
+    var tilde = document.createElement('span');
+    tilde.textContent = '~';
+    tilde.style.color = 'var(--text-secondary)';
+    el.appendChild(minSel);
+    el.appendChild(tilde);
+    el.appendChild(maxSel);
+  }
+
+  function renderProgVoicingMode() {
+    var el = document.getElementById('prog-voicing-mode');
+    el.innerHTML = '';
+    var modes = [['closed', '코드 (트라이어드/4화음)'], ['open', '오픈 보이싱']];
+    for (var i = 0; i < modes.length; i++) {
+      (function (m) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.progVoicingMode === m[0] ? ' active' : '');
+        b.textContent = m[1];
+        b.onclick = function () { state.progVoicingMode = m[0]; renderProgression(); };
+        el.appendChild(b);
+      })(modes[i]);
+    }
+  }
+
+  function renderProgResults() {
+    var el = document.getElementById('prog-results');
+    el.innerHTML = '';
+    if (state.progression.length === 0) {
+      var msg = document.createElement('div');
+      msg.className = 'gt-label';
+      msg.textContent = '위에서 코드를 추가해주세요.';
+      el.appendChild(msg);
+      return;
+    }
+
+    state.progression.forEach(function (chord, i) {
+      var q = QUALITIES[chord.quality];
+      var section = document.createElement('div');
+      section.style.marginBottom = '24px';
+      var heading = document.createElement('div');
+      heading.style.fontSize = '1rem';
+      heading.style.fontWeight = '600';
+      heading.style.letterSpacing = '-0.005em';
+      heading.style.marginBottom = '8px';
+      heading.textContent = (i + 1) + '. ' + NOTES[chord.root] + ' ' + q.label;
+      section.appendChild(heading);
+
+      if (state.progVoicingMode === 'closed') {
+        var sets = STRING_SETS[q.type];
+        var setLabels = SET_LABELS[q.type];
+        var anyFound = false;
+        for (var si = 0; si < sets.length; si++) {
+          var best = bestGripInRange(sets[si], q.intervals, chord.root, state.progFretMin, state.progFretMax);
+          if (!best) { continue; }
+          anyFound = true;
+          var wrap = document.createElement('div');
+          wrap.style.marginBottom = '14px';
+          var label = document.createElement('div');
+          label.className = 'gt-label';
+          label.textContent = setLabels[si];
+          wrap.appendChild(label);
+          var shapeStrings = [];
+          for (var ssi = 0; ssi < sets[si].length; ssi++) {
+            shapeStrings.push({ idx: sets[si][ssi], fret: best.frets[ssi], label: best.perm[ssi][1] });
+          }
+          var holder = document.createElement('div');
+          holder.innerHTML = buildOpenVoicingBoardSVG({ strings: shapeStrings });
+          wrap.appendChild(holder);
+          section.appendChild(wrap);
+        }
+        if (!anyFound) {
+          var none = document.createElement('div');
+          none.className = 'gt-grip';
+          none.textContent = '이 프렛 범위(' + state.progFretMin + '~' + state.progFretMax + ')에서는 구성음이 다 나오는 자리가 없어요.';
+          section.appendChild(none);
+        }
+      } else {
+        var voicings = computeOpenVoicingsForQuality(chord.root, chord.quality, [state.progFretMin, state.progFretMax]);
+        if (voicings.length === 0) {
+          var none2 = document.createElement('div');
+          none2.className = 'gt-grip';
+          none2.textContent = '이 프렛 범위에서는 오픈 보이싱을 못 찾았어요.';
+          section.appendChild(none2);
+        } else {
+          for (var vi = 0; vi < voicings.length; vi++) {
+            var v = voicings[vi];
+            var wrap2 = document.createElement('div');
+            wrap2.style.marginBottom = '14px';
+            var label2 = document.createElement('div');
+            label2.className = 'gt-label';
+            label2.textContent = (v.bassString === 0 ? '6번줄 베이스' : '5번줄 베이스');
+            wrap2.appendChild(label2);
+            var holder2 = document.createElement('div');
+            holder2.innerHTML = buildOpenVoicingBoardSVG(v);
+            wrap2.appendChild(holder2);
+            section.appendChild(wrap2);
+          }
+        }
+      }
+
+      el.appendChild(section);
+    });
+  }
+
+  function renderProgression() {
+    renderProgChords();
+    document.getElementById('prog-add-btn').onclick = function () {
+      state.progression.push({ root: 0, quality: 'major' });
+      renderProgression();
+    };
+    renderProgRange();
+    renderProgVoicingMode();
+    renderProgResults();
+  }
+
+  // ---------------------------------------------------------------
+  // 6. 왼쪽 메뉴 (코드 / 코드진행) 전환
+  // ---------------------------------------------------------------
+
+  function renderApp() {
+    document.getElementById('app').style.display = state.activeView === 'code' ? 'block' : 'none';
+    document.getElementById('app-progression').style.display = state.activeView === 'progression' ? 'block' : 'none';
+    document.getElementById('nav-code').className = 'nav-btn' + (state.activeView === 'code' ? ' active' : '');
+    document.getElementById('nav-progression').className = 'nav-btn' + (state.activeView === 'progression' ? ' active' : '');
+
+    if (state.activeView === 'code') { render(); } else { renderProgression(); }
+  }
+
+  document.getElementById('nav-code').onclick = function () { state.activeView = 'code'; renderApp(); };
+  document.getElementById('nav-progression').onclick = function () { state.activeView = 'progression'; renderApp(); };
+
+  renderApp();
 })();
 } catch (e) {
   var eEl = document.getElementById('gt-error');

@@ -1,0 +1,5 @@
+# 로컬 개발 도구 설정 (emilkowalski/skills 등) — 실제 앱 결과물이 아니라 제외
+.claude/
+.agents/
+.impeccable/
+skills-lock.json
