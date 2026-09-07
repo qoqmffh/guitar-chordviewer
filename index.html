@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기타 코드 뷰어</title>
+<style>
+  :root {
+    --surface-2: #ffffff;
+    --surface-1: #f4f4f0;
+    --border: #e2e1da;
+    --border-strong: #c9c8c0;
+    --bg-accent: #e6f1fb;
+    --text-accent: #0c447c;
+    --border-accent: #185fa5;
+    --text-primary: #1a1a1a;
+    --text-secondary: #5f5e5a;
+    --text-muted: #9a9990;
+    --text-danger: #791f1f;
+    --bg-danger: #fcebeb;
+    --radius: 8px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background: var(--surface-1);
+    margin: 0;
+    padding: 24px 16px 60px;
+  }
+  #app {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--surface-2);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 20px;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0,0,0,0);
+  }
+  .gt-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface-2);
+    cursor: pointer;
+  }
+  .gt-btn:hover { background: var(--surface-1); }
+  .gt-btn.active {
+    background: var(--bg-accent);
+    color: var(--text-accent);
+    border-color: var(--border-accent);
+  }
+  .gt-grip {
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 12px;
+    font-size: 12px;
+  }
+  .gt-grip-title { font-size: 13px; font-weight: 500; margin: 0 0 6px; }
+  .gt-row { display: flex; justify-content: space-between; color: var(--text-secondary); padding: 2px 0; }
+  .gt-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .ts { font-size: 12px; fill: var(--text-secondary); font-family: var(--font-sans); }
+  #gt-error {
+    display: none;
+    background: var(--bg-danger);
+    color: var(--text-danger);
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  #gt-grips {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+  }
+  .gt-flex { display: flex; flex-wrap: wrap; gap: 6px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>기타 코드 지판 뷰어</h1>
+  <h2 class="sr-only">기타 지판 위 트라이어드/4화음 위치와 탑노트 기준, 포지션 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
+
+  <div id="gt-error"></div>
+
+  <div style="margin-bottom:12px;">
+    <div class="gt-label">보기 모드</div>
+    <div id="gt-modes" class="gt-flex"></div>
+  </div>
+
+  <div style="margin-bottom:12px;">
+    <div class="gt-label">루트음 / 탑노트</div>
+    <div id="gt-roots" class="gt-flex"></div>
+  </div>
+
+  <div id="gt-topstring-wrap" style="margin-bottom:12px;">
+    <div class="gt-label">탑노트가 있는 줄</div>
+    <div id="gt-topstrings" class="gt-flex"></div>
+  </div>
+
+  <div id="gt-position-wrap" style="margin-bottom:12px;">
+    <div class="gt-label">포지션 폭</div>
+    <div id="gt-posw" class="gt-flex" style="margin-bottom:8px;"></div>
+    <div class="gt-label">포지션 선택</div>
+    <div id="gt-positions" class="gt-flex"></div>
+  </div>
+
+  <div style="margin-bottom:16px;">
+    <div class="gt-label">코드 종류</div>
+    <div id="gt-qualities" class="gt-flex"></div>
+  </div>
+
+  <div id="gt-fretboard"></div>
+
+  <div id="gt-legend" class="gt-flex" style="margin:10px 0 16px; font-size:12px;"></div>
+
+  <div id="gt-grips-title" style="font-size:13px; font-weight:500; margin-bottom:8px;">추천 그립</div>
+  <div id="gt-grips"></div>
+</div>
+
+<script>
+try {
+(function () {
+
+  // ---------------------------------------------------------------
+  // 1. 상수 / 데이터
+  // ---------------------------------------------------------------
+
+  // 반음 순서 (샵 표기만 사용, 플랫 표기는 미구현)
+  var NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+  // 표준 튜닝: 인덱스 0 = 6번줄(저음 E) ... 인덱스 5 = 1번줄(고음 E)
+  // 값은 각 줄의 개방현 음을 0~11 반음 인덱스로 표현한 것
+  var OPEN = [4, 9, 2, 7, 11, 4];
+
+  var STRING_NAMES = ['6(E)', '5(A)', '4(D)', '3(G)', '2(B)', '1(E)'];
+
+  // 화면에 위→아래로 그릴 때 사용할 줄 순서 (1번줄이 위, 6번줄이 아래)
+  var DISPLAY_ORDER = [5, 4, 3, 2, 1, 0];
+
+  // 코드 종류 정의: intervals = [반음 오프셋, 표시 라벨] 목록
+  // type: 'triad'  -> 인접 3현 보이싱에 사용 (STRING_SETS.triad)
+  //       'chord4' -> 인접 4현 보이싱에 사용 (STRING_SETS.chord4)
+  var QUALITIES = {
+    major:    { label: '메이저 트라이어드',        intervals: [[0,'R'],[4,'3'],[7,'5']],                 type: 'triad'  },
+    minor:    { label: '마이너 트라이어드',        intervals: [[0,'R'],[3,'b3'],[7,'5']],                type: 'triad'  },
+    dom7:     { label: '도미넌트7 1-3-5-b7',       intervals: [[0,'R'],[4,'3'],[7,'5'],[10,'b7']],       type: 'chord4' },
+    maj7:     { label: '메이저7 1-3-5-7',          intervals: [[0,'R'],[4,'3'],[7,'5'],[11,'7']],        type: 'chord4' },
+    min7:     { label: '마이너7 1-b3-5-b7',        intervals: [[0,'R'],[3,'b3'],[7,'5'],[10,'b7']],      type: 'chord4' },
+    halfdim7: { label: '하프디미니쉬7 1-b3-b5-b7', intervals: [[0,'R'],[3,'b3'],[6,'b5'],[10,'b7']],     type: 'chord4' },
+    dim7:     { label: '디미니쉬7 1-b3-b5-bb7',    intervals: [[0,'R'],[3,'b3'],[6,'b5'],[9,'bb7']],     type: 'chord4' },
+    aug7:     { label: '어그먼트7 1-3-#5-7',       intervals: [[0,'R'],[4,'3'],[8,'#5'],[11,'7']],       type: 'chord4' }
+  };
+
+  // 인터벌 라벨별 색상 (지판 위 점 색상)
+  var LABEL_COLOR = {
+    R: '#A32D2D', '3': '#185FA5', b3: '#0F6E56', '5': '#3B6D11',
+    b5: '#854F0B', '#5': '#534AB7', '7': '#993556', b7: '#5F5E5A', bb7: '#993C1D'
+  };
+
+  // 3현/4현 세트 정의 (인덱스는 OPEN 배열 인덱스, 즉 0=6번줄 ... 5=1번줄)
+  var STRING_SETS = {
+    triad:  [[0,1,2], [1,2,3], [2,3,4], [3,4,5]],
+    chord4: [[0,1,2,3], [1,2,3,4], [2,3,4,5]]
+  };
+  var SET_LABELS = {
+    triad:  ['6-5-4번줄', '5-4-3번줄', '4-3-2번줄', '3-2-1번줄'],
+    chord4: ['6-5-4-3번줄', '5-4-3-2번줄', '4-3-2-1번줄']
+  };
+
+  // 탑노트 기준 모드에서: 탑노트가 있는 줄 번호 -> STRING_SETS[type] 배열의 인덱스
+  var TOPSTRING_TO_SETIDX = {
+    triad:  { 1: 3, 2: 2, 3: 1, 4: 0 },
+    chord4: { 1: 2, 2: 1, 3: 0 }
+  };
+
+  // ---------------------------------------------------------------
+  // 2. 상태
+  // ---------------------------------------------------------------
+  var state = {
+    mode: 'root',       // 'root' | 'top' | 'position'
+    root: 0,             // 0~11 (C=0)
+    quality: 'major',    // QUALITIES 키
+    topString: 1,        // 탑노트 기준 모드에서 선택한 줄 번호
+    posWindow: 4,        // 포지션 묶기 모드: 프렛 폭 (4 또는 5)
+    posStart: null        // 포지션 묶기 모드: 선택된 시작 프렛
+  };
+
+  // ---------------------------------------------------------------
+  // 3. 유틸 함수
+  // ---------------------------------------------------------------
+
+  // 배열의 모든 순열 생성 (3개, 4개 모두 대응하는 범용 버전)
+  function permuteAll(arr) {
+    if (arr.length <= 1) { return [arr]; }
+    var res = [];
+    for (var i = 0; i < arr.length; i++) {
+      var rest = arr.slice(0, i).concat(arr.slice(i + 1));
+      var subs = permuteAll(rest);
+      for (var j = 0; j < subs.length; j++) {
+        res.push([arr[i]].concat(subs[j]));
+      }
+    }
+    return res;
+  }
+
+  // 주어진 현 조합(strings)에 intervals를 배치할 수 있는 가장 좁은(프렛 폭이 최소인)
+  // 그립을 찾는다. filterFn으로 특정 순열만 허용하도록 제한할 수 있다.
+  // (예: 탑노트 고정 모드에서는 마지막 현에 루트(오프셋 0)가 오는 순열만 허용)
+  function bestGrip(strings, intervals, root, filterFn) {
+    filterFn = filterFn || function () { return true; };
+    var best = null;
+    var allPerms = permuteAll(intervals);
+    var perms = [];
+    for (var pi = 0; pi < allPerms.length; pi++) {
+      if (filterFn(allPerms[pi])) { perms.push(allPerms[pi]); }
+    }
+    for (var qi = 0; qi < perms.length; qi++) {
+      var perm = perms[qi];
+      var opts = [];
+      for (var si = 0; si < strings.length; si++) {
+        var s = strings[si];
+        var offset = perm[si][0];
+        var open = OPEN[s];
+        var target = ((root + offset) % 12 + 12) % 12;
+        var f0 = ((target - open) % 12 + 12) % 12;
+        var arr = [f0];
+        if (f0 + 12 <= 15) { arr.push(f0 + 12); }
+        opts.push(arr);
+      }
+      (function rec(idx, cur) {
+        if (idx === opts.length) {
+          var span = Math.max.apply(null, cur) - Math.min.apply(null, cur);
+          var minF = Math.min.apply(null, cur);
+          if (!best || span < best.span || (span === best.span && minF < best.minF)) {
+            best = { frets: cur.slice(), perm: perm, span: span, minF: minF };
+          }
+          return;
+        }
+        for (var oi = 0; oi < opts[idx].length; oi++) {
+          rec(idx + 1, cur.concat([opts[idx][oi]]));
+        }
+      })(0, []);
+    }
+    return best;
+  }
+
+  function noteName(i) { return NOTES[((i % 12) + 12) % 12]; }
+  function currentType() { return QUALITIES[state.quality].type; }
+
+  function validTopStrings() {
+    var keys = Object.keys(TOPSTRING_TO_SETIDX[currentType()]);
+    var nums = [];
+    for (var i = 0; i < keys.length; i++) { nums.push(Number(keys[i])); }
+    nums.sort(function (a, b) { return a - b; });
+    return nums;
+  }
+
+  function ensureValidTopString() {
+    var opts = validTopStrings();
+    var found = false;
+    for (var i = 0; i < opts.length; i++) { if (opts[i] === state.topString) { found = true; } }
+    if (!found) { state.topString = opts[opts.length - 1]; }
+  }
+
+  // 포지션 묶기: posWindow 폭의 프렛 구간 중, 코드 구성음이 전부 등장하는
+  // 구간의 시작 프렛 목록을 찾는다 (최대 8개, 서로 2프렛 이상 떨어진 것만).
+  function computeValidPositions() {
+    var ws = state.posWindow;
+    var q = QUALITIES[state.quality];
+    var map = {};
+    for (var i = 0; i < q.intervals.length; i++) { map[q.intervals[i][0]] = q.intervals[i][1]; }
+    var required = [];
+    for (var i2 = 0; i2 < q.intervals.length; i2++) { required.push(q.intervals[i2][1]); }
+    var maxFret = 12;
+    var valid = [];
+    for (var s = 1; s <= maxFret - ws + 1; s++) {
+      var present = {};
+      for (var st = 0; st < 6; st++) {
+        for (var f = s; f <= s + ws - 1; f++) {
+          var note = (OPEN[st] + f) % 12;
+          var offset = ((note - state.root) % 12 + 12) % 12;
+          if (map[offset] !== undefined) { present[map[offset]] = true; }
+        }
+      }
+      var ok = true;
+      for (var r = 0; r < required.length; r++) { if (!present[required[r]]) { ok = false; break; } }
+      if (ok) { valid.push(s); }
+    }
+    var picked = [];
+    for (var v = 0; v < valid.length; v++) {
+      if (picked.length === 0 || valid[v] - picked[picked.length - 1] >= 2) { picked.push(valid[v]); }
+    }
+    return picked.slice(0, 8);
+  }
+
+  function ensureValidPosition() {
+    var opts = computeValidPositions();
+    var found = false;
+    for (var i = 0; i < opts.length; i++) { if (opts[i] === state.posStart) { found = true; } }
+    if (!found) { state.posStart = opts.length ? opts[0] : null; }
+  }
+
+  // ---------------------------------------------------------------
+  // 4. 렌더링
+  // ---------------------------------------------------------------
+
+  function renderModes() {
+    var el = document.getElementById('gt-modes');
+    el.innerHTML = '';
+    var modes = [['root', '전체 지판'], ['top', '탑노트 기준'], ['position', '포지션 묶기']];
+    for (var i = 0; i < modes.length; i++) {
+      (function (m) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.mode === m[0] ? ' active' : '');
+        b.textContent = m[1];
+        b.onclick = function () {
+          state.mode = m[0];
+          ensureValidTopString();
+          if (state.mode === 'position') { ensureValidPosition(); }
+          render();
+        };
+        el.appendChild(b);
+      })(modes[i]);
+    }
+  }
+
+  function renderRoots() {
+    var el = document.getElementById('gt-roots');
+    el.innerHTML = '';
+    for (var i = 0; i < NOTES.length; i++) {
+      (function (n, idx) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.root === idx ? ' active' : '');
+        b.textContent = n;
+        b.onclick = function () {
+          state.root = idx;
+          if (state.mode === 'position') { ensureValidPosition(); }
+          render();
+        };
+        el.appendChild(b);
+      })(NOTES[i], i);
+    }
+  }
+
+  function renderTopStrings() {
+    var wrap = document.getElementById('gt-topstring-wrap');
+    wrap.style.display = state.mode === 'top' ? 'block' : 'none';
+    var el = document.getElementById('gt-topstrings');
+    el.innerHTML = '';
+    var opts = validTopStrings();
+    for (var i = 0; i < opts.length; i++) {
+      (function (n) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.topString === n ? ' active' : '');
+        b.textContent = n + '번줄';
+        b.onclick = function () { state.topString = n; render(); };
+        el.appendChild(b);
+      })(opts[i]);
+    }
+  }
+
+  function renderPositionControls() {
+    var wrap = document.getElementById('gt-position-wrap');
+    wrap.style.display = state.mode === 'position' ? 'block' : 'none';
+
+    var wEl = document.getElementById('gt-posw');
+    wEl.innerHTML = '';
+    var widths = [4, 5];
+    for (var i = 0; i < widths.length; i++) {
+      (function (w) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.posWindow === w ? ' active' : '');
+        b.textContent = w + '프렛';
+        b.onclick = function () { state.posWindow = w; ensureValidPosition(); render(); };
+        wEl.appendChild(b);
+      })(widths[i]);
+    }
+
+    var pEl = document.getElementById('gt-positions');
+    pEl.innerHTML = '';
+    var opts = computeValidPositions();
+    if (opts.length === 0) {
+      var span = document.createElement('span');
+      span.style.fontSize = '12px';
+      span.style.color = 'var(--text-secondary)';
+      span.textContent = '이 폭에서는 모든 구성음이 한 포지션에 들어오지 않아요. 폭을 늘려보세요.';
+      pEl.appendChild(span);
+      return;
+    }
+    for (var j = 0; j < opts.length; j++) {
+      (function (s, idx) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.posStart === s ? ' active' : '');
+        b.textContent = '포지션' + (idx + 1) + ' (' + s + '~' + (s + state.posWindow - 1) + '프렛)';
+        b.onclick = function () { state.posStart = s; render(); };
+        pEl.appendChild(b);
+      })(opts[j], j);
+    }
+  }
+
+  function renderQualities() {
+    var el = document.getElementById('gt-qualities');
+    el.innerHTML = '';
+    var keys = Object.keys(QUALITIES);
+    for (var i = 0; i < keys.length; i++) {
+      (function (k) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.quality === k ? ' active' : '');
+        b.textContent = QUALITIES[k].label;
+        b.onclick = function () {
+          state.quality = k;
+          if (state.mode === 'top') { ensureValidTopString(); }
+          if (state.mode === 'position') { ensureValidPosition(); }
+          render();
+        };
+        el.appendChild(b);
+      })(keys[i]);
+    }
+  }
+
+  function getRelevantStrings() {
+    if (state.mode !== 'top') { return null; }
+    var type = currentType();
+    return STRING_SETS[type][TOPSTRING_TO_SETIDX[type][state.topString]];
+  }
+
+  function renderFretboard() {
+    var maxFret = 12, x0 = 110, dx = 42, y0 = 40, dy = 40;
+    var relevant = getRelevantStrings();
+    var posWin = null;
+    if (state.mode === 'position' && state.posStart) {
+      posWin = [state.posStart, state.posStart + state.posWindow - 1];
+    }
+
+    var svg = '<svg width="100%" viewBox="0 0 680 290" role="img">' +
+      '<title>프렛보드 다이어그램</title>' +
+      '<desc>선택한 루트음, 탑노트 또는 포지션 구간에 맞는 음정 위치를 표시</desc>';
+
+    if (posWin) {
+      var bx1 = x0 + (posWin[0] - 1) * dx;
+      var bx2 = x0 + posWin[1] * dx;
+      svg += '<rect x="' + bx1 + '" y="' + (y0 - 14) + '" width="' + (bx2 - bx1) +
+        '" height="' + (dy * 5 + 28) + '" rx="10" fill="var(--bg-accent)" opacity="0.5"/>';
+    }
+
+    svg += '<rect x="' + x0 + '" y="' + (y0 - 2) + '" width="4" height="' + (dy * 5 + 4) +
+      '" fill="var(--text-primary)" opacity="0.6"/>';
+
+    for (var f = 1; f <= maxFret; f++) {
+      var x = x0 + f * dx;
+      var fdim = posWin && (f < posWin[0] || f > posWin[1]);
+      svg += '<line x1="' + x + '" y1="' + y0 + '" x2="' + x + '" y2="' + (y0 + dy * 5) +
+        '" stroke="var(--border-strong)" stroke-width="0.5" opacity="' + (fdim ? '0.3' : '1') + '"/>';
+    }
+
+    for (var i = 0; i < 6; i++) {
+      var s = DISPLAY_ORDER[i];
+      var y = y0 + i * dy;
+      var dim = (relevant !== null && relevant.indexOf(s) === -1);
+      svg += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + maxFret * dx) + '" y2="' + y +
+        '" stroke="var(--border-strong)" stroke-width="1" opacity="' + (dim ? '0.35' : '1') + '"/>';
+      svg += '<text class="ts" x="45" y="' + y + '" text-anchor="end" dominant-baseline="central" opacity="' +
+        (dim ? '0.4' : '1') + '">' + STRING_NAMES[s] + '</text>';
+    }
+
+    var markers = [3, 5, 7, 9, 12];
+    for (var mi = 0; mi < markers.length; mi++) {
+      var f5 = markers[mi];
+      var cx = x0 + (f5 - 1) * dx + dx / 2;
+      var fy = y0 + dy * 5 + 16;
+      svg += '<circle cx="' + cx + '" cy="' + fy + '" r="3" fill="var(--text-muted)"/>';
+      svg += '<text class="ts" x="' + cx + '" y="' + fy + '" text-anchor="middle" dominant-baseline="central" fill="var(--text-muted)">' + f5 + '</text>';
+    }
+
+    var q = QUALITIES[state.quality];
+    var map = {};
+    for (var ivi = 0; ivi < q.intervals.length; ivi++) { map[q.intervals[ivi][0]] = q.intervals[ivi][1]; }
+
+    for (var row = 0; row < 6; row++) {
+      var s2 = DISPLAY_ORDER[row];
+      if (relevant !== null && relevant.indexOf(s2) === -1) { continue; }
+      var y2 = y0 + row * dy;
+      for (var f2 = 0; f2 <= maxFret; f2++) {
+        if (posWin && (f2 < posWin[0] || f2 > posWin[1])) { continue; }
+        var note = (OPEN[s2] + f2) % 12;
+        var offset = ((note - state.root) % 12 + 12) % 12;
+        if (map[offset] !== undefined) {
+          var label = map[offset];
+          var cx2 = f2 === 0 ? x0 - 24 : x0 + (f2 - 1) * dx + dx / 2;
+          var color = LABEL_COLOR[label];
+          svg += '<circle cx="' + cx2 + '" cy="' + y2 + '" r="13" fill="' + color +
+            '" stroke="var(--surface-2)" stroke-width="1.5"/>';
+          svg += '<text x="' + cx2 + '" y="' + y2 + '" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#fff" style="font-family:var(--font-sans)">' + label + '</text>';
+        }
+      }
+    }
+
+    svg += '</svg>';
+    document.getElementById('gt-fretboard').innerHTML = svg;
+  }
+
+  function renderLegend() {
+    var q = QUALITIES[state.quality];
+    var el = document.getElementById('gt-legend');
+    el.innerHTML = '';
+    for (var i = 0; i < q.intervals.length; i++) {
+      var label = q.intervals[i][1];
+      var color = LABEL_COLOR[label];
+      var d = document.createElement('div');
+      d.style.display = 'flex'; d.style.alignItems = 'center'; d.style.gap = '5px';
+      var dot = document.createElement('span');
+      dot.style.width = '11px'; dot.style.height = '11px'; dot.style.borderRadius = '50%';
+      dot.style.background = color; dot.style.display = 'inline-block';
+      var txt = document.createElement('span');
+      txt.style.color = 'var(--text-secondary)';
+      txt.textContent = label;
+      d.appendChild(dot); d.appendChild(txt);
+      el.appendChild(d);
+    }
+  }
+
+  function renderGrips() {
+    var el = document.getElementById('gt-grips');
+    var titleEl = document.getElementById('gt-grips-title');
+    el.innerHTML = '';
+    var q = QUALITIES[state.quality];
+
+    if (state.mode === 'top') {
+      titleEl.textContent = '탑노트 고정 그립 (' + state.topString + '번줄 최상단 = 루트)';
+      var strings = getRelevantStrings();
+      var topPos = strings.length - 1;
+      var best = bestGrip(strings, q.intervals, state.root, function (perm) { return perm[topPos][0] === 0; });
+      var card = document.createElement('div');
+      card.className = 'gt-grip';
+      var title = document.createElement('div');
+      title.className = 'gt-grip-title';
+      title.textContent = NOTES[state.root] + ' ' + q.label;
+      card.appendChild(title);
+      for (var i = 0; i < strings.length; i++) {
+        var s = strings[i];
+        var fret = best.frets[i];
+        var label = best.perm[i][1];
+        var note = noteName(OPEN[s] + fret);
+        var row = document.createElement('div');
+        row.className = 'gt-row';
+        row.innerHTML = '<span>' + STRING_NAMES[s] + '번줄' + (i === topPos ? ' (탑)' : '') +
+          '</span><span>' + fret + '프렛 (' + label + ', ' + note + ')</span>';
+        card.appendChild(row);
+      }
+      el.appendChild(card);
+
+    } else if (state.mode === 'position') {
+      if (!state.posStart) {
+        titleEl.textContent = '포지션 구성음';
+        var card0 = document.createElement('div');
+        card0.className = 'gt-grip';
+        card0.textContent = '유효한 포지션이 없어요. 폭을 늘려보세요.';
+        el.appendChild(card0);
+        return;
+      }
+      titleEl.textContent = '포지션 구성음 (' + state.posStart + '~' + (state.posStart + state.posWindow - 1) + '프렛)';
+      var map2 = {};
+      for (var mi2 = 0; mi2 < q.intervals.length; mi2++) { map2[q.intervals[mi2][0]] = q.intervals[mi2][1]; }
+      var card = document.createElement('div');
+      card.className = 'gt-grip';
+      var title2 = document.createElement('div');
+      title2.className = 'gt-grip-title';
+      title2.textContent = NOTES[state.root] + ' ' + q.label;
+      card.appendChild(title2);
+      for (var i2 = 0; i2 < 6; i2++) {
+        var s3 = DISPLAY_ORDER[i2];
+        var hits = [];
+        for (var f3 = state.posStart; f3 <= state.posStart + state.posWindow - 1; f3++) {
+          var note2 = (OPEN[s3] + f3) % 12;
+          var offset2 = ((note2 - state.root) % 12 + 12) % 12;
+          if (map2[offset2] !== undefined) { hits.push(f3 + '프렛(' + map2[offset2] + ')'); }
+        }
+        var row = document.createElement('div');
+        row.className = 'gt-row';
+        row.innerHTML = '<span>' + STRING_NAMES[s3] + '번줄</span><span>' + (hits.length ? hits.join(', ') : '-') + '</span>';
+        card.appendChild(row);
+      }
+      el.appendChild(card);
+
+    } else {
+      titleEl.textContent = '추천 그립 (가장 좁은 위치)';
+      var sets = STRING_SETS[q.type];
+      var labels = SET_LABELS[q.type];
+      for (var si = 0; si < sets.length; si++) {
+        var strings2 = sets[si];
+        var best2 = bestGrip(strings2, q.intervals, state.root);
+        var card2 = document.createElement('div');
+        card2.className = 'gt-grip';
+        var title3 = document.createElement('div');
+        title3.className = 'gt-grip-title';
+        title3.textContent = labels[si];
+        card2.appendChild(title3);
+        for (var i3 = 0; i3 < strings2.length; i3++) {
+          var s4 = strings2[i3];
+          var fret2 = best2.frets[i3];
+          var label2 = best2.perm[i3][1];
+          var note3 = noteName(OPEN[s4] + fret2);
+          var row2 = document.createElement('div');
+          row2.className = 'gt-row';
+          row2.innerHTML = '<span>' + STRING_NAMES[s4] + '번줄</span><span>' + fret2 + '프렛 (' + label2 + ', ' + note3 + ')</span>';
+          card2.appendChild(row2);
+        }
+        el.appendChild(card2);
+      }
+    }
+  }
+
+  function render() {
+    renderModes();
+    renderRoots();
+    renderTopStrings();
+    renderPositionControls();
+    renderQualities();
+    renderFretboard();
+    renderLegend();
+    renderGrips();
+  }
+
+  render();
+})();
+} catch (e) {
+  var eEl = document.getElementById('gt-error');
+  if (eEl) { eEl.style.display = 'block'; eEl.textContent = '렌더링 오류: ' + e.message; }
+}
+</script>
+</body>
+</html>
