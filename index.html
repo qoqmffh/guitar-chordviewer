@@ -6,25 +6,24 @@
 <title>기타 코드 뷰어</title>
 <style>
   :root {
+    /* 애플 공식 홈페이지 팔레트 오마주 */
     --surface-2: #ffffff;
-    --surface-1: #f4f4f0;
-    --border: #e2e1da;
-    --border-strong: #c9c8c0;
-    --bg-accent: #e6f1fb;
-    --text-accent: #0c447c;
-    --border-accent: #185fa5;
-    --text-primary: #1a1a1a;
-    --text-secondary: #5f5e5a;
-    --text-muted: #9a9990;
-    --text-danger: #791f1f;
-    --bg-danger: #fcebeb;
-    --radius: 8px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --surface-1: #f5f5f7;         /* 애플 특유의 밝은 그레이 섹션 배경 */
+    --border: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.14);
+    --bg-accent: #0071e3;         /* 애플 블루 */
+    --text-accent: #0071e3;
+    --border-accent: #0071e3;
+    --text-primary: #1d1d1f;      /* 애플 시그니처 다크 그레이(순검정 아님) */
+    --text-secondary: #6e6e73;
+    --text-muted: #a1a1a6;
+    --text-danger: #d70015;
+    --bg-danger: #fff2f1;
+    --radius: 12px;               /* 카드 안쪽 요소 */
+    --radius-card: 18px;          /* 큰 카드/네비 */
+    --radius-pill: 980px;         /* 알약 버튼 */
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-    /* 재질(유리) 레이어 — 사이드바는 무거운/구조적 재질, 카드는 가벼운/상호작용 재질 */
-    --glass-heavy: rgba(255, 255, 255, 0.45);
-    --glass-light: rgba(255, 255, 255, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.6);
   }
   * { box-sizing: border-box; }
   html { font-size: 100%; } /* 사용자 브라우저 글자크기 설정 존중 (rem 기준) */
@@ -32,64 +31,79 @@
     font-family: var(--font-sans);
     font-size: 0.8125rem;
     color: var(--text-primary);
-    /* 블러가 비칠 은은한 배경 — 완전 평면이 아니라 재질이 뜰 표면을 만든다 */
-    background: linear-gradient(160deg, #eef2f6 0%, #f6f4ef 55%, #eef1ec 100%);
+    background: var(--surface-1);
     margin: 0;
-    padding: 24px 16px 60px;
+    padding: 0 0 60px;
   }
-  #page-shell {
-    max-width: 1280px;
-    margin: 0 auto;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  #sidebar {
-    flex: 0 0 120px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  #topnav {
     position: sticky;
-    top: 24px;
-    background: var(--glass-heavy);
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    border-radius: 14px;
-    padding: 8px;
+    border-bottom: 1px solid var(--border);
   }
+  #topnav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  #topnav-left { display: flex; align-items: center; gap: 10px; }
+  #topnav-brand {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+  #topnav-links { display: flex; gap: 2px; }
   .nav-btn {
-    text-align: left;
-    padding: 10px 14px;
+    padding: 6px 16px;
     font-size: 0.8125rem;
-    font-weight: 500;
-    border-radius: var(--radius);
-    border: 0.5px solid var(--border-strong);
-    background: var(--surface-2);
+    font-weight: 400;
+    border-radius: var(--radius-pill);
+    border: none;
+    background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+    white-space: nowrap;
+    transition: background 150ms ease, color 150ms ease;
   }
   @media (hover: hover) and (pointer: fine) {
-    .nav-btn:hover { background: var(--surface-1); }
+    .nav-btn:hover { color: var(--text-primary); }
   }
   .nav-btn.active {
-    background: var(--bg-accent);
+    background: rgba(0, 113, 227, 0.1);
     color: var(--text-accent);
-    border-color: var(--border-accent);
+    font-weight: 600;
   }
-  #page-content { flex: 1 1 auto; min-width: 0; }
-  #app, #app-progression {
+  .nav-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: var(--radius-pill);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    vertical-align: 1px;
+  }
+  #page-content { max-width: 1280px; margin: 0 auto; padding: 24px 16px 0; }
+  #app, #app-progression, #app-admin {
     max-width: 1200px;
     margin: 0 auto;
-    background: var(--glass-light);
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    border: 1px solid var(--glass-border);
-    border-top-color: rgba(255, 255, 255, 0.85); /* 빛을 받는 위쪽 모서리 */
-    border-radius: 16px;
-    padding: 24px 32px;
-    box-shadow: 0 12px 32px -16px rgba(30, 30, 20, 0.18);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 32px 40px;
+    box-shadow: 0 4px 24px -12px rgba(0, 0, 0, 0.1);
   }
   .prog-slot {
     display: flex;
@@ -103,7 +117,7 @@
     font-size: 0.8125rem;
     padding: 4px 6px;
     border-radius: var(--radius);
-    border: 0.5px solid var(--border-strong);
+    border: 1px solid var(--border-strong);
     background: var(--surface-2);
     transition: border-color 150ms ease;
   }
@@ -120,22 +134,24 @@
   }
   .prog-remove:hover { opacity: 1; }
   h1 {
-    font-size: 1.25rem;
+    font-size: 2rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.3;
-    margin: 0 0 20px;
+    letter-spacing: -0.022em;
+    line-height: 1.15;
+    margin: 0 0 24px;
   }
   .sr-only {
     position: absolute; width: 1px; height: 1px;
     overflow: hidden; clip: rect(0,0,0,0);
   }
   .gt-btn {
-    padding: 6px 10px;
+    padding: 6px 14px;
     font-size: 0.8125rem;
-    border-radius: var(--radius);
-    border: 0.5px solid var(--border-strong);
+    white-space: nowrap; /* 라벨이 두 줄로 쪼개져 마지막 글자만 남는 것 방지 */
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-strong);
     background: var(--surface-2);
+    color: var(--text-primary);
     cursor: pointer;
     transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
   }
@@ -144,13 +160,40 @@
   }
   .gt-btn.active {
     background: var(--bg-accent);
-    color: var(--text-accent);
-    border-color: var(--border-accent);
+    color: #fff;
+    border-color: var(--bg-accent);
   }
+  /* 상호 배타적인 N개 중 1개 고르는 스위치(보기 모드, 보이싱 방식) —
+     회색 트랙 안에 흰 알약이 뜨는 애플 세그먼티드 컨트롤 스타일.
+     칸 크기가 전부 동일해야 "표"처럼 정돈돼 보인다. */
+  .gt-segmented {
+    background: var(--surface-1);
+    border-radius: var(--radius-pill);
+    padding: 3px;
+    gap: 2px !important;
+  }
+  .gt-segmented .gt-btn {
+    flex: 1 1 0;
+    text-align: center;
+    border: none;
+  }
+  .gt-segmented .gt-btn.active {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  }
+
+  /* 12음/줄번호처럼 "같은 종류의 칸"이 여러 개 나열될 때 — 내용 길이가
+     달라도(C vs C#) 칸 폭을 통일해서 표처럼 격자가 딱 맞게 정렬되게 한다. */
+  .gt-grid-fixed .gt-btn {
+    min-width: 2.75rem;
+    text-align: center;
+  }
+
   .gt-grip {
     background: var(--surface-1);
     border-radius: var(--radius);
-    padding: 12px;
+    padding: 14px 16px;
     font-size: 0.8125rem;
   }
   .gt-grip-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.005em; margin: 0 0 6px; }
@@ -173,93 +216,351 @@
   }
   .gt-flex { display: flex; flex-wrap: wrap; gap: 6px; }
 
+  /* 홈 — 랜딩페이지 구조: 히어로 / 기능 카드 / 소식 / 게시판 / 푸터 */
+  .home-hero { text-align: center; padding: 48px 0 44px; max-width: 640px; margin: 0 auto; }
+  .home-hero-icon { font-size: 2.75rem; line-height: 1; margin-bottom: 12px; }
+  .home-hero-title { font-size: 2.5rem; text-align: center; margin: 0 0 12px; }
+  .home-hero-sub { font-size: 1.0625rem; line-height: 1.55; color: var(--text-secondary); margin: 0 0 28px; }
+  .home-hero-ctas { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .home-cta {
+    padding: 12px 26px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity 150ms ease, background 150ms ease;
+  }
+  .home-cta-primary { background: var(--bg-accent); color: #fff; }
+  .home-cta-secondary { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-strong); }
+  @media (hover: hover) and (pointer: fine) {
+    .home-cta-primary:hover { opacity: 0.88; }
+    .home-cta-secondary:hover { background: var(--surface-1); }
+  }
+
+  .home-section { max-width: 1120px; margin: 0 auto 44px; }
+  .home-section-title { font-size: 1.375rem; font-weight: 600; letter-spacing: -0.015em; text-align: center; margin: 0 0 20px; }
+
+  .home-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  .home-feature-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 26px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 24px -14px rgba(0, 0, 0, 0.12);
+    transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .home-feature-card:hover { transform: translateY(-2px); box-shadow: 0 10px 32px -14px rgba(0, 0, 0, 0.18); }
+  }
+  .home-feature-icon { font-size: 1.75rem; line-height: 1; }
+  .home-feature-title { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; }
+  .home-feature-desc { color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6; flex: 1 1 auto; }
+  .home-feature-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .home-feature-points li { font-size: 0.75rem; color: var(--text-primary); line-height: 1.5; padding-left: 14px; position: relative; }
+  .home-feature-points li::before { content: '•'; position: absolute; left: 0; color: var(--text-accent); }
+  .home-feature-link {
+    align-self: flex-start;
+    color: var(--text-accent);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: gap 150ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .home-feature-link:hover { gap: 8px; }
+  }
+
+  .home-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 4px 24px -14px rgba(0, 0, 0, 0.1);
+  }
+  .home-news-card { padding: 4px 20px; }
+  .home-news-row { display: flex; align-items: baseline; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .home-news-row:last-child { border-bottom: none; }
+  .home-news-date {
+    flex: 0 0 auto;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--surface-1);
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .home-news-text { color: var(--text-primary); font-size: 0.8125rem; line-height: 1.5; }
+
+  .home-board-card { padding: 20px; }
+  .home-board-fallback { font-size: 0.8125rem; color: var(--text-secondary); text-align: center; padding: 20px 0; }
+
+  .home-footer { max-width: 1120px; margin: 8px auto 0; padding: 28px 0 0; border-top: 1px solid var(--border); text-align: center; }
+  .home-footer-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 8px; }
+  .home-footer-body { font-size: 0.8125rem; line-height: 1.7; color: var(--text-primary); }
+
+  /* 광고 배너 자리 — 본문 좌우 여백에 뜨는 고정 레일. 화면이 충분히
+     넓을 때만(대형 모니터) 보이고, 노트북/태블릿/모바일에서는 숨겨서
+     본문과 겹치지 않게 한다. */
+  .ad-rail {
+    display: none;
+    position: fixed;
+    top: 96px;
+    width: 160px;
+    height: 600px;
+    max-height: calc(100vh - 116px);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    z-index: 5;
+    overflow: hidden;
+  }
+  .ad-rail img { max-width: 100%; max-height: 100%; border-radius: calc(var(--radius) - 2px); }
+  #ad-rail-left { left: 24px; }
+  #ad-rail-right { right: 24px; }
+  @media (min-width: 1760px) {
+    .ad-rail { display: flex; }
+  }
+
+  /* 광고관리자모드 진입용 비밀번호 모달 */
+  #admin-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #admin-modal-overlay.open { display: flex; }
+  #admin-modal {
+    background: var(--surface-2);
+    border-radius: var(--radius-card);
+    padding: 28px 26px;
+    max-width: 340px;
+    width: 100%;
+    box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.45);
+  }
+  #admin-modal h3 { font-size: 1.0625rem; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  #admin-modal p { font-size: 0.8125rem; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.5; }
+  #admin-pw-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+    background: var(--surface-1);
+    color: var(--text-primary);
+  }
+  #admin-pw-input:focus { outline: none; border-color: var(--border-accent); }
+  #admin-pw-error { color: var(--text-danger); font-size: 0.75rem; min-height: 16px; margin-bottom: 10px; }
+  #admin-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* 광고관리자모드 패널 폼 */
+  .admin-field-label { font-size: 0.75rem; color: var(--text-secondary); margin: 0 0 4px; }
+  .admin-input {
+    width: 100%;
+    max-width: 480px;
+    padding: 9px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .admin-input:focus { outline: none; border-color: var(--border-accent); }
+  #admin-warning {
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  #admin-save-msg { font-size: 0.75rem; color: var(--text-accent); margin-left: 8px; }
+
   /* 재질(반투명/블러)을 지원하지 않거나 원치 않는 환경 — 불투명 표면으로 대체 */
   @media (prefers-reduced-transparency: reduce) {
-    #sidebar, #app, #app-progression {
-      background: var(--surface-2);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-    }
+    #topnav { background: var(--surface-2); backdrop-filter: none; -webkit-backdrop-filter: none; }
   }
   @media (prefers-contrast: more) {
-    #sidebar, #app, #app-progression {
-      background: var(--surface-2);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border: 1px solid var(--text-primary);
-    }
+    #topnav { background: var(--surface-2); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom-color: var(--text-primary); }
+    #app, #app-progression { border: 1px solid var(--text-primary); }
     .gt-btn, .nav-btn { border-color: var(--text-primary); }
   }
   @media (prefers-reduced-motion: reduce) {
     .gt-btn, .nav-btn, .prog-remove { transition: background 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
   }
 
-  /* 좁은 화면: 사이드바를 위쪽 가로 탭 바로 전환 */
+  /* 좁은 화면: 브랜드/탭을 살짝 줄이고 카드 여백을 좁힌다 */
   @media (max-width: 720px) {
-    body { padding: 16px 10px 40px; }
-    #page-shell { flex-direction: column; gap: 12px; }
-    #sidebar {
-      flex-direction: row;
-      width: 100%;
-      position: static;
-      overflow-x: auto;
-    }
-    .nav-btn { flex: 1 1 0; text-align: center; white-space: nowrap; }
-    #app, #app-progression { padding: 18px 16px; border-radius: 12px; }
+    #topnav-inner { padding: 10px 16px; }
+    #topnav-links { overflow-x: auto; }
+    #page-content { padding: 16px 10px 0; }
+    #app, #app-progression { padding: 20px 18px; border-radius: 14px; }
+    h1 { font-size: 1.5rem; }
+    .home-hero { padding: 32px 0 32px; }
+    .home-hero-title { font-size: 1.875rem; }
+    .home-hero-sub { font-size: 0.9375rem; }
+    .home-section { margin-bottom: 32px; }
   }
 </style>
 </head>
 <body>
-<div id="page-shell">
-  <nav id="sidebar">
-    <button id="nav-code" class="nav-btn active">코드</button>
-    <button id="nav-progression" class="nav-btn">코드진행 (개발중)</button>
-  </nav>
-  <div id="page-content">
+<div id="ad-rail-left" class="ad-rail">광고 영역</div>
+<div id="ad-rail-right" class="ad-rail">광고 영역</div>
+<nav id="topnav">
+  <div id="topnav-inner">
+    <div id="topnav-left">
+      <button id="lang-toggle" class="nav-btn" style="font-weight:600;">EN</button>
+      <div id="topnav-brand">🎸 기타 코드 뷰어</div>
+    </div>
+    <div id="topnav-links">
+      <button id="nav-home" class="nav-btn active">홈</button>
+      <button id="nav-code" class="nav-btn">코드</button>
+      <button id="nav-progression" class="nav-btn"><span id="nav-progression-text">코드진행</span><span class="nav-badge" id="nav-progression-badge">개발중</span></button>
+      <button id="nav-scale" class="nav-btn">스케일</button>
+      <button id="nav-admin" class="nav-btn">🔒 <span id="nav-admin-text">광고관리자모드</span></button>
+    </div>
+  </div>
+</nav>
+
+<div id="admin-modal-overlay">
+  <div id="admin-modal">
+    <h3 id="admin-modal-title">광고관리자모드</h3>
+    <p id="admin-modal-desc">비밀번호를 입력하세요.</p>
+    <input id="admin-pw-input" type="password" autocomplete="off">
+    <div id="admin-pw-error"></div>
+    <div id="admin-modal-actions">
+      <button id="admin-modal-cancel" class="gt-btn">취소</button>
+      <button id="admin-modal-submit" class="home-cta home-cta-primary">확인</button>
+    </div>
+  </div>
+</div>
+<div id="page-content">
+<div id="app-home" style="display:none;">
+  <section class="home-hero">
+    <div class="home-hero-icon">🎸</div>
+    <h1 id="home-h1" class="home-hero-title">기타 코드 지판 뷰어</h1>
+    <p id="home-hero-sub" class="home-hero-sub"></p>
+    <div class="home-hero-ctas">
+      <button id="home-cta-code" class="home-cta home-cta-primary"></button>
+      <button id="home-cta-scale" class="home-cta home-cta-secondary"></button>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <h2 class="home-section-title" id="home-features-label">주요 기능</h2>
+    <div class="home-feature-grid" id="home-features"></div>
+  </section>
+
+  <section class="home-section">
+    <h2 class="home-section-title" id="home-news-label">공지사항</h2>
+    <div class="home-card home-news-card" id="home-news"></div>
+  </section>
+
+  <section class="home-section">
+    <h2 class="home-section-title" id="home-board-label">자유게시판</h2>
+    <div class="home-card home-board-card">
+      <script src="https://giscus.app/client.js"
+        data-repo="qoqmffh/guitar-chordviewer"
+        data-repo-id="R_kgDOUQy_CA"
+        data-category="General"
+        data-category-id=""
+        data-mapping="specific"
+        data-term="free-board"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="ko"
+        crossorigin="anonymous"
+        async>
+      </script>
+      <div id="home-board-fallback" class="home-board-fallback">
+        댓글판을 여는 중이에요. 잠시만 기다려주세요 — 안 뜨면 새로고침 해보세요.
+      </div>
+    </div>
+  </section>
+
+  <footer class="home-footer">
+    <div class="home-footer-label" id="home-creator-label">제작자 정보</div>
+    <div class="home-footer-body">
+      박태준 · <span id="home-creator-contact">광고문의</span> <a href="mailto:etude_8838@naver.com" style="color:var(--text-accent);">etude_8838@naver.com</a>
+    </div>
+  </footer>
+</div>
+
 <div id="app">
-  <h1>기타 코드 지판 뷰어</h1>
+  <h1 id="code-h1">기타 코드 지판 뷰어</h1>
   <h2 class="sr-only">기타 지판 위 트라이어드/4화음 위치와 멜로디 보이싱, 오픈 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
 
   <div id="gt-error"></div>
 
   <div style="margin-bottom:12px;">
-    <div class="gt-label">보기 모드</div>
-    <div id="gt-modes" class="gt-flex"></div>
+    <div class="gt-label" id="label-modes">보기 모드</div>
+    <div id="gt-modes" class="gt-flex gt-segmented"></div>
   </div>
 
   <div id="gt-standard-controls">
     <div style="margin-bottom:12px;">
-      <div class="gt-label">루트음 / 탑노트</div>
-      <div id="gt-roots" class="gt-flex"></div>
+      <div class="gt-label" id="label-root-top">루트음 / 탑노트</div>
+      <div id="gt-roots" class="gt-flex gt-grid-fixed"></div>
     </div>
 
     <div id="gt-topstring-wrap" style="margin-bottom:12px;">
-      <div class="gt-label">탑노트가 있는 줄</div>
-      <div id="gt-topstrings" class="gt-flex"></div>
+      <div class="gt-label" id="label-topstring">탑노트가 있는 줄</div>
+      <div id="gt-topstrings" class="gt-flex gt-grid-fixed"></div>
     </div>
 
     <div id="gt-fretgroup-wrap" style="margin-bottom:12px;">
-      <div class="gt-label">프렛 묶기</div>
+      <div class="gt-label" id="label-fretgroup">프렛 묶기</div>
       <div id="gt-fretgroup" class="gt-flex"></div>
     </div>
 
     <div style="margin-bottom:16px;">
-      <div class="gt-label">코드 종류</div>
+      <div class="gt-label" id="label-quality">코드 종류</div>
       <div id="gt-qualities" class="gt-flex"></div>
     </div>
   </div>
 
   <div id="gt-open-controls" style="display:none;">
+    <div id="open-wip-banner" style="margin-bottom:16px; padding:10px 14px; background:var(--surface-1); border-radius:var(--radius); font-size:0.75rem; color:var(--text-secondary);">
+      🚧 오픈 보이싱은 아직 공사중이에요 — 계속 손보고 있습니다.
+    </div>
     <div style="margin-bottom:12px;">
-      <div class="gt-label">조성 (키)</div>
-      <div id="gt-openkeys" class="gt-flex"></div>
+      <div class="gt-label" id="label-key">조성 (키)</div>
+      <div id="gt-openkeys" class="gt-flex gt-grid-fixed"></div>
     </div>
     <div style="margin-bottom:16px;">
-      <div class="gt-label">다이아토닉 코드</div>
+      <div class="gt-label" id="label-diatonic">다이아토닉 코드</div>
       <div id="gt-opendegrees" class="gt-flex"></div>
     </div>
     <div id="gt-openquality-wrap" style="margin-bottom:16px; display:none;">
-      <div class="gt-label">코드 종류 (선택한 다이아토닉 코드의 루트 기준)</div>
+      <div class="gt-label" id="label-open-quality">코드 종류 (선택한 다이아토닉 코드의 루트 기준)</div>
       <div id="gt-openqualities" class="gt-flex"></div>
     </div>
   </div>
@@ -273,28 +574,72 @@
 </div>
 
 <div id="app-progression" style="display:none;">
-  <h1>코드 진행</h1>
+  <h1 id="prog-h1">코드 진행</h1>
 
   <div style="margin-bottom:12px;">
-    <div class="gt-label">코드 진행</div>
+    <div class="gt-label" id="label-prog-chords">코드 진행</div>
     <div id="prog-chords" class="gt-flex" style="margin-bottom:8px;"></div>
     <button id="prog-add-btn" class="gt-btn">+ 코드 추가</button>
   </div>
 
   <div style="margin-bottom:12px;">
-    <div class="gt-label">프렛 범위 (개방현은 항상 허용)</div>
+    <div class="gt-label" id="label-prog-range">프렛 범위 (개방현은 항상 허용)</div>
     <div id="prog-range" class="gt-flex"></div>
   </div>
 
   <div style="margin-bottom:16px;">
-    <div class="gt-label">보이싱 방식</div>
-    <div id="prog-voicing-mode" class="gt-flex"></div>
+    <div class="gt-label" id="label-prog-voicing">보이싱 방식</div>
+    <div id="prog-voicing-mode" class="gt-flex gt-segmented"></div>
   </div>
 
   <div id="prog-results"></div>
 </div>
 
+<div id="app-scale" style="display:none;">
+  <h1 id="scale-h1">스케일</h1>
+
+  <div style="margin-bottom:16px;">
+    <div class="gt-label" id="label-scale-root">루트음</div>
+    <div id="scale-roots" class="gt-flex gt-grid-fixed"></div>
   </div>
+
+  <div id="scale-groups" style="margin-bottom:16px;"></div>
+
+  <div id="scale-fretboard"></div>
+
+  <div id="scale-legend" class="gt-flex" style="margin:10px 0 16px; font-size:12px;"></div>
+
+  <div id="scale-usage"></div>
+</div>
+
+<div id="app-admin" style="display:none;">
+  <h1 id="admin-h1">광고관리자모드</h1>
+  <div id="admin-warning">⚠️ 이 설정은 지금 이 브라우저에만 저장돼요. 실제로 모든 방문자에게 보이게 하려면 이 값을 개발자에게 전달해서 코드에 반영(배포)해야 합니다.</div>
+
+  <div style="margin-bottom:20px;">
+    <div class="gt-label" id="admin-left-label">왼쪽 배너</div>
+    <div class="admin-field-label" id="admin-img-label-1">이미지 URL</div>
+    <input id="admin-left-img" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-field-label" id="admin-link-label-1">클릭 시 이동할 링크 URL</div>
+    <input id="admin-left-link" class="admin-input" type="text" placeholder="https://...">
+  </div>
+
+  <div style="margin-bottom:20px;">
+    <div class="gt-label" id="admin-right-label">오른쪽 배너</div>
+    <div class="admin-field-label" id="admin-img-label-2">이미지 URL</div>
+    <input id="admin-right-img" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-field-label" id="admin-link-label-2">클릭 시 이동할 링크 URL</div>
+    <input id="admin-right-link" class="admin-input" type="text" placeholder="https://...">
+  </div>
+
+  <div>
+    <button id="admin-save-btn" class="home-cta home-cta-primary">저장</button>
+    <button id="admin-clear-btn" class="gt-btn">전체 초기화</button>
+    <button id="admin-logout-btn" class="gt-btn">로그아웃</button>
+    <span id="admin-save-msg"></span>
+  </div>
+</div>
+
 </div>
 
 <script>
@@ -361,6 +706,267 @@ try {
   })();
 
   // ---------------------------------------------------------------
+  // 0.5. 다국어(i18n) — UI 컨트롤/라벨만 우선 번역. 스케일 운용법의 긴
+  // 설명 본문(진행 예시, 타겟 노트 등)은 아직 한글 전용이라 t()를 거치지 않음.
+  // ---------------------------------------------------------------
+  var I18N = {
+    ko: {
+      brand: '🎸 기타 코드 뷰어',
+      navHome: '홈', navCode: '코드', navProgression: '코드진행', navProgressionBadge: '개발중', navScale: '스케일',
+
+      homeTitle: '기타 코드 지판 뷰어',
+      homeHeroSub: '루트음과 코드 종류만 고르면, 지판 전체에서 실제로 잡을 수 있는 그립을 바로 보여드려요.',
+      homeCtaCode: '코드 보러 가기',
+      homeCtaScale: '스케일 살펴보기',
+      homeFeaturesLabel: '주요 기능',
+      homeNews: '공지사항',
+      homeBoard: '자유게시판',
+      homeBoardFallback: '댓글판을 여는 중이에요. 잠시만 기다려주세요 — 안 뜨면 새로고침 해보세요.',
+      homeCreator: '제작자 정보',
+      homeCreatorContact: '광고문의',
+      homeFeatureCode: {
+        icon: '🎸', title: '코드',
+        desc: '루트음과 코드 종류를 고르면 지판 전체에서 구성음 위치를 바로 보여줘요.',
+        points: [
+          '전체 지판 — 구성음이 나오는 모든 자리를 한눈에',
+          '멜로디 보이싱 — 탑노트를 고정한 그립, "프렛 묶기"로 손이 닿는 구간만 표시',
+          '오픈 보이싱 — 조성별 다이아토닉/추가 코드를 실제 손가락으로 누를 수 있는 그립으로'
+        ],
+        link: '코드로 이동 →'
+      },
+      homeFeatureProgression: {
+        icon: '🎶', title: '코드진행',
+        desc: '코드를 순서대로 넣고 프렛 범위를 지정하면, 그 구간 안에서만 그립을 찾아줘요.',
+        points: [], link: '코드진행으로 이동 →'
+      },
+      homeFeatureScale: {
+        icon: '🎼', title: '스케일',
+        desc: '루트음과 스케일 종류를 고르면 지판 전체에 스케일 음을 표시하고, 어떻게 쓰면 좋은지도 정리해뒀어요.',
+        points: [], link: '스케일로 이동 →'
+      },
+
+      modeRoot: '전체 지판', modeTop: '멜로디 보이싱', modeOpen: '오픈 보이싱', badgeWip: '공사중',
+      labelModes: '보기 모드',
+      labelRootTop: '루트음 / 탑노트',
+      labelTopString: '탑노트가 있는 줄',
+      labelFretGroup: '프렛 묶기',
+      fretGroupOn: '켜짐 (탑노트 주변만 표시)', fretGroupOff: '꺼짐 (전체 프렛 표시)',
+      labelQuality: '코드 종류',
+      recommendedGrip: '추천 그립',
+      recommendedGripNarrow: '추천 그립 (가장 좁은 위치)',
+      fretGroupGripsTitle: '프렛 묶기: {n}번줄에 올 수 있는 구성음별 그립 ({c}개)',
+      melodyFixedGripTitle: '멜로디 보이싱 고정 그립 ({n}번줄 최상단 = 루트)',
+      string: '번줄', stringN: '{n}번줄', top: '탑',
+      fret: '프렛', openString: '개방현', mute: 'X',
+      openWip: '🚧 오픈 보이싱은 아직 공사중이에요 — 계속 손보고 있습니다.',
+      labelKey: '조성 (키)',
+      labelDiatonicChord: '다이아토닉 코드',
+      labelOpenQuality: '코드 종류 (선택한 다이아토닉 코드의 루트 기준)',
+      defaultForm: '기본형',
+      noDiatonicInKey: '이 조성에서는 오픈 보이싱이 가능한 다이아토닉 코드가 없어요.',
+      openTitle: '오픈 보이싱',
+      selectKeyDegree: '위에서 조성과 다이아토닉 코드를 선택하세요.',
+      bass6: '6번줄 베이스', bass5: '5번줄 베이스',
+      unplayableBanner: '⚠ 왼손 4개 손가락으로 구조상 누를 수 없는 모양 (검토용, 아직 삭제 안 함)',
+      unplayableTag: ' — ⚠ 손가락 구조상 불가 (검토용)',
+
+      progTitle: '코드 진행',
+      progChordsLabel: '코드 진행',
+      progAddBtn: '+ 코드 추가',
+      progRangeLabel: '프렛 범위 (개방현은 항상 허용)',
+      progVoicingLabel: '보이싱 방식',
+      progClosed: '코드 (트라이어드/4화음)', progOpen: '오픈 보이싱',
+      progEmpty: '위에서 코드를 추가해주세요.',
+      progNoClosed: '이 프렛 범위({min}~{max})에서는 구성음이 다 나오는 자리가 없어요.',
+      progNoOpen: '이 프렛 범위에서는 오픈 보이싱을 못 찾았어요.',
+      progRemoveChord: '이 코드 삭제',
+
+      scaleTitle: '스케일',
+      labelScaleRoot: '루트음',
+      scaleUsageTitle: '이 스케일 운용법',
+      usageDiatonicFn: '다이아토닉 코드 (화성 기능별)',
+      usageDiatonic: '다이아토닉 코드',
+      usageProgressions: '대표 진행 패턴',
+      usageTargetNotes: '코드별 타겟 노트 (즉흥연주용)',
+      usageChordFit: '어울리는 코드',
+      usageTips: '활용 팁',
+      characterNote: '캐릭터 음', avoidNote: '어보이드 음', noAvoidNote: '뚜렷한 어보이드 음 없음',
+
+      groupDiatonic: '다이아토닉 모드', groupMinor: '마이너 계열', groupMelodicModes: '멜로딕 마이너 모드',
+      groupPentatonic: '펜타토닉 / 블루스', groupSymmetric: '심메트릭',
+
+      scaleNames: {
+        ionian: '아이오니안 (메이저)', dorian: '도리안', phrygian: '프리지안', lydian: '리디안',
+        mixolydian: '믹소리디안', aeolian: '에올리안 (내추럴 마이너)', locrian: '로크리안',
+        harmonicMinor: '하모닉 마이너', melodicMinor: '멜로딕 마이너',
+        dorianB2: '도리안 b2', lydianAug: '리디안 어그먼트', lydianDominant: '리디안 도미넌트',
+        mixolydianB6: '믹소리디안 b6', locrianSharp2: '로크리안 #2', altered: '알터드',
+        majorPent: '메이저 펜타토닉', minorPent: '마이너 펜타토닉', blues: '블루스',
+        wholeTone: '홀톤', dimWH: '디미니쉬 (온-반)', dimHW: '디미니쉬 (반-온)'
+      },
+      qualityNames: {
+        major: '메이저 트라이어드', minor: '마이너 트라이어드', dom7: '도미넌트7', maj7: '메이저7',
+        min7: '마이너7', halfdim7: '하프디미니쉬7', dim7: '디미니쉬7', aug7: '어그먼트7'
+      },
+
+      navAdmin: '광고관리자모드',
+      adRailPlaceholder: '광고 영역',
+      adminModalTitle: '광고관리자모드',
+      adminModalDesc: '비밀번호를 입력하세요.',
+      adminModalCancel: '취소',
+      adminModalSubmit: '확인',
+      adminPwWrong: '비밀번호가 틀렸어요.',
+      adminTitle: '광고관리자모드',
+      adminWarning: '⚠️ 이 설정은 지금 이 브라우저에만 저장돼요. 실제로 모든 방문자에게 보이게 하려면 이 값을 개발자에게 전달해서 코드에 반영(배포)해야 합니다.',
+      adminLeftLabel: '왼쪽 배너',
+      adminRightLabel: '오른쪽 배너',
+      adminImgLabel: '이미지 URL',
+      adminLinkLabel: '클릭 시 이동할 링크 URL',
+      adminSave: '저장',
+      adminClear: '전체 초기화',
+      adminLogout: '로그아웃',
+      adminSaved: '저장했어요.',
+      adminCleared: '초기화했어요.'
+    },
+    en: {
+      brand: '🎸 Guitar Chord Viewer',
+      navHome: 'Home', navCode: 'Chords', navProgression: 'Progression', navProgressionBadge: 'WIP', navScale: 'Scale',
+
+      homeTitle: 'Guitar Chord Fretboard Viewer',
+      homeHeroSub: 'Pick a root and a chord type — see every real, playable grip across the whole neck, instantly.',
+      homeCtaCode: 'Explore Chords',
+      homeCtaScale: 'Browse Scales',
+      homeFeaturesLabel: 'Key Features',
+      homeNews: 'Announcements',
+      homeBoard: 'Discussion Board',
+      homeBoardFallback: 'Loading the comment board — if it doesn\'t appear, try refreshing.',
+      homeCreator: 'About the Creator',
+      homeCreatorContact: 'Business inquiries',
+      homeFeatureCode: {
+        icon: '🎸', title: 'Chords',
+        desc: 'Pick a root and chord type and instantly see every instance of its notes across the fretboard.',
+        points: [
+          'Full Fretboard — every spot the chord tones appear, at a glance',
+          'Melody Voicing — a grip with a fixed top note; "Fret Grouping" boxes off what your hand can reach',
+          'Open Voicing — diatonic/extra chords per key, shown as real, playable open-chord grips'
+        ],
+        link: 'Go to Chords →'
+      },
+      homeFeatureProgression: {
+        icon: '🎶', title: 'Progression',
+        desc: 'Enter chords in order and set a fret range — it finds grips that fit within it.',
+        points: [], link: 'Go to Progression →'
+      },
+      homeFeatureScale: {
+        icon: '🎼', title: 'Scale',
+        desc: 'Pick a root and a scale type to see it across the whole neck, plus notes on how to actually use it.',
+        points: [], link: 'Go to Scale →'
+      },
+
+      modeRoot: 'Full Fretboard', modeTop: 'Melody Voicing', modeOpen: 'Open Voicing', badgeWip: 'WIP',
+      labelModes: 'View Mode',
+      labelRootTop: 'Root / Top Note',
+      labelTopString: 'Top Note String',
+      labelFretGroup: 'Fret Grouping',
+      fretGroupOn: 'On (near top note only)', fretGroupOff: 'Off (show all frets)',
+      labelQuality: 'Chord Type',
+      recommendedGrip: 'Recommended Grip',
+      recommendedGripNarrow: 'Recommended Grip (narrowest position)',
+      fretGroupGripsTitle: 'Fret grouping: grips by note on string {n} ({c})',
+      melodyFixedGripTitle: 'Melody voicing fixed grip (string {n} top = root)',
+      string: 'string', stringN: 'String {n}', top: 'top',
+      fret: 'fret', openString: 'open', mute: 'X',
+      openWip: '🚧 Open Voicing is still a work in progress — actively being refined.',
+      labelKey: 'Key',
+      labelDiatonicChord: 'Diatonic Chords',
+      labelOpenQuality: 'Chord Type (based on selected diatonic root)',
+      defaultForm: 'Default',
+      noDiatonicInKey: 'No diatonic chord in this key has a valid open voicing.',
+      openTitle: 'Open Voicing',
+      selectKeyDegree: 'Select a key and a diatonic chord above.',
+      bass6: 'String 6 bass', bass5: 'String 5 bass',
+      unplayableBanner: '⚠ Structurally unplayable with 4 left-hand fingers (under review, not removed yet)',
+      unplayableTag: ' — ⚠ unplayable shape (under review)',
+
+      progTitle: 'Chord Progression',
+      progChordsLabel: 'Progression',
+      progAddBtn: '+ Add Chord',
+      progRangeLabel: 'Fret Range (open strings always allowed)',
+      progVoicingLabel: 'Voicing Style',
+      progClosed: 'Chord (triad/4-note)', progOpen: 'Open Voicing',
+      progEmpty: 'Add a chord above to get started.',
+      progNoClosed: 'No spot in this fret range ({min}–{max}) covers every chord tone.',
+      progNoOpen: 'No open voicing found in this fret range.',
+      progRemoveChord: 'Remove this chord',
+
+      scaleTitle: 'Scale',
+      labelScaleRoot: 'Root',
+      scaleUsageTitle: 'How to use this scale',
+      usageDiatonicFn: 'Diatonic Chords (by function)',
+      usageDiatonic: 'Diatonic Chords',
+      usageProgressions: 'Signature Progressions',
+      usageTargetNotes: 'Target Notes per Chord (for improvising)',
+      usageChordFit: 'Chords It Fits',
+      usageTips: 'Usage Tips',
+      characterNote: 'Character note', avoidNote: 'Avoid note', noAvoidNote: 'No notable avoid note',
+
+      groupDiatonic: 'Diatonic Modes', groupMinor: 'Minor Family', groupMelodicModes: 'Melodic Minor Modes',
+      groupPentatonic: 'Pentatonic / Blues', groupSymmetric: 'Symmetric',
+
+      scaleNames: {
+        ionian: 'Ionian (Major)', dorian: 'Dorian', phrygian: 'Phrygian', lydian: 'Lydian',
+        mixolydian: 'Mixolydian', aeolian: 'Aeolian (Natural Minor)', locrian: 'Locrian',
+        harmonicMinor: 'Harmonic Minor', melodicMinor: 'Melodic Minor',
+        dorianB2: 'Dorian b2', lydianAug: 'Lydian Augmented', lydianDominant: 'Lydian Dominant',
+        mixolydianB6: 'Mixolydian b6', locrianSharp2: 'Locrian #2', altered: 'Altered',
+        majorPent: 'Major Pentatonic', minorPent: 'Minor Pentatonic', blues: 'Blues',
+        wholeTone: 'Whole Tone', dimWH: 'Diminished (Whole-Half)', dimHW: 'Diminished (Half-Whole)'
+      },
+      qualityNames: {
+        major: 'Major Triad', minor: 'Minor Triad', dom7: 'Dominant7', maj7: 'Major7',
+        min7: 'Minor7', halfdim7: 'Half-Diminished7', dim7: 'Diminished7', aug7: 'Augmented7'
+      },
+
+      navAdmin: 'Ad Admin',
+      adRailPlaceholder: 'Ad Space',
+      adminModalTitle: 'Ad Admin Mode',
+      adminModalDesc: 'Enter the password.',
+      adminModalCancel: 'Cancel',
+      adminModalSubmit: 'Submit',
+      adminPwWrong: 'Wrong password.',
+      adminTitle: 'Ad Admin Mode',
+      adminWarning: '⚠️ This only saves in this browser. To actually show it to every visitor, pass these values to the developer to deploy in the code.',
+      adminLeftLabel: 'Left Banner',
+      adminRightLabel: 'Right Banner',
+      adminImgLabel: 'Image URL',
+      adminLinkLabel: 'Link URL (opens on click)',
+      adminSave: 'Save',
+      adminClear: 'Clear All',
+      adminLogout: 'Log Out',
+      adminSaved: 'Saved.',
+      adminCleared: 'Cleared.'
+    }
+  };
+
+  // t(key): 현재 언어의 문자열을 반환. {n}/{c}/{min}/{max} 같은 자리표시자는
+  // vars 객체로 치환. 스케일 운용법 본문(진행/타겟노트/팁 등 자유서술)은
+  // 아직 한글 전용이라 이 함수를 거치지 않고 그대로 출력됨.
+  function t(key, vars) {
+    var str = (I18N[state.lang] && I18N[state.lang][key] !== undefined) ? I18N[state.lang][key] : I18N.ko[key];
+    if (str === undefined) { return key; }
+    if (vars) {
+      for (var k in vars) { str = str.replace('{' + k + '}', vars[k]); }
+    }
+    return str;
+  }
+  function tScaleName(key) { return (I18N[state.lang].scaleNames && I18N[state.lang].scaleNames[key]) || I18N.ko.scaleNames[key] || key; }
+  function tQualityName(key) { return (I18N[state.lang].qualityNames && I18N[state.lang].qualityNames[key]) || I18N.ko.qualityNames[key] || key; }
+  // "6(E)" 같은 줄 이름/줄 번호를 언어별 어순으로 포맷 ("6(E)번줄" vs "String 6(E)")
+  function stringLabel(name) { return state.lang === 'ko' ? (name + '번줄') : ('String ' + name); }
+  // 프렛 번호를 언어별 어순으로 포맷 ("3프렛" vs "fret 3")
+  function fretLabel(n) { return state.lang === 'ko' ? (n + '프렛') : ('fret ' + n); }
+
+  // ---------------------------------------------------------------
   // 1. 상수 / 데이터
   // ---------------------------------------------------------------
 
@@ -382,14 +988,14 @@ try {
   // required: 오픈 보이싱에서 반드시 커버돼야 하는(생략 불가) 라벨 목록.
   // 순정 5도·(대개의) 7도는 있으면 좋지만 없어도 무방해서 required에서 뺀다.
   var QUALITIES = {
-    major:    { label: '메이저 트라이어드',        intervals: [[0,'R'],[4,'3'],[7,'5']],                 type: 'triad',  required: ['R','3'] },
-    minor:    { label: '마이너 트라이어드',        intervals: [[0,'R'],[3,'b3'],[7,'5']],                type: 'triad',  required: ['R','b3'] },
-    dom7:     { label: '도미넌트7 1-3-5-b7',       intervals: [[0,'R'],[4,'3'],[7,'5'],[10,'b7']],       type: 'chord4', required: ['R','3'] },
-    maj7:     { label: '메이저7 1-3-5-7',          intervals: [[0,'R'],[4,'3'],[7,'5'],[11,'7']],        type: 'chord4', required: ['R','3'] },
-    min7:     { label: '마이너7 1-b3-5-b7',        intervals: [[0,'R'],[3,'b3'],[7,'5'],[10,'b7']],      type: 'chord4', required: ['R','b3'] },
-    halfdim7: { label: '하프디미니쉬7 1-b3-b5-b7', intervals: [[0,'R'],[3,'b3'],[6,'b5'],[10,'b7']],     type: 'chord4', required: ['R','b3','b5'] },
-    dim7:     { label: '디미니쉬7 1-b3-b5-bb7',    intervals: [[0,'R'],[3,'b3'],[6,'b5'],[9,'bb7']],     type: 'chord4', required: ['R','b3','b5'] },
-    aug7:     { label: '어그먼트7 1-3-#5-7',       intervals: [[0,'R'],[4,'3'],[8,'#5'],[11,'7']],       type: 'chord4', required: ['R','3','#5'] }
+    major:    { label: '메이저 트라이어드',   intervals: [[0,'R'],[4,'3'],[7,'5']],                 type: 'triad',  required: ['R','3'] },
+    minor:    { label: '마이너 트라이어드',   intervals: [[0,'R'],[3,'b3'],[7,'5']],                type: 'triad',  required: ['R','b3'] },
+    dom7:     { label: '도미넌트7',           intervals: [[0,'R'],[4,'3'],[7,'5'],[10,'b7']],       type: 'chord4', required: ['R','3'] },
+    maj7:     { label: '메이저7',             intervals: [[0,'R'],[4,'3'],[7,'5'],[11,'7']],        type: 'chord4', required: ['R','3'] },
+    min7:     { label: '마이너7',             intervals: [[0,'R'],[3,'b3'],[7,'5'],[10,'b7']],      type: 'chord4', required: ['R','b3'] },
+    halfdim7: { label: '하프디미니쉬7',       intervals: [[0,'R'],[3,'b3'],[6,'b5'],[10,'b7']],     type: 'chord4', required: ['R','b3','b5'] },
+    dim7:     { label: '디미니쉬7',           intervals: [[0,'R'],[3,'b3'],[6,'b5'],[9,'bb7']],     type: 'chord4', required: ['R','b3','b5'] },
+    aug7:     { label: '어그먼트7',           intervals: [[0,'R'],[4,'3'],[8,'#5'],[11,'7']],       type: 'chord4', required: ['R','3','#5'] }
   };
 
   // 오픈 보이싱 전용 추가 코드 종류(다이아토닉 아래 별도 섹션). 조성의 으뜸음을
@@ -409,18 +1015,67 @@ try {
   var LABEL_COLOR = {
     R: '#A32D2D', '3': '#185FA5', b3: '#0F6E56', '5': '#3B6D11',
     b5: '#854F0B', '#5': '#534AB7', '7': '#993556', b7: '#5F5E5A', bb7: '#993C1D',
-    '2': '#8A6D00', '9': '#2C7DA0', '4': '#8C4B9E'
+    '2': '#8A6D00', '9': '#2C7DA0', '4': '#8C4B9E',
+    b2: '#6B3FA0', '6': '#2E7D32', b6: '#B24A00', '1': '#A32D2D', '#4': '#7A5C1E'
   };
+
+  // 스케일 종류 — 도수(1,2,b3...) 기준으로 정의. 그룹별로 묶어서 메뉴에 표시.
+  var SCALE_GROUPS = [
+    { label: '다이아토닉 모드', groupKey: 'groupDiatonic', scales: [
+      { key: 'ionian',      label: '아이오니안 (메이저)',    intervals: [[0,'1'],[2,'2'],[4,'3'],[5,'4'],[7,'5'],[9,'6'],[11,'7']] },
+      { key: 'dorian',      label: '도리안',                 intervals: [[0,'1'],[2,'2'],[3,'b3'],[5,'4'],[7,'5'],[9,'6'],[10,'b7']] },
+      { key: 'phrygian',    label: '프리지안',               intervals: [[0,'1'],[1,'b2'],[3,'b3'],[5,'4'],[7,'5'],[8,'b6'],[10,'b7']] },
+      { key: 'lydian',      label: '리디안',                 intervals: [[0,'1'],[2,'2'],[4,'3'],[6,'#4'],[7,'5'],[9,'6'],[11,'7']] },
+      { key: 'mixolydian',  label: '믹소리디안',             intervals: [[0,'1'],[2,'2'],[4,'3'],[5,'4'],[7,'5'],[9,'6'],[10,'b7']] },
+      { key: 'aeolian',     label: '에올리안 (내추럴 마이너)', intervals: [[0,'1'],[2,'2'],[3,'b3'],[5,'4'],[7,'5'],[8,'b6'],[10,'b7']] },
+      { key: 'locrian',     label: '로크리안',               intervals: [[0,'1'],[1,'b2'],[3,'b3'],[5,'4'],[6,'b5'],[8,'b6'],[10,'b7']] }
+    ]},
+    { label: '마이너 계열', groupKey: 'groupMinor', scales: [
+      { key: 'harmonicMinor', label: '하모닉 마이너', intervals: [[0,'1'],[2,'2'],[3,'b3'],[5,'4'],[7,'5'],[8,'b6'],[11,'7']] },
+      { key: 'melodicMinor',  label: '멜로딕 마이너', intervals: [[0,'1'],[2,'2'],[3,'b3'],[5,'4'],[7,'5'],[9,'6'],[11,'7']] }
+    ]},
+    { label: '멜로딕 마이너 모드', groupKey: 'groupMelodicModes', scales: [
+      { key: 'dorianB2',      label: '도리안 b2',        intervals: [[0,'1'],[1,'b2'],[3,'b3'],[5,'4'],[7,'5'],[9,'6'],[10,'b7']] },
+      { key: 'lydianAug',     label: '리디안 어그먼트',   intervals: [[0,'1'],[2,'2'],[4,'3'],[6,'#4'],[8,'#5'],[9,'6'],[11,'7']] },
+      { key: 'lydianDominant',label: '리디안 도미넌트',   intervals: [[0,'1'],[2,'2'],[4,'3'],[6,'#4'],[7,'5'],[9,'6'],[10,'b7']] },
+      { key: 'mixolydianB6',  label: '믹소리디안 b6',     intervals: [[0,'1'],[2,'2'],[4,'3'],[5,'4'],[7,'5'],[8,'b6'],[10,'b7']] },
+      { key: 'locrianSharp2', label: '로크리안 #2',       intervals: [[0,'1'],[2,'2'],[3,'b3'],[5,'4'],[6,'b5'],[8,'b6'],[10,'b7']] },
+      { key: 'altered',       label: '알터드',            intervals: [[0,'1'],[1,'b2'],[3,'b3'],[4,'3'],[6,'b5'],[8,'b6'],[10,'b7']] }
+    ]},
+    { label: '펜타토닉 / 블루스', groupKey: 'groupPentatonic', scales: [
+      { key: 'majorPent', label: '메이저 펜타토닉', intervals: [[0,'1'],[2,'2'],[4,'3'],[7,'5'],[9,'6']] },
+      { key: 'minorPent', label: '마이너 펜타토닉', intervals: [[0,'1'],[3,'b3'],[5,'4'],[7,'5'],[10,'b7']] },
+      { key: 'blues',     label: '블루스',          intervals: [[0,'1'],[3,'b3'],[5,'4'],[6,'b5'],[7,'5'],[10,'b7']] }
+    ]},
+    { label: '심메트릭', groupKey: 'groupSymmetric', scales: [
+      { key: 'wholeTone', label: '홀톤',           intervals: [[0,'1'],[2,'2'],[4,'3'],[6,'#4'],[8,'#5'],[10,'b7']] },
+      { key: 'dimWH',     label: '디미니쉬 (온-반)', intervals: [[0,'1'],[2,'2'],[3,'b3'],[5,'4'],[6,'b5'],[8,'b6'],[9,'6'],[11,'7']] },
+      { key: 'dimHW',     label: '디미니쉬 (반-온)', intervals: [[0,'1'],[1,'b2'],[3,'b3'],[4,'3'],[6,'b5'],[7,'5'],[9,'6'],[10,'b7']] }
+    ]}
+  ];
+
+  function findScale(key) {
+    for (var gi = 0; gi < SCALE_GROUPS.length; gi++) {
+      var scales = SCALE_GROUPS[gi].scales;
+      for (var si = 0; si < scales.length; si++) {
+        if (scales[si].key === key) { return scales[si]; }
+      }
+    }
+    return null;
+  }
 
   // 3현/4현 세트 정의 (인덱스는 OPEN 배열 인덱스, 즉 0=6번줄 ... 5=1번줄)
   var STRING_SETS = {
     triad:  [[0,1,2], [1,2,3], [2,3,4], [3,4,5]],
     chord4: [[0,1,2,3], [1,2,3,4], [2,3,4,5]]
   };
-  var SET_LABELS = {
-    triad:  ['6-5-4번줄', '5-4-3번줄', '4-3-2번줄', '3-2-1번줄'],
-    chord4: ['6-5-4-3번줄', '5-4-3-2번줄', '4-3-2-1번줄']
+  var SET_STRING_NUMS = {
+    triad:  [[6,5,4], [5,4,3], [4,3,2], [3,2,1]],
+    chord4: [[6,5,4,3], [5,4,3,2], [4,3,2,1]]
   };
+  function stringSetLabel(nums) {
+    return state.lang === 'ko' ? (nums.join('-') + '번줄') : ('Strings ' + nums.join('-'));
+  }
 
   // 탑노트 기준 모드에서: 탑노트가 있는 줄 번호 -> STRING_SETS[type] 배열의 인덱스
   var TOPSTRING_TO_SETIDX = {
@@ -440,6 +1095,352 @@ try {
     { label: 'vii°', offset: 11, qual: 'halfdim7' }
   ];
 
+  // 다이아토닉 코드의 화성 기능 (토닉/서브도미넌트/도미넌트) — 장조 기준
+  // 보편 이론이라 스케일별 데이터가 아니라 한 번만 정의해서 공용으로 씀.
+  var DIATONIC_FUNCTION = { 'I': 'tonic', 'iii': 'tonic', 'vi': 'tonic', 'ii': 'subdominant', 'IV': 'subdominant', 'V': 'dominant', 'vii°': 'dominant' };
+  var FUNCTION_INFO = {
+    tonic:       { label: '토닉 — 안정',          desc: '집(홈)처럼 편안하게 들리는 자리. 진행을 여기서 시작하거나 끝내면 안정적으로 마무리됨.' },
+    subdominant: { label: '서브도미넌트 — 이동/준비', desc: '토닉에서 벗어나 다른 곳으로 가려는 자리. 도미넌트로 가기 전 준비 단계로도 많이 씀.' },
+    dominant:    { label: '도미넌트 — 긴장→해결',    desc: '긴장감이 강해서 토닉으로 돌아가고 싶어함. 진행 끝에서 해결감을 만드는 자리.' }
+  };
+
+  // QUALITIES에 없는 화음(마이너메이저7 등)을 스케일 운용법 표시에서만
+  // 쓰기 위한 보조 테이블 — "코드 종류" 메뉴 등 다른 곳에는 영향 없음.
+  var SCALE_CHORD_EXTRA = {
+    minMaj7: { label: 'm(maj7)', intervals: [[0, 'R'], [3, 'b3'], [7, '5'], [11, '7']] }
+  };
+  function scaleChordName(rootPC, offset, qualKey) {
+    var pc = (rootPC + offset) % 12;
+    var q = QUALITIES[qualKey] || SCALE_CHORD_EXTRA[qualKey];
+    var shortLabel = QUALITY_SHORT[qualKey] || q.label;
+    return NOTES[pc] + shortLabel;
+  }
+
+  // 스케일 운용법. 리서치 기반(ReAct+ToT — 다이아토닉 하모나이제이션 검증,
+  // 모달 뱀프 진행, 코드-스케일 매칭, 캐릭터/어보이드 음).
+  //
+  // kind: 'modal'  — 7개(또는 그에 준하는) 다이아토닉 코드 표가 실제로 성립하는
+  //                   스케일(다이아토닉 7모드 + 하모닉 마이너)에만 사용.
+  //       'simple' — 코드를 스케일 자체 음을 3도씩 쌓아 다이아토닉화하는 게
+  //                   관례가 아니거나(멜로딕 마이너 모드는 스케일 순서 그대로
+  //                   쌓으면 실제 화음과 다르게 나옴 — 예: 알터드 스케일을
+  //                   그대로 쌓으면 하프디미니쉬가 나오지 도미넌트가 안 나옴),
+  //                   애초에 5음이라 코드 하모나이제이션 개념이 약한
+  //                   (펜타토닉/블루스) 스케일, 특정 화음 위의 "컬러 스케일"로만
+  //                   쓰이는(심메트릭) 스케일에 사용.
+  var SCALE_USAGE = {
+    ionian: {
+      kind: 'modal',
+      diatonic: DIATONIC_DEGREES,
+      useFunction: true,
+      progressions: [
+        { roman: ['I', 'IV', 'V'],        vibe: '록/팝/컨트리 — 밝고 직선적인 3코드 진행' },
+        { roman: ['I', 'V', 'vi', 'IV'],  vibe: '"4개의 매직 코드" — 팝 히트곡에 셀 수 없이 등장 (Let It Be, Don\'t Stop Believin\' 등)' },
+        { roman: ['I', 'vi', 'IV', 'V'],  vibe: '1950년대 두왑/초기 로큰롤 — 부드럽게 순환 (Stand By Me 등)' },
+        { roman: ['ii', 'V', 'I'],        vibe: '재즈 스탠다드의 핵심 진행 — 강한 전진감으로 해결' }
+      ],
+      targetNotes: [
+        { roman: 'I',    tip: '3음·7음을 강조 — 가장 안정적인 도착점' },
+        { roman: 'ii',   tip: 'b3음을 강조해서 마이너 색을 확실히' },
+        { roman: 'iii',  tip: '5음을 강조 — I코드와 공유하는 음이라 자연스럽게 이어짐' },
+        { roman: 'IV',   tip: '3음을 강조 — I로 돌아가고 싶은 느낌을 만듦' },
+        { roman: 'V',    tip: '3음(이끔음)과 b7음을 강조 — 이 둘의 트라이톤이 I로 강하게 해결됨' },
+        { roman: 'vi',   tip: 'b3음을 강조 — I의 relative minor 느낌' },
+        { roman: 'vii°', tip: 'b5음을 강조해 불안정함을 극대화, I나 vi로 해결' }
+      ],
+      character: { label: '7', desc: '이 음이 있어야 아이오니안답게 들려요 (장7도)' },
+      avoid: { label: '4', desc: '메이저 계열 코드 위에서 3음과 반음으로 부딪혀요 — 길게 끌지 말고 지나가는 음으로 쓰세요' },
+      context: '메이저 계열 코드(Maj, Maj6, Maj7, Maj9, 6/9) 위, 특히 장조 다이아토닉 진행 전체에 씁니다.'
+    },
+
+    dorian: {
+      kind: 'modal',
+      diatonic: [
+        { label: 'i',    offset: 0,  qual: 'min7' },
+        { label: 'ii',   offset: 2,  qual: 'min7' },
+        { label: 'bIII', offset: 3,  qual: 'maj7' },
+        { label: 'IV',   offset: 5,  qual: 'dom7' },
+        { label: 'v',    offset: 7,  qual: 'min7' },
+        { label: 'vi°',  offset: 9,  qual: 'halfdim7' },
+        { label: 'bVII', offset: 10, qual: 'maj7' }
+      ],
+      progressions: [
+        { roman: ['i', 'IV'],        vibe: '👉 이런 진행에서 쓰세요: 마이너 토닉과 메이저4도가 오가는 모달 뱀프 — Santana "Oye Como Va"(Am7-D7)가 정확히 이 진행' },
+        { roman: ['i', 'bVII', 'IV'], vibe: '록/펑크에서 흔한 도리안 진행' },
+        { roman: ['i', 'ii', 'bVII', 'i'], vibe: '토닉 주변을 맴도는 정적인 모달 사운드 — Simon & Garfunkel "Scarborough Fair"의 선율이 이 모드' }
+      ],
+      targetNotes: [
+        { roman: 'i',   tip: '6음(장6도)을 꼭 넣어서 도리안임을 드러내세요 — b6이면 에올리안이 돼버림' },
+        { roman: 'IV',  tip: '이 코드가 도리안의 시그니처. 4도 위의 메이저 코드로 넘어갈 때 6음이 3음으로 자연스럽게 이어짐' },
+        { roman: 'bVII', tip: '5음을 강조 — 토닉으로 부드럽게 돌아오는 자리' }
+      ],
+      character: { label: '6', desc: '장6도 — 에올리안(자연 단조)의 b6과 구분되는 도리안만의 정체성' },
+      avoid: null,
+      context: '마이너7 계열 코드(m7, m9, m6, m11, m13) 위. 뚜렷한 어보이드 음이 없어서 마이너 모드 중 가장 다루기 쉽고, 펑크/재즈/록의 정적인 모달 진행에 자주 씁니다.'
+    },
+
+    phrygian: {
+      kind: 'modal',
+      diatonic: [
+        { label: 'i',    offset: 0,  qual: 'min7' },
+        { label: 'bII',  offset: 1,  qual: 'maj7' },
+        { label: 'bIII', offset: 3,  qual: 'dom7' },
+        { label: 'iv',   offset: 5,  qual: 'min7' },
+        { label: 'v°',   offset: 7,  qual: 'halfdim7' },
+        { label: 'bVI',  offset: 8,  qual: 'maj7' },
+        { label: 'bvii', offset: 10, qual: 'min7' }
+      ],
+      progressions: [
+        { roman: ['i', 'bII'],  vibe: '👉 이런 진행에서 쓰세요: 반음 위 코드로 이동하는 어둡고 이국적인 무브 — Metallica "Wherever I May Roam"의 메인 리프가 E 프리지안' },
+        { roman: ['i', 'bvii', 'bVI', 'i'], vibe: '토닉 주변을 어둡게 맴도는 모달 뱀프 — Megadeth "Symphony of Destruction" 인트로류' }
+      ],
+      targetNotes: [
+        { roman: 'i',   tip: 'b2음을 짧게 스치듯 — 오래 끌면 너무 불안정해짐' },
+        { roman: 'bII', tip: '이 코드가 프리지안의 시그니처. 토닉에서 반음 위로 이동하는 긴장감이 핵심' }
+      ],
+      character: { label: 'b2', desc: '단2도 — 다른 마이너 모드에는 없는 프리지안만의 반음 어택' },
+      avoid: { label: 'b2', desc: 'b2는 루트와, b6은 5음과 반음으로 부딪혀요 (둘 다) — 캐릭터 음이자 동시에 조심할 음' },
+      context: '마이너 계열 코드 위, 어둡고 이국적인 사운드(플라멩고, 메탈, 중동/스페인풍)를 원할 때 씁니다.'
+    },
+
+    lydian: {
+      kind: 'modal',
+      diatonic: [
+        { label: 'I',    offset: 0,  qual: 'maj7' },
+        { label: 'II',   offset: 2,  qual: 'dom7' },
+        { label: 'iii',  offset: 4,  qual: 'min7' },
+        { label: '#iv°', offset: 6,  qual: 'halfdim7' },
+        { label: 'V',    offset: 7,  qual: 'maj7' },
+        { label: 'vi',   offset: 9,  qual: 'min7' },
+        { label: 'vii',  offset: 11, qual: 'min7' }
+      ],
+      progressions: [
+        { roman: ['I', 'II'],  vibe: '👉 이런 진행에서 쓰세요: 온음 위 메이저 코드로 이동, 붕 뜨는 몽환적 느낌 — Joe Satriani "Flying in a Blue Dream"(C 리디안)이 정석' },
+        { roman: ['I', 'II', 'I'], vibe: '영화음악/앰비언트에서 자주 쓰는 정적인 리디안 뱀프 — 심슨 가족(The Simpsons) 테마곡 오프닝' }
+      ],
+      targetNotes: [
+        { roman: 'I',  tip: '#4음(#11)을 적극적으로 강조 — 이게 리디안의 전부라고 해도 무방' },
+        { roman: 'II', tip: '이 코드가 리디안의 시그니처. I코드의 #4음이 이 코드의 루트가 됨' }
+      ],
+      character: { label: '#4', desc: '증4도 — 리디안의 정체성 그 자체' },
+      avoid: null,
+      context: '메이저7 계열 코드(특히 Maj7#11) 위. 어보이드 음이 없어서 아이오니안보다 훨씬 자유롭게 다룰 수 있고, 몽환적·영화음악스러운 사운드에 잘 어울립니다.'
+    },
+
+    mixolydian: {
+      kind: 'modal',
+      diatonic: [
+        { label: 'I',    offset: 0,  qual: 'dom7' },
+        { label: 'ii',   offset: 2,  qual: 'min7' },
+        { label: 'iii°', offset: 4,  qual: 'halfdim7' },
+        { label: 'IV',   offset: 5,  qual: 'maj7' },
+        { label: 'v',    offset: 7,  qual: 'min7' },
+        { label: 'vi',   offset: 9,  qual: 'min7' },
+        { label: 'bVII', offset: 10, qual: 'maj7' }
+      ],
+      progressions: [
+        { roman: ['I', 'bVII', 'IV'], vibe: '👉 이런 진행에서 쓰세요: Lynyrd Skynyrd "Sweet Home Alabama"가 정확히 이 진행(D-C-G)' },
+        { roman: ['I', 'bVII', 'I'],  vibe: '블루스/록에서 흔한 도미넌트 토닉 뱀프' }
+      ],
+      targetNotes: [
+        { roman: 'I',    tip: 'b7음을 강조해서 도미넌트 성격을 확실히 (장7도를 쓰면 아이오니안이 됨)' },
+        { roman: 'bVII', tip: '5음을 강조 — 토닉으로 매끄럽게 돌아오는 자리' }
+      ],
+      character: { label: 'b7', desc: '단7도 — 아이오니안과 갈라지는 지점, 도미넌트 성격을 만듦' },
+      avoid: { label: '4', desc: '3음과 반음으로 부딪혀요 (아이오니안과 같은 이유) — 지나가는 음으로만' },
+      context: '도미넌트7 계열 코드 위, 록/블루스/컨트리/펑크에서 매우 흔한 사운드입니다.'
+    },
+
+    aeolian: {
+      kind: 'modal',
+      diatonic: [
+        { label: 'i',    offset: 0,  qual: 'min7' },
+        { label: 'ii°',  offset: 2,  qual: 'halfdim7' },
+        { label: 'bIII', offset: 3,  qual: 'maj7' },
+        { label: 'iv',   offset: 5,  qual: 'min7' },
+        { label: 'v',    offset: 7,  qual: 'min7' },
+        { label: 'bVI',  offset: 8,  qual: 'maj7' },
+        { label: 'bVII', offset: 10, qual: 'dom7' }
+      ],
+      progressions: [
+        { roman: ['i', 'bVII', 'bVI'], vibe: '👉 이런 진행에서 쓰세요: Bob Dylan "All Along the Watchtower"(Jimi Hendrix 버전 유명)가 정확히 이 진행을 곡 전체에서 반복' },
+        { roman: ['i', 'iv', 'v', 'i'],     vibe: '내추럴 마이너의 기본 케이던스 (v는 마이너라 당김이 약함 — 강한 해결을 원하면 하모닉 마이너의 V7 사용)' },
+        { roman: ['i', 'bVII', 'bIII', 'bVI'], vibe: 'Ozzy Osbourne "Crazy Train"류 록 진행' }
+      ],
+      targetNotes: [
+        { roman: 'i',   tip: 'b3·b7음을 강조 — 자연스러운 단조 느낌' },
+        { roman: 'bVI', tip: '토닉에서 살짝 벗어나는 색채 코드로 활용' },
+        { roman: 'bVII', tip: '토닉으로 돌아가는 길목, 5음을 강조' }
+      ],
+      character: { label: 'b6', desc: '단6도 — 도리안의 장6도와 구분되는 에올리안만의 어두움' },
+      avoid: { label: 'b6', desc: '5음과 반음으로 부딪혀요 — 캐릭터 음이자 동시에 조심할 음' },
+      context: '마이너7 계열 코드 위, 팝/록에서 가장 흔하게 쓰이는 "단조" 사운드입니다.'
+    },
+
+    locrian: {
+      kind: 'modal',
+      diatonic: [
+        { label: 'i°',   offset: 0,  qual: 'halfdim7' },
+        { label: 'bII',  offset: 1,  qual: 'maj7' },
+        { label: 'biii', offset: 3,  qual: 'min7' },
+        { label: 'iv',   offset: 5,  qual: 'min7' },
+        { label: 'bV',   offset: 6,  qual: 'maj7' },
+        { label: 'bVI',  offset: 8,  qual: 'dom7' },
+        { label: 'bvii', offset: 10, qual: 'min7' }
+      ],
+      progressions: [
+        { roman: ['i°'], vibe: '👉 이런 진행에서 쓰세요: 단독 진행보다는 마이너키 ii-V-i의 ii° 자리 (예: Dm7♭5 - G7 - Cm)에서 짧게 지나가는 용도가 훨씬 흔함. 로크리안만으로 곡 전체를 끌고 가는 유명곡은 사실상 없음' }
+      ],
+      targetNotes: [
+        { roman: 'i°', tip: 'b5음(코드 구성음)과 b3음을 강조. b2음은 스치듯만 — 루트와 바로 부딪힘' }
+      ],
+      character: { label: 'b5', desc: '감5도 — 하프디미니쉬(m7b5) 코드의 정체성' },
+      avoid: { label: 'b2', desc: '루트와 반음으로 바로 부딪혀서 오래 끌면 매우 불안정하게 들려요' },
+      context: 'm7b5 코드 위. 특히 마이너키 진행의 ii-V-i에서 ii° 자리에 짧게 등장하는 용도로 가장 많이 쓰이고, 단독 토널센터로는 잘 안 씁니다.'
+    },
+
+    harmonicMinor: {
+      kind: 'modal',
+      diatonic: [
+        { label: 'i',    offset: 0,  qual: 'minMaj7' },
+        { label: 'ii°',  offset: 2,  qual: 'halfdim7' },
+        { label: 'bIII+', offset: 3, qual: 'aug7' },
+        { label: 'iv',   offset: 5,  qual: 'min7' },
+        { label: 'V',    offset: 7,  qual: 'dom7' },
+        { label: 'bVI',  offset: 8,  qual: 'maj7' },
+        { label: 'vii°', offset: 11, qual: 'dim7' }
+      ],
+      progressions: [
+        { roman: ['V', 'i'], vibe: '하모닉 마이너의 핵심 이유 — 마이너 키에서 V7이 강하게 i로 해결됨 (그냥 마이너7-마이너보다 훨씬 강한 케이던스)' },
+        { roman: ['i', 'vii°', 'i'], vibe: '완전 감7화음(vii°7)이 토닉으로 반음씩 해결되는 긴장감 있는 진행' }
+      ],
+      targetNotes: [
+        { roman: 'i',   tip: '장7도(이끔음)를 강조 — 이게 있어야 V7이 성립되고 하모닉 마이너다워짐' },
+        { roman: 'V',   tip: '3음(이끔음)과 b7음의 트라이톤이 i로 강하게 해결됨 — 재즈/클래식 케이던스의 핵심' },
+        { roman: 'vii°', tip: '완전 감7화음, 어느 음을 눌러도 반음 위 코드톤으로 해결되는 느낌을 만듦' }
+      ],
+      character: { label: '7', desc: '자연 단조에는 없는 장7도(이끔음) — 이 음이 V7 코드를 가능하게 함' },
+      avoid: null,
+      context: '마이너 키에서 강한 V7→i 해결을 원할 때, 또는 마이너 토닉(m/maj7)이나 vii°7 코드 위에 씁니다. b6과 7 사이가 증2도라 프레이징이 살짝 이국적으로 들릴 수 있어요 (오히려 그게 매력).'
+    },
+
+    melodicMinor: {
+      kind: 'simple',
+      chordFit: [
+        { label: 'm(maj7), m6, m6/9', desc: '마이너 토닉 코드 — 재즈에서 "재즈 마이너"라 부르는 이유' }
+      ],
+      usageNotes: [
+        '내림차순(하행)일 땐 자연 단조로 되돌리는 경우도 많음 — 이 도구는 상행(어센딩) 형태만 다룹니다.',
+        '이 스케일의 2~7번째 음에서 시작하면 아래 "멜로딕 마이너 모드" 6개가 나옵니다 — 각각 특정 코드 위에서 따로 쓰는 게 더 실전적입니다.'
+      ],
+      character: { label: '7', desc: '단조인데 장7도 — 이 조합이 "재즈 마이너"의 정체성' },
+      avoid: null,
+      context: '마이너 토닉 코드(m/maj7, m6) 위에 직접 쓰거나, 아래 6개 모드를 통해 각각 다른 코드(도미넌트7#11, 알터드 등) 위에서 활용합니다.'
+    },
+
+    dorianB2: {
+      kind: 'simple',
+      chordFit: [{ label: 'm7(b9), sus4(b9)', desc: '마이너 서스 계열 — b9 색을 원할 때' }],
+      usageNotes: ['멜로딕 마이너의 2번째 모드. 도리안에 b2가 더해진 형태라 마이너 서스 코드 위에서 긴장감을 살짝 더할 때 씁니다.'],
+      character: { label: 'b2', desc: '도리안과 갈라지는 지점' },
+      avoid: null,
+      context: 'm7(b9) 계열 코드 위. 실전에서는 6개 멜로딕 마이너 모드 중 가장 적게 쓰이는 편.'
+    },
+    lydianAug: {
+      kind: 'simple',
+      chordFit: [{ label: 'maj7(#5), maj9(#5)', desc: '증5도가 들어간 메이저7 계열' }],
+      usageNotes: ['멜로딕 마이너의 3번째 모드. 리디안에 #5까지 더해진, 리디안보다 한층 더 붕 뜨는 사운드.'],
+      character: { label: '#5', desc: '리디안과 갈라지는 지점' },
+      avoid: null,
+      context: 'Maj7#5 코드 위. 임팩트 있는 색채 화음에 사용.'
+    },
+    lydianDominant: {
+      kind: 'simple',
+      chordFit: [{ label: '7(#11), 9(#11), 13(#11)', desc: '어사이드-해결되지 않는 도미넌트7 계열' }],
+      usageNotes: ['멜로딕 마이너의 4번째 모드 — 믹소리디안에 #4(#11)가 더해진 형태. Duke Ellington "Take the A Train"의 대표적 도미넌트7#11 사운드가 이 스케일입니다.'],
+      character: { label: '#4', desc: '#11로도 부름 — 믹소리디안과 갈라지는 지점, 어보이드 음이던 4를 올려서 없앰' },
+      avoid: null,
+      context: '도미넌트7#11 코드 위, 특히 II7이나 IV7처럼 바로 I로 해결되지 않는 도미넌트7 코드에 자주 씁니다.'
+    },
+    mixolydianB6: {
+      kind: 'simple',
+      chordFit: [{ label: '7(b13), 9(b13)', desc: 'b13 색이 들어간 도미넌트7 계열' }],
+      usageNotes: ['멜로딕 마이너의 5번째 모드 — 믹소리디안에 b6(b13)가 더해진 형태. 마이너 키로 해결되는 V7 위에서 자연스럽게 씀 (해결될 마이너 키의 b6과 음이 겹침).'],
+      character: { label: 'b6', desc: 'b13으로도 부름 — 믹소리디안과 갈라지는 지점' },
+      avoid: null,
+      context: '마이너 키로 해결되는 V7(b13) 코드 위.'
+    },
+    locrianSharp2: {
+      kind: 'simple',
+      chordFit: [{ label: 'm7(b5), m9(b5)', desc: '하프디미니쉬 코드 — 그래서 "하프디미니쉬 스케일"이라고도 부름' }],
+      usageNotes: ['멜로딕 마이너의 6번째 모드. 로크리안에서 어보이드였던 b2를 자연2도로 올린 형태라, 로크리안보다 훨씬 다루기 쉽습니다. 마이너키 ii-V-i의 ii°(m7b5) 자리에 표준으로 사용.'],
+      character: { label: '2', desc: '자연2도 — 로크리안과 갈라지는 지점, 어보이드였던 b2를 없앰' },
+      avoid: null,
+      context: 'm7b5 코드 위, 특히 마이너키 ii-V-i 진행의 ii° 자리에 가장 표준적으로 씁니다.'
+    },
+    altered: {
+      kind: 'simple',
+      chordFit: [{ label: '7alt (7b9, 7#9, 7#11, 7#5 등)', desc: '알터드 도미넌트 — 재즈에서 가장 긴장감 강한 도미넌트 사운드' }],
+      usageNotes: [
+        '멜로딕 마이너의 7번째 모드(수퍼 로크리안). b9·#9·b5·#5 텐션이 전부 들어있어서, 이 중 원하는 걸 골라 쓰는 방식으로 접근합니다.',
+        '코드 자체(R-3-b7)만 유지하면 나머지 텐션은 자유롭게 골라 쓰는 게 실전적 — 스케일 음을 순서대로 그대로 쌓으면 코드와 안 맞습니다.'
+      ],
+      character: { label: 'b5', desc: '#5(b13)도 함께 씀 — 알터드 텐션의 핵심' },
+      avoid: null,
+      context: 'V7alt 코드 위, 재즈 ii-V-i에서 마이너로 해결되는 V7에 특히 표준적으로 사용.'
+    },
+
+    majorPent: {
+      kind: 'simple',
+      chordFit: [{ label: 'Maj, Maj6, Maj7, 6/9, 도미넌트7 계열', desc: '3음·4음이 빠져있어서 아이오니안의 어보이드 음(4) 걱정 없이 안전하게 사용 가능' }],
+      usageNotes: ['어보이드 음이 원천적으로 빠져있어서 왕초보부터 실전까지 가장 안전하게 쓸 수 있는 스케일.', '록/컨트리/팝 리드 기타의 기본 무기.'],
+      character: { label: '6', desc: '장6도가 특유의 밝고 경쾌한 느낌을 만듦' },
+      avoid: null,
+      context: '메이저 계열 코드 위, 사실상 장조 다이아토닉 진행 전체 위에서 안전하게 사용 가능.'
+    },
+    minorPent: {
+      kind: 'simple',
+      chordFit: [{ label: 'm, m7, m9, 도미넌트7(블루스 진행)', desc: '록/블루스 리드의 기본 스케일' }],
+      usageNotes: ['2음·6음이 빠져있어서 걸리는 음 없이 프레이징하기 쉬움.', '블루스 진행에서는 마이너 펜타토닉을 메이저 코드 위에 얹어서 "블루스 느낌"을 내는 것도 흔한 관습.'],
+      character: { label: 'b3', desc: '단3도가 마이너/블루지한 색을 만듦' },
+      avoid: null,
+      context: '마이너 계열 코드 위, 그리고 관습적으로 블루스/록 진행 전체 위에 (메이저 코드가 섞여 있어도) 사용.'
+    },
+    blues: {
+      kind: 'simple',
+      chordFit: [{ label: '도미넌트7 (12마디 블루스), m7', desc: '마이너 펜타토닉 + b5(블루노트) 추가' }],
+      usageNotes: ['b5(블루노트)는 스쳐 지나가는 음으로 쓰는 게 정석 — 길게 끌면 어색해질 수 있음.', '12마디 블루스 진행 전체에서 코드가 바뀌어도 하나의 블루스 스케일로 쭉 밀고 가는 게 전통적인 접근.'],
+      character: { label: 'b5', desc: '블루노트 — 블루스 스케일의 정체성' },
+      avoid: null,
+      context: '12마디 블루스, 록, 블루스록 진행 전체에서 코드 변화와 상관없이 쭉 사용하는 게 전통적 접근.'
+    },
+
+    wholeTone: {
+      kind: 'simple',
+      chordFit: [{ label: '7(#5), 7(#11), 어그먼트', desc: '해결되지 않는(붕 뜬) 도미넌트/어그먼트 계열' }],
+      usageNotes: ['음 간격이 전부 온음이라 방향성이 흐릿하고 몽환적 — 드뷔시 등 인상주의 음악에서 즐겨 씀.', '한 종류(온음 시작점 기준 딱 2개)밖에 없어서, 어느 루트에서 시작해도 6개 음 중 겹치는 경우가 많음.'],
+      character: { label: '#5', desc: '증5도가 어그먼트/붕 뜬 느낌을 만듦' },
+      avoid: null,
+      context: '어그먼트 코드나 해결을 미루는 도미넌트7#5/#11 코드 위, 몽환적/인상주의적 색채가 필요할 때.'
+    },
+    dimWH: {
+      kind: 'simple',
+      chordFit: [{ label: '완전 감7화음 (dim7)', desc: '온음-반음이 교대로 반복되는 대칭 스케일' }],
+      usageNotes: ['4개 루트(단3도 간격)마다 완전히 같은 스케일이 반복되는 대칭 구조.'],
+      character: { label: 'b3', desc: 'b5·6과 함께 완전 감7화음의 구성음과 일치' },
+      avoid: null,
+      context: '완전 감7화음(dim7) 코드 위, 클래식/재즈에서 감화음이 지나가는 구간에 사용.'
+    },
+    dimHW: {
+      kind: 'simple',
+      chordFit: [{ label: '7(b9), 7(#9), 7(#11), 13', desc: '알터드 텐션이 들어간 도미넌트7 — "도미넌트 디미니쉬 스케일"' }],
+      usageNotes: ['반음-온음이 교대로 반복되는 대칭 스케일. 알터드 스케일과 함께 재즈 도미넌트7의 양대 컬러 스케일로 취급됨.'],
+      character: { label: 'b9', desc: '#9도 함께 나옴 — 알터드 도미넌트 텐션과 일치' },
+      avoid: null,
+      context: '도미넌트7(b9,#9,#11,13) 코드 위, 특히 II7이나 강한 이차 도미넌트에 사용.'
+    }
+  };
+
   // ---------------------------------------------------------------
   // 2. 상태
   // ---------------------------------------------------------------
@@ -453,12 +1454,52 @@ try {
     openDegree: null,     // 오픈 보이싱 모드: 선택한 다이아토닉 코드 인덱스 (0~6)
     openQualityOverride: null, // 선택한 다이아토닉 코드의 루트를 그대로 쓰되, 코드 종류만
                                // 다이아토닉 기본형 대신 EXTRA_OPEN_QUALITIES 키로 바꿔치기
-    activeView: 'code',   // 'code' | 'progression' (왼쪽 메뉴)
+    activeView: 'home',   // 'home' | 'code' | 'progression' | 'scale' | 'admin' (왼쪽 메뉴)
     progression: [{ root: 0, quality: 'major' }], // 코드진행: 코드 슬롯 목록
     progFretMin: 4,       // 코드진행: 프렛 범위 시작
     progFretMax: 7,       // 코드진행: 프렛 범위 끝
-    progVoicingMode: 'closed' // 코드진행 보이싱 방식: 'closed'(트라이어드/4화음) | 'open'(오픈 보이싱)
+    progVoicingMode: 'closed', // 코드진행 보이싱 방식: 'closed'(트라이어드/4화음) | 'open'(오픈 보이싱)
+    scaleRoot: 0,          // 스케일 모드: 루트음 (0~11, C=0)
+    scaleKey: 'ionian',    // 스케일 모드: 선택한 스케일 (SCALE_GROUPS 키)
+    lang: 'ko',            // 'ko' | 'en' — UI 언어 (스케일 운용법 설명 본문은 아직 한글 전용)
+    adAuthed: false,       // 광고관리자모드 비밀번호 인증 여부 (세션 한정, sessionStorage에 저장)
+    adConfig: { left: { img: '', link: '' }, right: { img: '', link: '' } } // 좌우 배너 설정. 이 브라우저(localStorage)에만 저장됨
   };
+
+  // ---------------------------------------------------------------
+  // 2.5 광고 배너 / 광고관리자모드 — 정적 페이지라 서버가 없으므로,
+  // 여기서 저장하는 값은 "이 브라우저"에만 남는다. 실제로 모든 방문자에게
+  // 보여주려면 이 값을 코드(AD_CONFIG 기본값)에 반영해서 재배포해야 한다.
+  // ---------------------------------------------------------------
+  var AD_STORAGE_KEY = 'gt-ad-config';
+  var AD_AUTH_KEY = 'gt-ad-authed';
+  // SHA-256("gtchord-2026") 의 16진 해시. 평문 비밀번호를 소스에 그대로
+  // 남기지 않기 위한 최소한의 조치일 뿐 — 정적 사이트라 진짜 보안은 아님.
+  var ADMIN_PW_HASH = '4c7c5ca8447a306fb16197642908c2b5054e4f60440ab0ad21d3094a6b8e1fcd';
+
+  (function loadAdConfig() {
+    try {
+      var raw = localStorage.getItem(AD_STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && parsed.left && parsed.right) { state.adConfig = parsed; }
+      }
+      state.adAuthed = sessionStorage.getItem(AD_AUTH_KEY) === '1';
+    } catch (e) { /* 프라이빗 모드 등 스토리지 접근 불가 시 기본값 유지 */ }
+  })();
+
+  function saveAdConfig() {
+    try { localStorage.setItem(AD_STORAGE_KEY, JSON.stringify(state.adConfig)); } catch (e) { /* 무시 */ }
+  }
+
+  function sha256Hex(text) {
+    if (!(window.crypto && window.crypto.subtle)) { return Promise.resolve(null); }
+    var enc = new TextEncoder().encode(text);
+    return window.crypto.subtle.digest('SHA-256', enc).then(function (buf) {
+      var bytes = Array.from(new Uint8Array(buf));
+      return bytes.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
 
   // ---------------------------------------------------------------
   // 3. 유틸 함수
@@ -805,12 +1846,18 @@ try {
   function renderModes() {
     var el = document.getElementById('gt-modes');
     el.innerHTML = '';
-    var modes = [['root', '전체 지판'], ['top', '멜로디 보이싱'], ['open', '오픈 보이싱']];
+    var modes = [['root', t('modeRoot')], ['top', t('modeTop')], ['open', t('modeOpen')]];
     for (var i = 0; i < modes.length; i++) {
       (function (m) {
         var b = document.createElement('button');
         b.className = 'gt-btn' + (state.mode === m[0] ? ' active' : '');
         b.textContent = m[1];
+        if (m[0] === 'open') {
+          var badge = document.createElement('span');
+          badge.className = 'nav-badge';
+          badge.textContent = t('badgeWip');
+          b.appendChild(badge);
+        }
         b.onclick = function () {
           state.mode = m[0];
           ensureValidTopString();
@@ -848,7 +1895,7 @@ try {
       (function (n) {
         var b = document.createElement('button');
         b.className = 'gt-btn' + (state.topString === n ? ' active' : '');
-        b.textContent = n + '번줄';
+        b.textContent = t('stringN', { n: n });
         b.onclick = function () { state.topString = n; render(); };
         el.appendChild(b);
       })(opts[i]);
@@ -863,12 +1910,12 @@ try {
     el.innerHTML = '';
     var b = document.createElement('button');
     b.className = 'gt-btn' + (state.fretGroup ? ' active' : '');
-    b.textContent = state.fretGroup ? '켜짐 (탑노트 주변만 표시)' : '꺼짐 (전체 프렛 표시)';
+    b.textContent = state.fretGroup ? t('fretGroupOn') : t('fretGroupOff');
     b.onclick = function () { state.fretGroup = !state.fretGroup; render(); };
     el.appendChild(b);
   }
 
-  var QUALITY_SHORT = { maj7: 'maj7', min7: 'm7', dom7: '7', halfdim7: 'm7♭5' };
+  var QUALITY_SHORT = { maj7: 'maj7', min7: 'm7', dom7: '7', halfdim7: 'm7♭5', aug7: 'maj7#5', dim7: 'dim7' };
 
   function renderOpenKeys() {
     var el = document.getElementById('gt-openkeys');
@@ -905,7 +1952,7 @@ try {
       var span = document.createElement('span');
       span.style.fontSize = '12px';
       span.style.color = 'var(--text-secondary)';
-      span.textContent = '이 조성에서는 오픈 보이싱이 가능한 다이아토닉 코드가 없어요.';
+      span.textContent = t('noDiatonicInKey');
       el.appendChild(span);
     }
   }
@@ -924,7 +1971,7 @@ try {
 
     var defaultBtn = document.createElement('button');
     defaultBtn.className = 'gt-btn' + (state.openQualityOverride === null ? ' active' : '');
-    defaultBtn.textContent = '기본형 (' + NOTES[rootPC] + QUALITY_SHORT[deg.qual] + ')';
+    defaultBtn.textContent = t('defaultForm') + ' (' + NOTES[rootPC] + QUALITY_SHORT[deg.qual] + ')';
     defaultBtn.onclick = function () { state.openQualityOverride = null; render(); };
     el.appendChild(defaultBtn);
 
@@ -971,7 +2018,7 @@ try {
       (function (k) {
         var b = document.createElement('button');
         b.className = 'gt-btn' + (state.quality === k ? ' active' : '');
-        b.textContent = QUALITIES[k].label;
+        b.textContent = tQualityName(k);
         b.onclick = function () {
           state.quality = k;
           if (state.mode === 'top') { ensureValidTopString(); }
@@ -1073,6 +2120,72 @@ try {
     return svg;
   }
 
+  // 스케일 하나를 전체 지판(15프렛)에 걸쳐 전부 표시한다. buildFretboardSVG와
+  // 같은 시각 언어를 쓰되, 코드(QUALITIES)가 아니라 임의의 intervals 배열
+  // (스케일 도수)을 그대로 받는다 — 6현 전부, 흐림 처리 없음.
+  function buildScaleFretboardSVG(rootPC, scale) {
+    var maxFret = 15, x0 = 110, dx = 68, y0 = 40, dy = 30;
+
+    var svg = '<svg width="100%" viewBox="0 0 1164 240" role="img">' +
+      '<title>스케일 다이어그램</title>' +
+      '<desc>선택한 루트음과 스케일에 맞는 음정 위치를 전체 지판에 표시</desc>';
+
+    svg += '<rect x="' + x0 + '" y="' + (y0 - 2) + '" width="4" height="' + (dy * 5 + 4) +
+      '" fill="var(--text-primary)" opacity="0.6"/>';
+
+    for (var f = 1; f <= maxFret; f++) {
+      var x = x0 + f * dx;
+      svg += '<line x1="' + x + '" y1="' + y0 + '" x2="' + x + '" y2="' + (y0 + dy * 5) +
+        '" stroke="var(--border-strong)" stroke-width="0.5"/>';
+    }
+
+    for (var i = 0; i < 6; i++) {
+      var s = DISPLAY_ORDER[i];
+      var y = y0 + i * dy;
+      svg += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + maxFret * dx) + '" y2="' + y +
+        '" stroke="var(--border-strong)" stroke-width="1"/>';
+      svg += '<text class="ts" x="45" y="' + y + '" text-anchor="end" dominant-baseline="central">' + STRING_NAMES[s] + '</text>';
+    }
+
+    var markers = [3, 5, 7, 9, 12, 15];
+    var dotY = y0 + dy * 5 + 10;
+    var labelY = dotY + 18;
+    for (var mi = 0; mi < markers.length; mi++) {
+      var f5 = markers[mi];
+      var cx = x0 + (f5 - 1) * dx + dx / 2;
+      if (f5 === 12) {
+        svg += '<circle cx="' + cx + '" cy="' + (dotY - 5) + '" r="2.5" fill="var(--text-muted)"/>';
+        svg += '<circle cx="' + cx + '" cy="' + (dotY + 5) + '" r="2.5" fill="var(--text-muted)"/>';
+      } else {
+        svg += '<circle cx="' + cx + '" cy="' + dotY + '" r="3" fill="var(--text-muted)"/>';
+      }
+      svg += '<text class="ts" x="' + cx + '" y="' + labelY + '" text-anchor="middle" dominant-baseline="central" fill="var(--text-muted)">' + f5 + '</text>';
+    }
+
+    var map = {};
+    for (var ivi = 0; ivi < scale.intervals.length; ivi++) { map[scale.intervals[ivi][0]] = scale.intervals[ivi][1]; }
+
+    for (var row = 0; row < 6; row++) {
+      var s2 = DISPLAY_ORDER[row];
+      var y2 = y0 + row * dy;
+      for (var f2 = 0; f2 <= maxFret; f2++) {
+        var note = (OPEN[s2] + f2) % 12;
+        var offset = ((note - rootPC) % 12 + 12) % 12;
+        if (map[offset] !== undefined) {
+          var label = map[offset];
+          var cx2 = f2 === 0 ? x0 - 24 : x0 + (f2 - 1) * dx + dx / 2;
+          var color = LABEL_COLOR[label] || 'var(--text-secondary)';
+          svg += '<circle cx="' + cx2 + '" cy="' + y2 + '" r="11" fill="' + color +
+            '" stroke="var(--surface-2)" stroke-width="1.5"/>';
+          svg += '<text x="' + cx2 + '" y="' + y2 + '" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#fff" style="font-family:var(--font-sans)">' + label + '</text>';
+        }
+      }
+    }
+
+    svg += '</svg>';
+    return svg;
+  }
+
   // 오픈 보이싱 그립 하나를 다른 지판 다이어그램과 같은 방향(가로, 6번줄이
   // 아래쪽/남쪽, 1번줄이 위쪽, 너트가 왼쪽)으로 그린다.
   // shape.strings: [{idx(0~5, 0=6번줄), fret, label}], idx 오름차순 정렬됨
@@ -1091,7 +2204,7 @@ try {
       '<desc>선택한 오픈 보이싱 그립 하나를 표시 (개방현/뮤트 포함)</desc>';
 
     if (!playable) {
-      svg += '<text x="' + x0 + '" y="14" font-size="13" font-weight="600" fill="var(--text-danger)" style="font-family:var(--font-sans)">⚠ 왼손 4개 손가락으로 구조상 누를 수 없는 모양 (검토용, 아직 삭제 안 함)</text>';
+      svg += '<text x="' + x0 + '" y="14" font-size="13" font-weight="600" fill="var(--text-danger)" style="font-family:var(--font-sans)">' + t('unplayableBanner') + '</text>';
     }
 
     if (pressedFrets.length) {
@@ -1159,7 +2272,7 @@ try {
       if (state.openDegree === null) {
         var msg = document.createElement('div');
         msg.className = 'gt-label';
-        msg.textContent = '위에서 조성과 다이아토닉 코드를 선택하세요.';
+        msg.textContent = t('selectKeyDegree');
         container.appendChild(msg);
         return;
       }
@@ -1170,7 +2283,7 @@ try {
         col.style.marginBottom = '18px';
         var label = document.createElement('div');
         label.className = 'gt-label';
-        label.textContent = (v.bassString === 0 ? '6번줄 베이스' : '5번줄 베이스');
+        label.textContent = (v.bassString === 0 ? t('bass6') : t('bass5'));
         col.appendChild(label);
         var holder = document.createElement('div');
         holder.innerHTML = buildOpenVoicingBoardSVG(v);
@@ -1235,8 +2348,8 @@ try {
       var note = noteName(OPEN[s] + fret);
       var row = document.createElement('div');
       row.className = 'gt-row';
-      row.innerHTML = '<span>' + STRING_NAMES[s] + '번줄' + (i === topPos ? ' (탑)' : '') +
-        '</span><span>' + fret + '프렛 (' + label + ', ' + note + ')</span>';
+      row.innerHTML = '<span>' + stringLabel(STRING_NAMES[s]) + (i === topPos ? ' (' + t('top') + ')' : '') +
+        '</span><span>' + fretLabel(fret) + ' (' + label + ', ' + note + ')</span>';
       card.appendChild(row);
     }
     return card;
@@ -1249,31 +2362,32 @@ try {
     var q = QUALITIES[state.quality];
 
     if (state.mode === 'top' && state.fretGroup) {
-      titleEl.textContent = '프렛 묶기: ' + state.topString + '번줄에 올 수 있는 구성음별 그립 (' + q.intervals.length + '개)';
+      titleEl.textContent = t('fretGroupGripsTitle', { n: state.topString, c: q.intervals.length });
       var grips = computeGroupedGrips();
       for (var k = 0; k < grips.length; k++) {
         var g = grips[k];
-        var titleText = NOTES[state.root] + ' ' + q.label + ' — ' + state.topString + '번줄 = ' + g.topLabel;
+        var titleText = NOTES[state.root] + ' ' + tQualityName(state.quality) + ' — ' + stringLabel(state.topString) + ' = ' + g.topLabel;
         el.appendChild(buildGripCard(g.strings, g.best, g.topPos, titleText));
       }
 
     } else if (state.mode === 'top') {
-      titleEl.textContent = '멜로디 보이싱 고정 그립 (' + state.topString + '번줄 최상단 = 루트)';
+      titleEl.textContent = t('melodyFixedGripTitle', { n: state.topString });
       var strings = getRelevantStrings();
       var topPos = strings.length - 1;
       var best = bestGrip(strings, q.intervals, state.root, function (perm) { return perm[topPos][0] === 0; });
-      el.appendChild(buildGripCard(strings, best, topPos, NOTES[state.root] + ' ' + q.label));
+      el.appendChild(buildGripCard(strings, best, topPos, NOTES[state.root] + ' ' + tQualityName(state.quality)));
 
     } else if (state.mode === 'open') {
       if (state.openDegree === null) {
-        titleEl.textContent = '오픈 보이싱';
+        titleEl.textContent = t('openTitle');
       } else {
         var deg = DIATONIC_DEGREES[state.openDegree];
         var rootPC2 = (state.openKey + deg.offset) % 12;
         var qualLabel = state.openQualityOverride !== null
           ? EXTRA_OPEN_QUALITIES[state.openQualityOverride].label
           : QUALITY_SHORT[deg.qual];
-        titleEl.textContent = NOTES[state.openKey] + ' 조성 — ' + deg.label + ' (' + NOTES[rootPC2] + qualLabel + ')';
+        var keyPhrase = state.lang === 'ko' ? (NOTES[state.openKey] + ' 조성') : ('Key of ' + NOTES[state.openKey]);
+        titleEl.textContent = keyPhrase + ' — ' + deg.label + ' (' + NOTES[rootPC2] + qualLabel + ')';
         var voicings = currentOpenVoicings();
         for (var vi = 0; vi < voicings.length; vi++) {
           var v = voicings[vi];
@@ -1284,8 +2398,8 @@ try {
           var title = document.createElement('div');
           title.className = 'gt-grip-title';
           if (!playable) { title.style.color = 'var(--text-danger)'; }
-          title.textContent = (v.bassString === 0 ? '6번줄 베이스' : '5번줄 베이스') +
-            (playable ? '' : ' — ⚠ 손가락 구조상 불가 (검토용)');
+          title.textContent = (v.bassString === 0 ? t('bass6') : t('bass5')) +
+            (playable ? '' : t('unplayableTag'));
           card.appendChild(title);
           for (var si = 0; si < v.strings.length; si++) {
             var st = v.strings[si];
@@ -1293,8 +2407,8 @@ try {
             var row = document.createElement('div');
             row.className = 'gt-row';
             if (!playable) { row.style.color = 'var(--text-danger)'; }
-            row.innerHTML = '<span>' + STRING_NAMES[st.idx] + '번줄</span><span>' +
-              (st.fret === 0 ? '개방현' : st.fret + '프렛') + ' (' + st.label + ', ' + note + ')</span>';
+            row.innerHTML = '<span>' + stringLabel(STRING_NAMES[st.idx]) + '</span><span>' +
+              (st.fret === 0 ? t('openString') : fretLabel(st.fret)) + ' (' + st.label + ', ' + note + ')</span>';
             card.appendChild(row);
           }
           el.appendChild(card);
@@ -1302,9 +2416,9 @@ try {
       }
 
     } else {
-      titleEl.textContent = '추천 그립 (가장 좁은 위치)';
+      titleEl.textContent = t('recommendedGripNarrow');
       var sets = STRING_SETS[q.type];
-      var labels = SET_LABELS[q.type];
+      var setNums = SET_STRING_NUMS[q.type];
       for (var si = 0; si < sets.length; si++) {
         var strings2 = sets[si];
         var best2 = bestGrip(strings2, q.intervals, state.root);
@@ -1312,7 +2426,7 @@ try {
         card2.className = 'gt-grip';
         var title3 = document.createElement('div');
         title3.className = 'gt-grip-title';
-        title3.textContent = labels[si];
+        title3.textContent = stringSetLabel(setNums[si]);
         card2.appendChild(title3);
         for (var i3 = 0; i3 < strings2.length; i3++) {
           var s4 = strings2[i3];
@@ -1321,7 +2435,7 @@ try {
           var note3 = noteName(OPEN[s4] + fret2);
           var row2 = document.createElement('div');
           row2.className = 'gt-row';
-          row2.innerHTML = '<span>' + STRING_NAMES[s4] + '번줄</span><span>' + fret2 + '프렛 (' + label2 + ', ' + note3 + ')</span>';
+          row2.innerHTML = '<span>' + stringLabel(STRING_NAMES[s4]) + '</span><span>' + fretLabel(fret2) + ' (' + label2 + ', ' + note3 + ')</span>';
           card2.appendChild(row2);
         }
         el.appendChild(card2);
@@ -1329,7 +2443,21 @@ try {
     }
   }
 
+  function renderCodeStatic() {
+    document.getElementById('code-h1').textContent = t('homeTitle');
+    document.getElementById('label-modes').textContent = t('labelModes');
+    document.getElementById('label-root-top').textContent = t('labelRootTop');
+    document.getElementById('label-topstring').textContent = t('labelTopString');
+    document.getElementById('label-fretgroup').textContent = t('labelFretGroup');
+    document.getElementById('label-quality').textContent = t('labelQuality');
+    document.getElementById('open-wip-banner').textContent = t('openWip');
+    document.getElementById('label-key').textContent = t('labelKey');
+    document.getElementById('label-diatonic').textContent = t('labelDiatonicChord');
+    document.getElementById('label-open-quality').textContent = t('labelOpenQuality');
+  }
+
   function render() {
+    renderCodeStatic();
     document.getElementById('gt-standard-controls').style.display = state.mode === 'open' ? 'none' : 'block';
     document.getElementById('gt-open-controls').style.display = state.mode === 'open' ? 'block' : 'none';
 
@@ -1377,7 +2505,7 @@ try {
       var qkeys = Object.keys(QUALITIES);
       for (var qi = 0; qi < qkeys.length; qi++) {
         var qopt = document.createElement('option');
-        qopt.value = qkeys[qi]; qopt.textContent = QUALITIES[qkeys[qi]].label;
+        qopt.value = qkeys[qi]; qopt.textContent = tQualityName(qkeys[qi]);
         if (qkeys[qi] === chord.quality) { qopt.selected = true; }
         qualSel.appendChild(qopt);
       }
@@ -1386,7 +2514,7 @@ try {
       var removeBtn = document.createElement('button');
       removeBtn.className = 'prog-remove';
       removeBtn.textContent = '✕';
-      removeBtn.title = '이 코드 삭제';
+      removeBtn.title = t('progRemoveChord');
       removeBtn.onclick = function () { state.progression.splice(i, 1); renderProgression(); };
 
       slot.appendChild(rootSel);
@@ -1405,11 +2533,11 @@ try {
     maxSel.className = 'prog-select';
     for (var f = 0; f <= 15; f++) {
       var o1 = document.createElement('option');
-      o1.value = f; o1.textContent = f + '프렛';
+      o1.value = f; o1.textContent = fretLabel(f);
       if (f === state.progFretMin) { o1.selected = true; }
       minSel.appendChild(o1);
       var o2 = document.createElement('option');
-      o2.value = f; o2.textContent = f + '프렛';
+      o2.value = f; o2.textContent = fretLabel(f);
       if (f === state.progFretMax) { o2.selected = true; }
       maxSel.appendChild(o2);
     }
@@ -1434,7 +2562,7 @@ try {
   function renderProgVoicingMode() {
     var el = document.getElementById('prog-voicing-mode');
     el.innerHTML = '';
-    var modes = [['closed', '코드 (트라이어드/4화음)'], ['open', '오픈 보이싱']];
+    var modes = [['closed', t('progClosed')], ['open', t('progOpen')]];
     for (var i = 0; i < modes.length; i++) {
       (function (m) {
         var b = document.createElement('button');
@@ -1452,7 +2580,7 @@ try {
     if (state.progression.length === 0) {
       var msg = document.createElement('div');
       msg.className = 'gt-label';
-      msg.textContent = '위에서 코드를 추가해주세요.';
+      msg.textContent = t('progEmpty');
       el.appendChild(msg);
       return;
     }
@@ -1466,12 +2594,12 @@ try {
       heading.style.fontWeight = '600';
       heading.style.letterSpacing = '-0.005em';
       heading.style.marginBottom = '8px';
-      heading.textContent = (i + 1) + '. ' + NOTES[chord.root] + ' ' + q.label;
+      heading.textContent = (i + 1) + '. ' + NOTES[chord.root] + ' ' + tQualityName(chord.quality);
       section.appendChild(heading);
 
       if (state.progVoicingMode === 'closed') {
         var sets = STRING_SETS[q.type];
-        var setLabels = SET_LABELS[q.type];
+        var setNums = SET_STRING_NUMS[q.type];
         var anyFound = false;
         for (var si = 0; si < sets.length; si++) {
           var best = bestGripInRange(sets[si], q.intervals, chord.root, state.progFretMin, state.progFretMax);
@@ -1481,7 +2609,7 @@ try {
           wrap.style.marginBottom = '14px';
           var label = document.createElement('div');
           label.className = 'gt-label';
-          label.textContent = setLabels[si];
+          label.textContent = stringSetLabel(setNums[si]);
           wrap.appendChild(label);
           var shapeStrings = [];
           for (var ssi = 0; ssi < sets[si].length; ssi++) {
@@ -1495,7 +2623,7 @@ try {
         if (!anyFound) {
           var none = document.createElement('div');
           none.className = 'gt-grip';
-          none.textContent = '이 프렛 범위(' + state.progFretMin + '~' + state.progFretMax + ')에서는 구성음이 다 나오는 자리가 없어요.';
+          none.textContent = t('progNoClosed', { min: state.progFretMin, max: state.progFretMax });
           section.appendChild(none);
         }
       } else {
@@ -1503,7 +2631,7 @@ try {
         if (voicings.length === 0) {
           var none2 = document.createElement('div');
           none2.className = 'gt-grip';
-          none2.textContent = '이 프렛 범위에서는 오픈 보이싱을 못 찾았어요.';
+          none2.textContent = t('progNoOpen');
           section.appendChild(none2);
         } else {
           for (var vi = 0; vi < voicings.length; vi++) {
@@ -1512,7 +2640,7 @@ try {
             wrap2.style.marginBottom = '14px';
             var label2 = document.createElement('div');
             label2.className = 'gt-label';
-            label2.textContent = (v.bassString === 0 ? '6번줄 베이스' : '5번줄 베이스');
+            label2.textContent = (v.bassString === 0 ? t('bass6') : t('bass5'));
             wrap2.appendChild(label2);
             var holder2 = document.createElement('div');
             holder2.innerHTML = buildOpenVoicingBoardSVG(v);
@@ -1526,7 +2654,16 @@ try {
     });
   }
 
+  function renderProgStatic() {
+    document.getElementById('prog-h1').textContent = t('progTitle');
+    document.getElementById('label-prog-chords').textContent = t('progChordsLabel');
+    document.getElementById('prog-add-btn').textContent = t('progAddBtn');
+    document.getElementById('label-prog-range').textContent = t('progRangeLabel');
+    document.getElementById('label-prog-voicing').textContent = t('progVoicingLabel');
+  }
+
   function renderProgression() {
+    renderProgStatic();
     renderProgChords();
     document.getElementById('prog-add-btn').onclick = function () {
       state.progression.push({ root: 0, quality: 'major' });
@@ -1538,20 +2675,504 @@ try {
   }
 
   // ---------------------------------------------------------------
-  // 6. 왼쪽 메뉴 (코드 / 코드진행) 전환
+  // 6. 홈 (공지사항 / 사용법 / 자유게시판 / 제작자 정보)
   // ---------------------------------------------------------------
 
-  function renderApp() {
-    document.getElementById('app').style.display = state.activeView === 'code' ? 'block' : 'none';
-    document.getElementById('app-progression').style.display = state.activeView === 'progression' ? 'block' : 'none';
-    document.getElementById('nav-code').className = 'nav-btn' + (state.activeView === 'code' ? ' active' : '');
-    document.getElementById('nav-progression').className = 'nav-btn' + (state.activeView === 'progression' ? ' active' : '');
+  // 공지사항: 최신이 위로. 새 업데이트 생기면 이 배열 맨 앞에 추가.
+  var NEWS = [
+    { date: '2026-09-09', ko: '홈 메뉴 추가 (공지사항 / 사용법 / 자유게시판 / 제작자 정보)', en: 'Added Home menu (announcements / guide / discussion board / creator info)' },
+    { date: '2026-09-07', ko: '보기 모드에 "오픈 보이싱" 추가 — 조성별 다이아토닉 코드 + add2/add9/9/m9/M9/sus2/sus4, 손가락으로 실제 칠 수 있는지 자동 판정', en: 'Added "Open Voicing" view mode — diatonic chords per key plus add2/add9/9/m9/M9/sus2/sus4, with automatic playability checking' },
+    { date: '2026-09-07', ko: '"멜로디 보이싱" 프렛 묶기 기능, 지판 15프렛까지 확장', en: 'Added fret grouping to "Melody Voicing", extended fretboard to 15 frets' },
+    { date: '2026-09-07', ko: '왼쪽에 "코드진행" 메뉴 추가 (개발 중)', en: 'Added "Progression" menu on the left (work in progress)' },
+    { date: '2026-09-07', ko: '기타 코드 지판 뷰어 첫 공개', en: 'First release of the Guitar Chord Fretboard Viewer' }
+  ];
 
-    if (state.activeView === 'code') { render(); } else { renderProgression(); }
+  function renderHomeNews() {
+    var el = document.getElementById('home-news');
+    el.innerHTML = '';
+    for (var i = 0; i < NEWS.length; i++) {
+      var row = document.createElement('div');
+      row.className = 'home-news-row';
+      row.innerHTML = '<span class="home-news-date">' + NEWS[i].date + '</span><span class="home-news-text">' + NEWS[i][state.lang] + '</span>';
+      el.appendChild(row);
+    }
   }
 
+  // 히어로 CTA 밑에 나오는 3개 기능 카드. i18n의 homeFeature* 객체를 그대로 사용하고,
+  // "이동" 링크를 누르면 실제로 해당 메뉴로 전환한다 (단순 설명이 아니라 진짜 내비게이션).
+  function renderHomeFeatures() {
+    var el = document.getElementById('home-features');
+    el.innerHTML = '';
+    var defs = [
+      { key: 'homeFeatureCode', view: 'code' },
+      { key: 'homeFeatureProgression', view: 'progression' },
+      { key: 'homeFeatureScale', view: 'scale' }
+    ];
+    defs.forEach(function (d) {
+      var f = I18N[state.lang][d.key] || I18N.ko[d.key];
+      var card = document.createElement('div');
+      card.className = 'home-feature-card';
+
+      var icon = document.createElement('div');
+      icon.className = 'home-feature-icon';
+      icon.textContent = f.icon;
+      card.appendChild(icon);
+
+      var title = document.createElement('div');
+      title.className = 'home-feature-title';
+      title.textContent = f.title;
+      card.appendChild(title);
+
+      var desc = document.createElement('div');
+      desc.className = 'home-feature-desc';
+      desc.textContent = f.desc;
+      card.appendChild(desc);
+
+      if (f.points && f.points.length) {
+        var ul = document.createElement('ul');
+        ul.className = 'home-feature-points';
+        f.points.forEach(function (p) {
+          var li = document.createElement('li');
+          li.textContent = p;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+      }
+
+      var link = document.createElement('button');
+      link.className = 'home-feature-link';
+      link.textContent = f.link;
+      link.onclick = function () { state.activeView = d.view; renderApp(); };
+      card.appendChild(link);
+
+      el.appendChild(card);
+    });
+  }
+
+  function renderHomeStatic() {
+    document.getElementById('home-h1').textContent = t('homeTitle');
+    document.getElementById('home-hero-sub').textContent = t('homeHeroSub');
+    document.getElementById('home-cta-code').textContent = t('homeCtaCode');
+    document.getElementById('home-cta-code').onclick = function () { state.activeView = 'code'; renderApp(); };
+    document.getElementById('home-cta-scale').textContent = t('homeCtaScale');
+    document.getElementById('home-cta-scale').onclick = function () { state.activeView = 'scale'; renderApp(); };
+    document.getElementById('home-features-label').textContent = t('homeFeaturesLabel');
+    document.getElementById('home-news-label').textContent = t('homeNews');
+    document.getElementById('home-board-label').textContent = t('homeBoard');
+    document.getElementById('home-board-fallback').textContent = t('homeBoardFallback');
+    document.getElementById('home-creator-label').textContent = t('homeCreator');
+    document.getElementById('home-creator-contact').textContent = t('homeCreatorContact');
+  }
+
+  // ---------------------------------------------------------------
+  // 7. 스케일 (왼쪽 메뉴 "스케일")
+  // ---------------------------------------------------------------
+
+  function renderScaleRoots() {
+    var el = document.getElementById('scale-roots');
+    el.innerHTML = '';
+    for (var i = 0; i < NOTES.length; i++) {
+      (function (idx) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.scaleRoot === idx ? ' active' : '');
+        b.textContent = NOTES[idx];
+        b.onclick = function () { state.scaleRoot = idx; renderScale(); };
+        el.appendChild(b);
+      })(i);
+    }
+  }
+
+  function renderScaleGroups() {
+    var el = document.getElementById('scale-groups');
+    el.innerHTML = '';
+    for (var gi = 0; gi < SCALE_GROUPS.length; gi++) {
+      var group = SCALE_GROUPS[gi];
+      var wrap = document.createElement('div');
+      wrap.style.marginBottom = '12px';
+      var label = document.createElement('div');
+      label.className = 'gt-label';
+      label.textContent = t(group.groupKey);
+      wrap.appendChild(label);
+      var row = document.createElement('div');
+      row.className = 'gt-flex';
+      for (var si = 0; si < group.scales.length; si++) {
+        (function (sc) {
+          var b = document.createElement('button');
+          b.className = 'gt-btn' + (state.scaleKey === sc.key ? ' active' : '');
+          b.textContent = tScaleName(sc.key);
+          b.onclick = function () { state.scaleKey = sc.key; renderScale(); };
+          row.appendChild(b);
+        })(group.scales[si]);
+      }
+      wrap.appendChild(row);
+      el.appendChild(wrap);
+    }
+  }
+
+  function renderScaleFretboard() {
+    var scale = findScale(state.scaleKey);
+    document.getElementById('scale-fretboard').innerHTML = buildScaleFretboardSVG(state.scaleRoot, scale);
+  }
+
+  function renderScaleLegend() {
+    var scale = findScale(state.scaleKey);
+    var el = document.getElementById('scale-legend');
+    el.innerHTML = '';
+    for (var i = 0; i < scale.intervals.length; i++) {
+      var label = scale.intervals[i][1];
+      var color = LABEL_COLOR[label] || 'var(--text-secondary)';
+      var d = document.createElement('div');
+      d.style.display = 'flex'; d.style.alignItems = 'center'; d.style.gap = '5px';
+      var dot = document.createElement('span');
+      dot.style.width = '11px'; dot.style.height = '11px'; dot.style.borderRadius = '50%';
+      dot.style.background = color; dot.style.display = 'inline-block';
+      var txt = document.createElement('span');
+      txt.style.color = 'var(--text-secondary)';
+      txt.textContent = label;
+      d.appendChild(dot); d.appendChild(txt);
+      el.appendChild(d);
+    }
+  }
+
+  function renderScaleUsage() {
+    var el = document.getElementById('scale-usage');
+    el.innerHTML = '';
+    var usage = SCALE_USAGE[state.scaleKey];
+    if (!usage) { return; } // 아직 정리 안 된 스케일은 섹션 자체를 숨김
+
+    var heading = document.createElement('div');
+    heading.style.fontSize = '1rem';
+    heading.style.fontWeight = '600';
+    heading.style.letterSpacing = '-0.005em';
+    heading.style.margin = '4px 0 14px';
+    heading.textContent = t('scaleUsageTitle');
+    el.appendChild(heading);
+
+    function findDeg(diatonic, roman) {
+      for (var i = 0; i < diatonic.length; i++) { if (diatonic[i].label === roman) { return diatonic[i]; } }
+      return null;
+    }
+
+    if (usage.kind === 'modal') {
+      var diatonic = usage.diatonic;
+
+      // 1) 다이아토닉 코드 — useFunction이면 화성 기능별로, 아니면 도수 순서 그대로
+      var chordSection = document.createElement('div');
+      chordSection.style.marginBottom = '18px';
+      var chordHead = document.createElement('div');
+      chordHead.className = 'gt-label';
+      chordHead.textContent = usage.useFunction ? t('usageDiatonicFn') : t('usageDiatonic');
+      chordSection.appendChild(chordHead);
+
+      function buildChip(d) {
+        var chip = document.createElement('div');
+        chip.className = 'gt-grip';
+        chip.style.padding = '8px 12px';
+        chip.innerHTML = '<div style="font-size:0.6875rem; color:var(--text-secondary); margin-bottom:2px;">' + d.label + '</div>' +
+          '<div style="font-weight:600;">' + scaleChordName(state.scaleRoot, d.offset, d.qual) + '</div>';
+        return chip;
+      }
+
+      if (usage.useFunction) {
+        var fnGroups = { tonic: [], subdominant: [], dominant: [] };
+        for (var i = 0; i < diatonic.length; i++) {
+          var fn = DIATONIC_FUNCTION[diatonic[i].label] || 'tonic';
+          fnGroups[fn].push(diatonic[i]);
+        }
+        var fnOrder = ['tonic', 'subdominant', 'dominant'];
+        for (var fi = 0; fi < fnOrder.length; fi++) {
+          var fnKey = fnOrder[fi];
+          if (!fnGroups[fnKey].length) { continue; }
+          var fnWrap = document.createElement('div');
+          fnWrap.style.marginBottom = '8px';
+          var fnLabel = document.createElement('div');
+          fnLabel.style.fontSize = '0.75rem';
+          fnLabel.style.fontWeight = '600';
+          fnLabel.style.color = 'var(--text-secondary)';
+          fnLabel.style.marginBottom = '4px';
+          fnLabel.textContent = FUNCTION_INFO[fnKey].label + ' — ' + FUNCTION_INFO[fnKey].desc;
+          fnWrap.appendChild(fnLabel);
+          var row = document.createElement('div');
+          row.className = 'gt-flex';
+          for (var gi = 0; gi < fnGroups[fnKey].length; gi++) { row.appendChild(buildChip(fnGroups[fnKey][gi])); }
+          fnWrap.appendChild(row);
+          chordSection.appendChild(fnWrap);
+        }
+      } else {
+        var flatRow = document.createElement('div');
+        flatRow.className = 'gt-flex';
+        for (var di = 0; di < diatonic.length; di++) { flatRow.appendChild(buildChip(diatonic[di])); }
+        chordSection.appendChild(flatRow);
+      }
+      el.appendChild(chordSection);
+
+      // 2) 대표 진행 패턴
+      var progSection = document.createElement('div');
+      progSection.style.marginBottom = '18px';
+      var progHead = document.createElement('div');
+      progHead.className = 'gt-label';
+      progHead.textContent = t('usageProgressions');
+      progSection.appendChild(progHead);
+      for (var pi = 0; pi < usage.progressions.length; pi++) {
+        var prog = usage.progressions[pi];
+        var chordNames = [];
+        for (var ri = 0; ri < prog.roman.length; ri++) {
+          var d2 = findDeg(diatonic, prog.roman[ri]);
+          chordNames.push(d2 ? scaleChordName(state.scaleRoot, d2.offset, d2.qual) : prog.roman[ri]);
+        }
+        var progCard = document.createElement('div');
+        progCard.className = 'gt-grip';
+        progCard.style.marginBottom = '8px';
+        progCard.innerHTML = '<div style="font-weight:600; margin-bottom:3px;">' + prog.roman.join(' – ') + ' <span style="color:var(--text-secondary); font-weight:400;">(' + chordNames.join(' – ') + ')</span></div>' +
+          '<div style="color:var(--text-secondary);">' + prog.vibe + '</div>';
+        progSection.appendChild(progCard);
+      }
+      el.appendChild(progSection);
+
+      // 3) 코드별 타겟 노트
+      if (usage.targetNotes) {
+        var targetSection = document.createElement('div');
+        targetSection.style.marginBottom = '18px';
+        var targetHead = document.createElement('div');
+        targetHead.className = 'gt-label';
+        targetHead.textContent = t('usageTargetNotes');
+        targetSection.appendChild(targetHead);
+        var targetCard = document.createElement('div');
+        targetCard.className = 'gt-grip';
+        for (var ti = 0; ti < usage.targetNotes.length; ti++) {
+          var tn = usage.targetNotes[ti];
+          var deg3 = findDeg(diatonic, tn.roman);
+          var row2 = document.createElement('div');
+          row2.className = 'gt-row';
+          row2.innerHTML = '<span style="flex:0 0 100px; font-weight:600; color:var(--text-primary);">' + tn.roman + ' (' + (deg3 ? scaleChordName(state.scaleRoot, deg3.offset, deg3.qual) : '') + ')</span><span style="flex:1 1 auto; text-align:left; margin-left:8px;">' + tn.tip + '</span>';
+          targetCard.appendChild(row2);
+        }
+        targetSection.appendChild(targetCard);
+        el.appendChild(targetSection);
+      }
+    } else {
+      // 'simple' — 코드 하모나이제이션이 성립하지 않거나 관례가 아닌 스케일
+      var fitSection = document.createElement('div');
+      fitSection.style.marginBottom = '14px';
+      var fitHead = document.createElement('div');
+      fitHead.className = 'gt-label';
+      fitHead.textContent = t('usageChordFit');
+      fitSection.appendChild(fitHead);
+      for (var ci = 0; ci < usage.chordFit.length; ci++) {
+        var cf = usage.chordFit[ci];
+        var cfCard = document.createElement('div');
+        cfCard.className = 'gt-grip';
+        cfCard.style.marginBottom = '6px';
+        cfCard.innerHTML = '<div style="font-weight:600; margin-bottom:2px;">' + cf.label + '</div><div style="color:var(--text-secondary);">' + cf.desc + '</div>';
+        fitSection.appendChild(cfCard);
+      }
+      el.appendChild(fitSection);
+
+      if (usage.usageNotes && usage.usageNotes.length) {
+        var noteSection = document.createElement('div');
+        noteSection.style.marginBottom = '14px';
+        var noteHead = document.createElement('div');
+        noteHead.className = 'gt-label';
+        noteHead.textContent = t('usageTips');
+        noteSection.appendChild(noteHead);
+        var noteCard = document.createElement('div');
+        noteCard.className = 'gt-grip';
+        for (var ui = 0; ui < usage.usageNotes.length; ui++) {
+          var noteRow = document.createElement('div');
+          noteRow.style.color = 'var(--text-secondary)';
+          noteRow.style.padding = '2px 0';
+          noteRow.textContent = '• ' + usage.usageNotes[ui];
+          noteCard.appendChild(noteRow);
+        }
+        noteSection.appendChild(noteCard);
+        el.appendChild(noteSection);
+      }
+    }
+
+    // 캐릭터 음 / 어보이드 음 (공통)
+    var noteWrap = document.createElement('div');
+    noteWrap.className = 'gt-grip';
+    noteWrap.style.marginBottom = '14px';
+    var charColor = LABEL_COLOR[usage.character.label] || 'var(--text-secondary)';
+    var rowsHtml = '<div class="gt-row"><span><span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:' + charColor + '; margin-right:5px;"></span>' + t('characterNote') + ' (' + usage.character.label + ')</span><span>' + usage.character.desc + '</span></div>';
+    if (usage.avoid) {
+      var avoidColor = LABEL_COLOR[usage.avoid.label] || 'var(--text-secondary)';
+      rowsHtml += '<div class="gt-row"><span><span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:' + avoidColor + '; margin-right:5px;"></span>' + t('avoidNote') + ' (' + usage.avoid.label + ')</span><span>' + usage.avoid.desc + '</span></div>';
+    } else {
+      rowsHtml += '<div class="gt-row"><span>' + t('avoidNote') + '</span><span>' + t('noAvoidNote') + '</span></div>';
+    }
+    noteWrap.innerHTML = rowsHtml;
+    el.appendChild(noteWrap);
+
+    // 주 사용처 (공통)
+    var context = document.createElement('div');
+    context.style.fontSize = '0.8125rem';
+    context.style.color = 'var(--text-primary)';
+    context.textContent = usage.context;
+    el.appendChild(context);
+  }
+
+  function renderScaleStatic() {
+    document.getElementById('scale-h1').textContent = t('scaleTitle');
+    document.getElementById('label-scale-root').textContent = t('labelScaleRoot');
+  }
+
+  function renderScale() {
+    renderScaleStatic();
+    renderScaleRoots();
+    renderScaleGroups();
+    renderScaleFretboard();
+    renderScaleLegend();
+    renderScaleUsage();
+  }
+
+  // ---------------------------------------------------------------
+  // 8. 왼쪽 메뉴 (홈 / 코드 / 코드진행 / 스케일) 전환
+  // ---------------------------------------------------------------
+
+  function renderTopNav() {
+    document.getElementById('topnav-brand').textContent = t('brand');
+    document.getElementById('nav-home').textContent = t('navHome');
+    document.getElementById('nav-code').textContent = t('navCode');
+    document.getElementById('nav-progression-text').textContent = t('navProgression');
+    document.getElementById('nav-progression-badge').textContent = t('navProgressionBadge');
+    document.getElementById('nav-scale').textContent = t('navScale');
+    document.getElementById('nav-admin-text').textContent = t('navAdmin');
+    document.getElementById('lang-toggle').textContent = state.lang === 'ko' ? 'EN' : '한글';
+  }
+
+  // 좌우 배너 자리 — state.adConfig에 이미지/링크가 있으면 그 광고를,
+  // 없으면 자리표시자 텍스트를 보여준다. nav/뷰와 무관하게 항상 최신 상태로 갱신.
+  function renderAdRails() {
+    ['left', 'right'].forEach(function (side) {
+      var el = document.getElementById('ad-rail-' + side);
+      var cfg = state.adConfig[side];
+      if (cfg && cfg.img) {
+        var img = '<img src="' + cfg.img.replace(/"/g, '&quot;') + '" alt="">';
+        el.innerHTML = cfg.link
+          ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored">' + img + '</a>'
+          : img;
+      } else {
+        el.textContent = t('adRailPlaceholder');
+      }
+    });
+  }
+
+  // --- 광고관리자모드 비밀번호 모달 ---
+  function openAdminModal() {
+    document.getElementById('admin-modal-title').textContent = t('adminModalTitle');
+    document.getElementById('admin-modal-desc').textContent = t('adminModalDesc');
+    document.getElementById('admin-modal-cancel').textContent = t('adminModalCancel');
+    document.getElementById('admin-modal-submit').textContent = t('adminModalSubmit');
+    document.getElementById('admin-pw-error').textContent = '';
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-modal-overlay').classList.add('open');
+  }
+  function closeAdminModal() {
+    document.getElementById('admin-modal-overlay').classList.remove('open');
+  }
+  function submitAdminPassword() {
+    var pw = document.getElementById('admin-pw-input').value;
+    sha256Hex(pw).then(function (hash) {
+      if (hash && hash === ADMIN_PW_HASH) {
+        state.adAuthed = true;
+        try { sessionStorage.setItem(AD_AUTH_KEY, '1'); } catch (e) { /* 무시 */ }
+        closeAdminModal();
+        state.activeView = 'admin';
+        renderApp();
+      } else {
+        document.getElementById('admin-pw-error').textContent = t('adminPwWrong');
+      }
+    });
+  }
+
+  // --- 광고관리자모드 패널 ---
+  function renderAdminView() {
+    document.getElementById('admin-h1').textContent = t('adminTitle');
+    document.getElementById('admin-warning').textContent = t('adminWarning');
+    document.getElementById('admin-left-label').textContent = t('adminLeftLabel');
+    document.getElementById('admin-right-label').textContent = t('adminRightLabel');
+    document.getElementById('admin-img-label-1').textContent = t('adminImgLabel');
+    document.getElementById('admin-link-label-1').textContent = t('adminLinkLabel');
+    document.getElementById('admin-img-label-2').textContent = t('adminImgLabel');
+    document.getElementById('admin-link-label-2').textContent = t('adminLinkLabel');
+    document.getElementById('admin-save-btn').textContent = t('adminSave');
+    document.getElementById('admin-clear-btn').textContent = t('adminClear');
+    document.getElementById('admin-logout-btn').textContent = t('adminLogout');
+    document.getElementById('admin-save-msg').textContent = '';
+
+    document.getElementById('admin-left-img').value = state.adConfig.left.img || '';
+    document.getElementById('admin-left-link').value = state.adConfig.left.link || '';
+    document.getElementById('admin-right-img').value = state.adConfig.right.img || '';
+    document.getElementById('admin-right-link').value = state.adConfig.right.link || '';
+
+    document.getElementById('admin-save-btn').onclick = function () {
+      state.adConfig.left.img = document.getElementById('admin-left-img').value.trim();
+      state.adConfig.left.link = document.getElementById('admin-left-link').value.trim();
+      state.adConfig.right.img = document.getElementById('admin-right-img').value.trim();
+      state.adConfig.right.link = document.getElementById('admin-right-link').value.trim();
+      saveAdConfig();
+      renderAdRails();
+      document.getElementById('admin-save-msg').textContent = t('adminSaved');
+    };
+    document.getElementById('admin-clear-btn').onclick = function () {
+      state.adConfig = { left: { img: '', link: '' }, right: { img: '', link: '' } };
+      saveAdConfig();
+      renderAdRails();
+      renderAdminView();
+      document.getElementById('admin-save-msg').textContent = t('adminCleared');
+    };
+    document.getElementById('admin-logout-btn').onclick = function () {
+      state.adAuthed = false;
+      try { sessionStorage.removeItem(AD_AUTH_KEY); } catch (e) { /* 무시 */ }
+      state.activeView = 'home';
+      renderApp();
+    };
+  }
+
+  function renderApp() {
+    renderTopNav();
+    renderAdRails();
+    document.getElementById('app-home').style.display = state.activeView === 'home' ? 'block' : 'none';
+    document.getElementById('app').style.display = state.activeView === 'code' ? 'block' : 'none';
+    document.getElementById('app-progression').style.display = state.activeView === 'progression' ? 'block' : 'none';
+    document.getElementById('app-scale').style.display = state.activeView === 'scale' ? 'block' : 'none';
+    document.getElementById('app-admin').style.display = state.activeView === 'admin' ? 'block' : 'none';
+    document.getElementById('nav-home').className = 'nav-btn' + (state.activeView === 'home' ? ' active' : '');
+    document.getElementById('nav-code').className = 'nav-btn' + (state.activeView === 'code' ? ' active' : '');
+    document.getElementById('nav-progression').className = 'nav-btn' + (state.activeView === 'progression' ? ' active' : '');
+    document.getElementById('nav-scale').className = 'nav-btn' + (state.activeView === 'scale' ? ' active' : '');
+    document.getElementById('nav-admin').className = 'nav-btn' + (state.activeView === 'admin' ? ' active' : '');
+
+    if (state.activeView === 'home') {
+      renderHomeStatic();
+      renderHomeFeatures();
+      renderHomeNews();
+    } else if (state.activeView === 'code') {
+      render();
+    } else if (state.activeView === 'progression') {
+      renderProgression();
+    } else if (state.activeView === 'scale') {
+      renderScale();
+    } else if (state.activeView === 'admin') {
+      renderAdminView();
+    }
+  }
+
+  document.getElementById('nav-home').onclick = function () { state.activeView = 'home'; renderApp(); };
   document.getElementById('nav-code').onclick = function () { state.activeView = 'code'; renderApp(); };
   document.getElementById('nav-progression').onclick = function () { state.activeView = 'progression'; renderApp(); };
+  document.getElementById('nav-scale').onclick = function () { state.activeView = 'scale'; renderApp(); };
+  document.getElementById('nav-admin').onclick = function () {
+    if (state.adAuthed) { state.activeView = 'admin'; renderApp(); } else { openAdminModal(); }
+  };
+  document.getElementById('lang-toggle').onclick = function () { state.lang = state.lang === 'ko' ? 'en' : 'ko'; renderApp(); };
+
+  document.getElementById('admin-modal-cancel').onclick = closeAdminModal;
+  document.getElementById('admin-modal-submit').onclick = submitAdminPassword;
+  document.getElementById('admin-pw-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { submitAdminPassword(); }
+  });
 
   renderApp();
 })();
