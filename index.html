@@ -331,7 +331,7 @@
     align-items: baseline;
     gap: 40px;
     width: 100%;
-    padding: 32px 4px;
+    padding: 32px 20px;
     border-top: 1px solid var(--border);
     background: none;
     border-left: none; border-right: none; border-bottom: none;
@@ -339,7 +339,7 @@
     cursor: pointer;
     font: inherit;
     color: inherit;
-    transition: background 180ms ease, padding-left 180ms ease, padding-right 180ms ease;
+    transition: background 180ms ease, color 180ms ease;
   }
   .home-feature-list > :last-child { border-bottom: 1px solid var(--border); }
   .home-feature-name {
@@ -362,7 +362,7 @@
   }
   .home-feature-points li::before { content: '–'; position: absolute; left: 0; }
   @media (hover: hover) and (pointer: fine) {
-    .home-feature-row:hover { background: #000; color: #fff; padding-left: 20px; padding-right: 20px; }
+    .home-feature-row:hover { background: #000; color: #fff; }
     .home-feature-row:hover .home-feature-desc,
     .home-feature-row:hover .home-feature-points li { color: rgba(255, 255, 255, 0.72); }
   }
