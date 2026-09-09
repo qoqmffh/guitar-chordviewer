@@ -2980,15 +2980,15 @@ try {
     { date: '2026-09-07', ko: '기타 코드 지판 뷰어 첫 공개', en: 'First release of the Guitar Chord Fretboard Viewer' }
   ];
 
-  // 공지사항은 영문 고정 표시(언어 토글과 무관, Chakra Petch Light) —
-  // NEWS 배열의 ko 필드는 관리자가 참고할 원문 메모로만 남겨두고 화면엔 안 씀.
+  // 제목("News")만 영문 고정, 내용은 한글 고정 표시(둘 다 언어 토글과
+  // 무관) — 폰트는 Chakra Petch Light(가늘게, 볼드 아님).
   function renderHomeNews() {
     var el = document.getElementById('home-news');
     el.innerHTML = '';
     for (var i = 0; i < NEWS.length; i++) {
       var row = document.createElement('div');
       row.className = 'home-news-row';
-      row.innerHTML = '<span class="home-news-date">' + NEWS[i].date + '</span><span class="home-news-text">' + NEWS[i].en + '</span>';
+      row.innerHTML = '<span class="home-news-date">' + NEWS[i].date + '</span><span class="home-news-text">' + NEWS[i].ko + '</span>';
       el.appendChild(row);
     }
   }
