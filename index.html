@@ -902,8 +902,8 @@ try {
       adminRightLabel: '오른쪽 배너',
       adminImgLabel: '이미지 URL',
       adminUploadLabel: '또는 이미지 파일 업로드',
-      adminUploadHint: '업로드하면 자동으로 압축해서 위 URL 칸에 채워져요.',
-      adminImgTooBig: '이미지가 너무 커요. 더 작은 파일로 시도해주세요.',
+      adminUploadHint: '업로드하면 자동으로 압축해서 위 URL 칸에 채워져요. 투명 배경 PNG가 아니면 웬만한 사진/스크린샷은 다 통과돼요.',
+      adminImgTooBig: '이미지가 너무 커요 (압축해도 약 1.1MB 초과). 투명 배경이 꼭 필요한 게 아니면 JPG로, 혹은 더 작은/단순한 이미지로 시도해주세요.',
       adminUploadFailed: '이미지를 처리하지 못했어요. 다른 파일로 시도해주세요.',
       adminLinkLabel: '클릭 시 이동할 링크 URL',
       adminSave: '저장',
@@ -1029,8 +1029,8 @@ try {
       adminRightLabel: 'Right Banner',
       adminImgLabel: 'Image URL',
       adminUploadLabel: 'Or upload an image file',
-      adminUploadHint: 'Uploading auto-compresses it and fills the URL field above.',
-      adminImgTooBig: 'That image is too large. Try a smaller file.',
+      adminUploadHint: 'Uploading auto-compresses it and fills the URL field above. Any photo or screenshot works unless it needs a transparent PNG background.',
+      adminImgTooBig: 'That image is too large even compressed (over ~1.1MB). If it doesn\'t need a transparent background, try a JPG, or a smaller/simpler image.',
       adminUploadFailed: 'Could not process that image. Try a different file.',
       adminLinkLabel: 'Link URL (opens on click)',
       adminSave: 'Save',
@@ -1702,8 +1702,18 @@ try {
 
   // 관리자모드에서 파일로 올린 이미지를 압축해서 data URI로 반환.
   // Realtime Database에 이미지 자체를 저장하는 방식이라(Storage 없이) 용량이
-  // 커지지 않도록 배너 크기(가로 240px 레일의 2배)에 맞춰 리사이즈+재인코딩한다.
-  // 투명도가 필요할 수 있는 PNG는 PNG로, 그 외(사진 등)는 JPEG로 압축.
+  // 커지지 않도록 배너 크기(가로 240px 레일의 2배)에 맞춰 리사이즈한다.
+  // 실제로 투명 픽셀이 있는 PNG만 PNG로 유지하고(로고 등), 그 외(사진, 배경이
+  // 꽉 찬 PNG 스크린샷 등)는 JPEG로 — 화질을 단계적으로 낮춰가며 목표 용량
+  // (약 1.2MB) 밑으로 맞춘다. "PNG라서 무조건 크다"는 문제를 피하기 위함.
+  var COMPRESS_TARGET_BYTES = 1200000; // data URI 문자열 길이 기준 대략치
+  function canvasHasTransparency(ctx, w, h) {
+    try {
+      var data = ctx.getImageData(0, 0, w, h).data;
+      for (var i = 3; i < data.length; i += 4) { if (data[i] < 255) { return true; } }
+      return false;
+    } catch (e) { return true; } // 확인 못 하면 안전하게 PNG로 유지
+  }
   function compressImageFile(file, maxW, maxH, quality) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
@@ -1721,9 +1731,15 @@ try {
           canvas.width = outW; canvas.height = outH;
           var ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, outW, outH);
-          var isPng = file.type === 'image/png';
           try {
-            resolve(isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', quality || 0.85));
+            var hasAlpha = file.type === 'image/png' && canvasHasTransparency(ctx, outW, outH);
+            if (hasAlpha) { resolve(canvas.toDataURL('image/png')); return; }
+            var qualities = [quality || 0.85, 0.7, 0.55, 0.4];
+            var result = canvas.toDataURL('image/jpeg', qualities[0]);
+            for (var qi = 1; qi < qualities.length && result.length > COMPRESS_TARGET_BYTES; qi++) {
+              result = canvas.toDataURL('image/jpeg', qualities[qi]);
+            }
+            resolve(result);
           } catch (e) { reject(e); }
         };
         img.src = reader.result;
@@ -3365,7 +3381,7 @@ try {
         var file = e.target.files && e.target.files[0];
         if (!file) { return; }
         compressImageFile(file, 480, 1400, 0.85).then(function (dataUrl) {
-          if (dataUrl.length > 900000) {
+          if (dataUrl.length > 1500000) {
             document.getElementById('admin-save-msg').textContent = t('adminImgTooBig');
             return;
           }
