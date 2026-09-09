@@ -323,66 +323,31 @@
     .home-cta-secondary:hover { background: var(--surface-1); }
   }
 
-  .home-section { max-width: 1120px; margin: 0 auto; padding: 72px 24px; }
+  /* 공지사항 섹션 — 히어로와 같은 크림 배경/Chakra Petch 폰트로 통일해서
+     검정 히어로 → 크림 공지사항 → 검정 푸터로 이어지게 한다(중간에 흰 배경
+     끊김 없이). */
+  .home-section {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    background: #f6f4ee url('imagedata/bg-cream.png');
+    background-size: 1100px auto;
+    padding: 56px 24px 72px;
+  }
+  .home-section-inner { max-width: 1120px; margin: 0 auto; }
   .home-section-title {
-    font-family: var(--font-display);
-    font-weight: 500;
+    font-family: var(--font-chakra);
+    font-weight: 600;
     font-size: clamp(1.5rem, 2.6vw, 2rem);
-    letter-spacing: -0.01em;
-    color: var(--text-primary);
+    color: #1a1a1a;
     margin: 0 0 8px;
   }
 
-  .home-feature-list { display: flex; flex-direction: column; margin-top: 28px; }
-  .home-feature-row {
-    display: flex;
-    align-items: baseline;
-    gap: 40px;
-    width: 100%;
-    padding: 32px 20px;
-    border-top: 1px solid var(--border);
-    background: none;
-    border-left: none; border-right: none; border-bottom: none;
-    text-align: left;
-    cursor: pointer;
-    font: inherit;
-    color: inherit;
-    transition: background 180ms ease, color 180ms ease;
-  }
-  .home-feature-list > :last-child { border-bottom: 1px solid var(--border); }
-  .home-feature-name {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: clamp(1.375rem, 2.8vw, 2rem);
-    flex: 0 0 auto;
-    min-width: 200px;
-  }
-  .home-feature-body { flex: 1 1 auto; min-width: 0; }
-  .home-feature-desc { font-family: var(--font-editorial); font-size: 0.9375rem; line-height: 1.6; color: var(--text-secondary); }
-  .home-feature-points { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-  .home-feature-points li {
-    font-family: var(--font-editorial);
-    font-size: 0.8125rem;
-    line-height: 1.55;
-    color: var(--text-secondary);
-    padding-left: 14px;
-    position: relative;
-  }
-  .home-feature-points li::before { content: '–'; position: absolute; left: 0; }
-  @media (hover: hover) and (pointer: fine) {
-    .home-feature-row:hover { background: #000; color: #fff; }
-    .home-feature-row:hover .home-feature-desc,
-    .home-feature-row:hover .home-feature-points li { color: rgba(255, 255, 255, 0.72); }
-  }
-
   .home-news-list { display: flex; flex-direction: column; margin-top: 28px; }
-  .home-news-row { display: flex; align-items: baseline; gap: 24px; padding: 16px 4px; border-top: 1px solid var(--border); }
-  .home-news-list > :last-child { border-bottom: 1px solid var(--border); }
-  .home-news-date { font-family: var(--font-editorial); font-size: 0.8125rem; color: var(--text-muted); flex: 0 0 92px; }
-  .home-news-text { font-family: var(--font-editorial); font-size: 0.9375rem; line-height: 1.55; color: var(--text-primary); }
-
-  .home-board-wrap { margin-top: 28px; }
-  .home-board-fallback { font-family: var(--font-editorial); font-size: 0.875rem; color: var(--text-secondary); padding: 8px 0; }
+  .home-news-row { display: flex; align-items: baseline; gap: 24px; padding: 16px 4px; border-top: 1px solid rgba(0, 0, 0, 0.12); }
+  .home-news-list > :last-child { border-bottom: 1px solid rgba(0, 0, 0, 0.12); }
+  .home-news-date { font-family: var(--font-chakra); font-size: 0.8125rem; color: rgba(0, 0, 0, 0.45); flex: 0 0 92px; }
+  .home-news-text { font-family: var(--font-chakra); font-size: 0.9375rem; line-height: 1.55; color: #1a1a1a; }
 
   .home-footer {
     background: #000;
@@ -549,9 +514,7 @@
     .bl-hero { padding: 40px 20px 56px; }
     .bl-annotation-row { flex-direction: column; gap: 32px; }
     .bl-annotation.right { align-items: flex-start; text-align: left; }
-    .home-section { padding: 48px 20px; }
-    .home-feature-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .home-feature-name { min-width: 0; }
+    .home-section { padding: 40px 20px 48px; }
     .home-news-row { gap: 4px 16px; flex-wrap: wrap; }
     .home-footer { padding: 36px 20px; }
   }
@@ -617,37 +580,9 @@
   </section>
 
   <section class="home-section">
-    <h2 class="home-section-title" id="home-features-label">기능</h2>
-    <div class="home-feature-list" id="home-features"></div>
-  </section>
-
-  <section class="home-section">
-    <h2 class="home-section-title" id="home-news-label">공지사항</h2>
-    <div class="home-news-list" id="home-news"></div>
-  </section>
-
-  <section class="home-section">
-    <h2 class="home-section-title" id="home-board-label">자유게시판</h2>
-    <div class="home-board-wrap">
-      <script src="https://giscus.app/client.js"
-        data-repo="qoqmffh/guitar-chordviewer"
-        data-repo-id="R_kgDOUQy_CA"
-        data-category="General"
-        data-category-id=""
-        data-mapping="specific"
-        data-term="free-board"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme="light"
-        data-lang="ko"
-        crossorigin="anonymous"
-        async>
-      </script>
-      <div id="home-board-fallback" class="home-board-fallback">
-        댓글판을 여는 중이에요. 잠시만 기다려주세요 — 안 뜨면 새로고침 해보세요.
-      </div>
+    <div class="home-section-inner">
+      <h2 class="home-section-title" id="home-news-label">News</h2>
+      <div class="home-news-list" id="home-news"></div>
     </div>
   </section>
 
@@ -3026,70 +2961,24 @@ try {
     { date: '2026-09-07', ko: '기타 코드 지판 뷰어 첫 공개', en: 'First release of the Guitar Chord Fretboard Viewer' }
   ];
 
+  // board-labs 브랜드 페이지 전체와 톤을 맞추려고 공지사항도 항상 영문으로
+  // 고정 표시(언어 토글과 무관) — NEWS 배열의 ko 필드는 관리자가 참고할 원문
+  // 메모로만 남겨두고 화면엔 안 씀.
   function renderHomeNews() {
     var el = document.getElementById('home-news');
     el.innerHTML = '';
     for (var i = 0; i < NEWS.length; i++) {
       var row = document.createElement('div');
       row.className = 'home-news-row';
-      row.innerHTML = '<span class="home-news-date">' + NEWS[i].date + '</span><span class="home-news-text">' + NEWS[i][state.lang] + '</span>';
+      row.innerHTML = '<span class="home-news-date">' + NEWS[i].date + '</span><span class="home-news-text">' + NEWS[i].en + '</span>';
       el.appendChild(row);
     }
   }
 
-  // 히어로 밑에 나오는 3개 기능 목록. i18n의 homeFeature* 객체를 그대로 쓰고,
-  // 행 전체가 버튼이라 어디를 눌러도 실제로 해당 메뉴로 이동한다(카드/화살표
-  // 없이 hover 시 행 전체가 반전되는 것만으로 클릭 가능함을 알림).
-  function renderHomeFeatures() {
-    var el = document.getElementById('home-features');
-    el.innerHTML = '';
-    var defs = [
-      { key: 'homeFeatureCode', view: 'code' },
-      { key: 'homeFeatureProgression', view: 'progression' },
-      { key: 'homeFeatureScale', view: 'scale' }
-    ];
-    defs.forEach(function (d) {
-      var f = I18N[state.lang][d.key] || I18N.ko[d.key];
-      var row = document.createElement('button');
-      row.className = 'home-feature-row';
-      row.onclick = function () { state.activeView = d.view; renderApp(); };
-
-      var name = document.createElement('div');
-      name.className = 'home-feature-name';
-      name.textContent = f.title;
-      row.appendChild(name);
-
-      var body = document.createElement('div');
-      body.className = 'home-feature-body';
-
-      var desc = document.createElement('div');
-      desc.className = 'home-feature-desc';
-      desc.textContent = f.desc;
-      body.appendChild(desc);
-
-      if (f.points && f.points.length) {
-        var ul = document.createElement('ul');
-        ul.className = 'home-feature-points';
-        f.points.forEach(function (p) {
-          var li = document.createElement('li');
-          li.textContent = p;
-          ul.appendChild(li);
-        });
-        body.appendChild(ul);
-      }
-
-      row.appendChild(body);
-      el.appendChild(row);
-    });
-  }
-
   function renderHomeStatic() {
     // 히어로(headline/subhead/코너 문구)는 board-labs 브랜드 카피로 고정 —
-    // 언어 토글과 무관하게 항상 영문. i18n을 거치지 않는다.
-    document.getElementById('home-features-label').textContent = t('homeFeaturesLabel');
-    document.getElementById('home-news-label').textContent = t('homeNews');
-    document.getElementById('home-board-label').textContent = t('homeBoard');
-    document.getElementById('home-board-fallback').textContent = t('homeBoardFallback');
+    // 언어 토글과 무관하게 항상 영문. i18n을 거치지 않는다. 공지사항 라벨도
+    // 마찬가지(HTML에 "News"로 이미 고정 표기, 여기서 덮어쓰지 않음).
     document.getElementById('home-creator-label').textContent = t('homeCreator');
     document.getElementById('home-creator-contact').textContent = t('homeCreatorContact');
   }
@@ -3522,7 +3411,6 @@ try {
 
     if (state.activeView === 'home') {
       renderHomeStatic();
-      renderHomeFeatures();
       renderHomeNews();
     } else if (state.activeView === 'code') {
       render();
