@@ -154,6 +154,11 @@
     vertical-align: 1px;
   }
   #page-content { max-width: 1280px; margin: 0 auto; padding: 24px 16px 0; }
+  /* 홈 화면 히어로는 nav 바로 밑에 크림 배경이 딱 붙어야 하는데,
+     #page-content의 top padding(24px)이 그 사이에 body 배경(회색)을
+     한 줄 노출시키고 있었다 — 다른 페이지(코드/스케일 등)에 쓰는 이
+     padding 값은 그대로 두고, 홈에서만 음수 마진으로 상쇄한다. */
+  #app-home { margin-top: -24px; }
   #app, #app-progression, #app-admin {
     max-width: 1200px;
     margin: 0 auto;
@@ -542,6 +547,7 @@
     #topnav-inner { padding: 10px 16px; }
     #topnav-links { overflow-x: auto; }
     #page-content { padding: 16px 10px 0; }
+    #app-home { margin-top: -16px; }
     #app, #app-progression { padding: 20px 18px; border-radius: 14px; }
     h1 { font-size: 1.5rem; }
     .bl-hero { padding: 40px 20px 56px; }
