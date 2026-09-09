@@ -359,6 +359,18 @@
     overflow: hidden;
   }
   .ad-rail img { max-width: 100%; max-height: 100%; border-radius: calc(var(--radius) - 2px); }
+  /* 실제 광고 이미지가 채워지면 빈 자리 표시용 테두리/배경을 없애고,
+     박스 크기 자체를 이미지 실제 비율에 맞게 줄인다 — 고정 640px 박스 안에
+     이미지가 떠 있어서 남는 여백이 액자처럼 보이는 문제 방지. */
+  .ad-rail.has-ad {
+    border: none;
+    background: none;
+    padding: 0;
+    height: auto;
+    max-height: calc(100vh - 104px);
+  }
+  .ad-rail.has-ad a { display: block; line-height: 0; }
+  .ad-rail.has-ad img { display: block; width: 100%; height: auto; max-height: calc(100vh - 104px); object-fit: contain; }
   #ad-rail-left { left: 16px; }
   #ad-rail-right { right: 16px; }
   @media (min-width: 1900px) {
@@ -3295,11 +3307,13 @@ try {
       var el = document.getElementById('ad-rail-' + side);
       var cfg = state.adConfig[side];
       if (cfg && cfg.img) {
+        el.classList.add('has-ad');
         var img = '<img src="' + cfg.img.replace(/"/g, '&quot;') + '" alt="">';
         el.innerHTML = cfg.link
           ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored" onclick="window.__gtAdClick && window.__gtAdClick(\'' + side + '\')">' + img + '</a>'
           : img;
       } else {
+        el.classList.remove('has-ad');
         el.textContent = t('adRailPlaceholder');
       }
     });
