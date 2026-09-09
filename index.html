@@ -54,6 +54,32 @@
     gap: 16px;
   }
   #topnav-left { display: flex; align-items: center; gap: 10px; }
+  /* 실시간 접속자 배지 — Firebase가 설정돼야만 나타남(설정 전엔 hidden 유지) */
+  .live-visitor-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .live-visitor-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #34c759; /* 애플 시스템 그린 */
+    flex: 0 0 auto;
+    animation: live-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes live-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.82); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .live-visitor-dot { animation: none; }
+  }
   #topnav-brand {
     font-size: 0.9375rem;
     font-weight: 600;
@@ -400,6 +426,17 @@
     margin-bottom: 20px;
   }
   #admin-save-msg { font-size: 0.75rem; color: var(--text-accent); margin-left: 8px; }
+  .admin-fb-status {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    margin-bottom: 14px;
+  }
+  .admin-fb-status.on { background: rgba(52, 199, 89, 0.14); color: #248a3d; }
+  .admin-fb-status.off { background: var(--bg-danger); color: var(--text-danger); }
+  .admin-click-stat { font-size: 0.75rem; color: var(--text-secondary); margin-top: -2px; }
 
   /* 재질(반투명/블러)을 지원하지 않거나 원치 않는 환경 — 불투명 표면으로 대체 */
   @media (prefers-reduced-transparency: reduce) {
@@ -436,6 +473,10 @@
     <div id="topnav-left">
       <button id="lang-toggle" class="nav-btn" style="font-weight:600;">EN</button>
       <div id="topnav-brand">🎸 기타 코드 뷰어</div>
+      <div id="live-visitor-badge" class="live-visitor-badge" hidden>
+        <span class="live-visitor-dot"></span>
+        <span id="live-visitor-text"></span>
+      </div>
     </div>
     <div id="topnav-links">
       <button id="nav-home" class="nav-btn active">홈</button>
@@ -614,6 +655,7 @@
 
 <div id="app-admin" style="display:none;">
   <h1 id="admin-h1">광고관리자모드</h1>
+  <div id="admin-fb-status" class="admin-fb-status"></div>
   <div id="admin-warning">⚠️ 이 설정은 지금 이 브라우저에만 저장돼요. 실제로 모든 방문자에게 보이게 하려면 이 값을 개발자에게 전달해서 코드에 반영(배포)해야 합니다.</div>
 
   <div style="margin-bottom:20px;">
@@ -622,6 +664,7 @@
     <input id="admin-left-img" class="admin-input" type="text" placeholder="https://...">
     <div class="admin-field-label" id="admin-link-label-1">클릭 시 이동할 링크 URL</div>
     <input id="admin-left-link" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-click-stat" id="admin-left-clicks"></div>
   </div>
 
   <div style="margin-bottom:20px;">
@@ -630,6 +673,7 @@
     <input id="admin-right-img" class="admin-input" type="text" placeholder="https://...">
     <div class="admin-field-label" id="admin-link-label-2">클릭 시 이동할 링크 URL</div>
     <input id="admin-right-link" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-click-stat" id="admin-right-clicks"></div>
   </div>
 
   <div>
@@ -641,6 +685,12 @@
 </div>
 
 </div>
+
+<!-- 실시간 접속자 수 / 광고 배너 공유 저장 / 클릭 집계용. FIREBASE_CONFIG가
+     설정 전 상태(REPLACE_ME)면 아래 앱 코드가 이 SDK를 아예 쓰지 않고
+     조용히 로컬 전용 모드로만 동작한다. -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
 <script>
 try {
@@ -817,7 +867,11 @@ try {
       adminModalSubmit: '확인',
       adminPwWrong: '비밀번호가 틀렸어요.',
       adminTitle: '광고관리자모드',
-      adminWarning: '⚠️ 이 설정은 지금 이 브라우저에만 저장돼요. 실제로 모든 방문자에게 보이게 하려면 이 값을 개발자에게 전달해서 코드에 반영(배포)해야 합니다.',
+      adminWarningOff: '⚠️ Firebase가 아직 연결 안 돼서, 지금 저장하면 이 브라우저에만 남아요 (다른 방문자한테는 안 보여요).',
+      adminWarningOn: '✅ Firebase에 연결돼 있어요. 저장하면 실제로 모든 방문자에게 보여요. 다만 비밀번호 보호는 완전한 서버 인증이 아니라 개발자도구로 우회할 수 있는 수준이니, 민감한 용도로는 쓰지 마세요.',
+      adminFbOn: '🟢 실시간 연결됨 — 모든 방문자에게 공유됩니다',
+      adminFbOff: '⚪ 로컬 미리보기 모드 — Firebase 미연결',
+      adminClicksLabel: '클릭수: {n}',
       adminLeftLabel: '왼쪽 배너',
       adminRightLabel: '오른쪽 배너',
       adminImgLabel: '이미지 URL',
@@ -826,7 +880,8 @@ try {
       adminClear: '전체 초기화',
       adminLogout: '로그아웃',
       adminSaved: '저장했어요.',
-      adminCleared: '초기화했어요.'
+      adminCleared: '초기화했어요.',
+      liveVisitors: '{n}명 접속 중'
     },
     en: {
       brand: '🎸 Guitar Chord Viewer',
@@ -935,7 +990,11 @@ try {
       adminModalSubmit: 'Submit',
       adminPwWrong: 'Wrong password.',
       adminTitle: 'Ad Admin Mode',
-      adminWarning: '⚠️ This only saves in this browser. To actually show it to every visitor, pass these values to the developer to deploy in the code.',
+      adminWarningOff: '⚠️ Firebase isn\'t connected yet, so saving now only stays in this browser (other visitors won\'t see it).',
+      adminWarningOn: '✅ Connected to Firebase. Saving will actually show it to every visitor. Note the password gate isn\'t real server auth, though — it can be bypassed via devtools, so don\'t rely on it for anything sensitive.',
+      adminFbOn: '🟢 Live — shared with every visitor',
+      adminFbOff: '⚪ Local preview only — Firebase not connected',
+      adminClicksLabel: 'Clicks: {n}',
       adminLeftLabel: 'Left Banner',
       adminRightLabel: 'Right Banner',
       adminImgLabel: 'Image URL',
@@ -944,7 +1003,8 @@ try {
       adminClear: 'Clear All',
       adminLogout: 'Log Out',
       adminSaved: 'Saved.',
-      adminCleared: 'Cleared.'
+      adminCleared: 'Cleared.',
+      liveVisitors: '{n} online'
     }
   };
 
@@ -1463,19 +1523,65 @@ try {
     scaleKey: 'ionian',    // 스케일 모드: 선택한 스케일 (SCALE_GROUPS 키)
     lang: 'ko',            // 'ko' | 'en' — UI 언어 (스케일 운용법 설명 본문은 아직 한글 전용)
     adAuthed: false,       // 광고관리자모드 비밀번호 인증 여부 (세션 한정, sessionStorage에 저장)
-    adConfig: { left: { img: '', link: '' }, right: { img: '', link: '' } } // 좌우 배너 설정. 이 브라우저(localStorage)에만 저장됨
+    adConfig: { left: { img: '', link: '' }, right: { img: '', link: '' } }, // 좌우 배너 설정
+    adClicks: { left: 0, right: 0 }, // 배너별 클릭수 (Firebase 연결 시에만 실제 값)
+    liveVisitors: 0        // 실시간 접속자 수 (Firebase 연결 시에만 의미 있는 값)
   };
 
   // ---------------------------------------------------------------
-  // 2.5 광고 배너 / 광고관리자모드 — 정적 페이지라 서버가 없으므로,
-  // 여기서 저장하는 값은 "이 브라우저"에만 남는다. 실제로 모든 방문자에게
-  // 보여주려면 이 값을 코드(AD_CONFIG 기본값)에 반영해서 재배포해야 한다.
+  // 2.5 광고 배너 / 광고관리자모드 / 실시간 접속자
+  //
+  // 이 사이트는 서버가 없는 정적(GitHub Pages) 페이지라, "모든 방문자가
+  // 공유하는" 상태(광고 배너, 클릭수, 동시 접속자 수)는 별도의 실시간
+  // 백엔드 없이는 절대 만들 수 없다. 그래서 Firebase Realtime Database를
+  // 붙여서 이 부분만 진짜 서버에 저장/공유되게 한다.
+  //
+  // FIREBASE_CONFIG를 채우지 않은 상태(REPLACE_ME)에서는 fbEnabled가 false로
+  // 남고, 광고 설정은 이 브라우저의 localStorage에만 저장되는 이전 동작으로
+  // 조용히 폴백한다 — 즉 Firebase를 설정하지 않아도 앱 자체는 깨지지 않는다.
+  //
+  // Firebase 프로젝트를 만든 뒤 아래 rules를 Realtime Database > 규칙에
+  // 그대로 붙여넣으면 된다(비밀번호 해시가 이미 반영돼 있음):
+  // {
+  //   "rules": {
+  //     "ads": {
+  //       ".read": true,
+  //       "left":  { ".write": "newData.child('_secret').val() === '<ADMIN_PW_HASH>'" },
+  //       "right": { ".write": "newData.child('_secret').val() === '<ADMIN_PW_HASH>'" }
+  //     },
+  //     "stats": { "clicks": {
+  //       ".read": true,
+  //       "left":  { ".write": true, ".validate": "newData.isNumber() && newData.val() >= 0" },
+  //       "right": { ".write": true, ".validate": "newData.isNumber() && newData.val() >= 0" }
+  //     }},
+  //     "presence": { ".read": true, "$id": { ".write": true } }
+  //   }
+  // }
   // ---------------------------------------------------------------
   var AD_STORAGE_KEY = 'gt-ad-config';
   var AD_AUTH_KEY = 'gt-ad-authed';
-  // SHA-256("gtchord-2026") 의 16진 해시. 평문 비밀번호를 소스에 그대로
-  // 남기지 않기 위한 최소한의 조치일 뿐 — 정적 사이트라 진짜 보안은 아님.
-  var ADMIN_PW_HASH = '4c7c5ca8447a306fb16197642908c2b5054e4f60440ab0ad21d3094a6b8e1fcd';
+  // SHA-256("2729") 의 16진 해시. 평문 비밀번호를 소스에 그대로 남기지
+  // 않기 위한 최소한의 조치일 뿐 — 정적 사이트라 진짜 보안은 아님.
+  var ADMIN_PW_HASH = 'd1a08ae1268b2fc1248ace198c3518a73d86ea765ff93d964a6182b4c32d80c3';
+
+  // 여기에 본인 Firebase 프로젝트의 설정값을 붙여넣으면 실시간 접속자 수 /
+  // 배너 공유 저장 / 클릭 집계가 전부 켜진다. 콘솔 > 프로젝트 설정 > 내 앱에서 확인 가능.
+  var FIREBASE_CONFIG = {
+    apiKey: 'AIzaSyC4PssgfG-2ese99-uP7AiV0JiN9SffEYU',
+    authDomain: 'guit-ad.firebaseapp.com',
+    databaseURL: 'https://guit-ad-default-rtdb.firebaseio.com',
+    projectId: 'guit-ad'
+  };
+
+  var fbEnabled = false;
+  var fbDb = null;
+  try {
+    if (FIREBASE_CONFIG.apiKey !== 'REPLACE_ME' && window.firebase && window.firebase.initializeApp) {
+      window.firebase.initializeApp(FIREBASE_CONFIG);
+      fbDb = window.firebase.database();
+      fbEnabled = true;
+    }
+  } catch (e) { fbEnabled = false; fbDb = null; }
 
   (function loadAdConfig() {
     try {
@@ -1488,8 +1594,67 @@ try {
     } catch (e) { /* 프라이빗 모드 등 스토리지 접근 불가 시 기본값 유지 */ }
   })();
 
+  // Firebase가 켜져 있으면 /ads, /stats/clicks 를 실시간 구독해서
+  // 다른 사람이 관리자모드에서 저장한 값이 새로고침 없이 바로 반영되게 한다.
+  function setupFirebaseSync() {
+    if (!fbEnabled) { return; }
+    fbDb.ref('ads').on('value', function (snap) {
+      var val = snap.val() || {};
+      state.adConfig = {
+        left: { img: (val.left && val.left.img) || '', link: (val.left && val.left.link) || '' },
+        right: { img: (val.right && val.right.img) || '', link: (val.right && val.right.link) || '' }
+      };
+      try { localStorage.setItem(AD_STORAGE_KEY, JSON.stringify(state.adConfig)); } catch (e) { /* 무시 */ }
+      renderAdRails();
+      if (state.activeView === 'admin') { renderAdminView(); }
+    });
+    fbDb.ref('stats/clicks').on('value', function (snap) {
+      var val = snap.val() || {};
+      state.adClicks = { left: val.left || 0, right: val.right || 0 };
+      if (state.activeView === 'admin') { renderAdminClickStats(); }
+    });
+  }
+
+  // 배너 저장: Firebase가 켜져 있으면 그쪽이 "진짜" — 모든 방문자가 공유해서 보게 됨.
+  // 항상 localStorage에도 같이 남겨서, Firebase 미설정 시엔 이전처럼 로컬 미리보기로 동작.
   function saveAdConfig() {
     try { localStorage.setItem(AD_STORAGE_KEY, JSON.stringify(state.adConfig)); } catch (e) { /* 무시 */ }
+    if (fbEnabled) {
+      fbDb.ref('ads/left').set({ img: state.adConfig.left.img, link: state.adConfig.left.link, _secret: ADMIN_PW_HASH });
+      fbDb.ref('ads/right').set({ img: state.adConfig.right.img, link: state.adConfig.right.link, _secret: ADMIN_PW_HASH });
+    }
+  }
+
+  // 배너 클릭 집계 — 방문자가 배너를 클릭할 때마다 호출(전역으로 노출해서
+  // 배너 링크의 onclick 속성에서 바로 부를 수 있게 함).
+  function trackAdClick(side) {
+    if (!fbEnabled) { return; }
+    fbDb.ref('stats/clicks/' + side).transaction(function (cur) { return (cur || 0) + 1; });
+  }
+  window.__gtAdClick = trackAdClick;
+
+  // 실시간 접속자 수 — Firebase Realtime Database의 .info/connected +
+  // onDisconnect()를 쓴 표준 "presence" 패턴. 탭을 닫거나 연결이 끊기면
+  // 서버가 자동으로 내 항목을 지워주기 때문에 별도 하트비트가 필요 없다.
+  function setupPresence() {
+    if (!fbEnabled) { return; }
+    fbDb.ref('.info/connected').on('value', function (snap) {
+      if (snap.val() !== true) { return; }
+      var myRef = fbDb.ref('presence').push();
+      myRef.onDisconnect().remove();
+      myRef.set(true);
+    });
+    fbDb.ref('presence').on('value', function (snap) {
+      state.liveVisitors = snap.numChildren();
+      renderLiveVisitorCount();
+    });
+  }
+
+  function renderLiveVisitorCount() {
+    var badge = document.getElementById('live-visitor-badge');
+    if (!fbEnabled) { badge.hidden = true; return; }
+    badge.hidden = false;
+    document.getElementById('live-visitor-text').textContent = t('liveVisitors', { n: state.liveVisitors });
   }
 
   function sha256Hex(text) {
@@ -3050,7 +3215,7 @@ try {
       if (cfg && cfg.img) {
         var img = '<img src="' + cfg.img.replace(/"/g, '&quot;') + '" alt="">';
         el.innerHTML = cfg.link
-          ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored">' + img + '</a>'
+          ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored" onclick="window.__gtAdClick && window.__gtAdClick(\'' + side + '\')">' + img + '</a>'
           : img;
       } else {
         el.textContent = t('adRailPlaceholder');
@@ -3087,9 +3252,19 @@ try {
   }
 
   // --- 광고관리자모드 패널 ---
+  function renderAdminClickStats() {
+    document.getElementById('admin-left-clicks').textContent = t('adminClicksLabel', { n: state.adClicks.left });
+    document.getElementById('admin-right-clicks').textContent = t('adminClicksLabel', { n: state.adClicks.right });
+  }
+
   function renderAdminView() {
+    var fbStatus = document.getElementById('admin-fb-status');
+    fbStatus.className = 'admin-fb-status ' + (fbEnabled ? 'on' : 'off');
+    fbStatus.textContent = fbEnabled ? t('adminFbOn') : t('adminFbOff');
+    renderAdminClickStats();
+
     document.getElementById('admin-h1').textContent = t('adminTitle');
-    document.getElementById('admin-warning').textContent = t('adminWarning');
+    document.getElementById('admin-warning').textContent = fbEnabled ? t('adminWarningOn') : t('adminWarningOff');
     document.getElementById('admin-left-label').textContent = t('adminLeftLabel');
     document.getElementById('admin-right-label').textContent = t('adminRightLabel');
     document.getElementById('admin-img-label-1').textContent = t('adminImgLabel');
@@ -3175,6 +3350,8 @@ try {
   });
 
   renderApp();
+  setupFirebaseSync();
+  setupPresence();
 })();
 } catch (e) {
   var eEl = document.getElementById('gt-error');
