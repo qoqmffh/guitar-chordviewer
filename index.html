@@ -55,7 +55,11 @@
     font-family: var(--font-sans);
     font-size: 0.8125rem;
     color: var(--text-primary);
-    background: var(--surface-1);
+    /* 홈 화면과 같은 크림 배경을 전체 페이지 기본값으로 — 코드/스케일 등도
+       이걸 그대로 물려받는다(코드/코드진행/관리자모드는 그 위에 흰색
+       카드(#app 등)가 얹히는 구조라 카드 자체는 그대로 흰색으로 보임). */
+    background: #f6f4ee url('imagedata/bg-cream.png');
+    background-size: 1100px auto;
     margin: 0;
     padding: 0 0 60px;
   }
