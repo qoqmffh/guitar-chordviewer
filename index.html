@@ -4,17 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>기타 코드 뷰어</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600&display=swap">
 <style>
   :root {
-    /* 애플 공식 홈페이지 팔레트 오마주 */
     --surface-2: #ffffff;
-    --surface-1: #f5f5f7;         /* 애플 특유의 밝은 그레이 섹션 배경 */
+    --surface-1: #f5f5f7;
     --border: rgba(0, 0, 0, 0.08);
     --border-strong: rgba(0, 0, 0, 0.14);
-    --bg-accent: #0071e3;         /* 애플 블루 */
-    --text-accent: #0071e3;
-    --border-accent: #0071e3;
-    --text-primary: #1d1d1f;      /* 애플 시그니처 다크 그레이(순검정 아님) */
+    --bg-accent: #000000;         /* 흑백 전용 팔레트 — 강조는 색이 아니라 굵기/크기로 */
+    --text-accent: #000000;
+    --border-accent: #000000;
+    --text-primary: #1d1d1f;
     --text-secondary: #6e6e73;
     --text-muted: #a1a1a6;
     --text-danger: #d70015;
@@ -23,6 +24,10 @@
     --radius-card: 18px;          /* 큰 카드/네비 */
     --radius-pill: 980px;         /* 알약 버튼 */
     --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    /* 홈 화면 전용 에디토리얼 타이포 — 라틴 문자는 Clash Display/General Sans,
+       한글은 자동으로 Pretendard로 폴백(두 폰트 다 한글 글리프가 없음) */
+    --font-display: 'Clash Display', 'Pretendard', var(--font-sans);
+    --font-editorial: 'General Sans', 'Pretendard', var(--font-sans);
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   }
   * { box-sizing: border-box; }
@@ -104,7 +109,7 @@
     .nav-btn:hover { color: var(--text-primary); }
   }
   .nav-btn.active {
-    background: rgba(0, 113, 227, 0.1);
+    background: rgba(0, 0, 0, 0.06);
     color: var(--text-accent);
     font-weight: 600;
   }
@@ -242,12 +247,58 @@
   }
   .gt-flex { display: flex; flex-wrap: wrap; gap: 6px; }
 
-  /* 홈 — 랜딩페이지 구조: 히어로 / 기능 카드 / 소식 / 게시판 / 푸터 */
-  .home-hero { text-align: center; padding: 48px 0 44px; max-width: 640px; margin: 0 auto; }
-  .home-hero-icon { font-size: 2.75rem; line-height: 1; margin-bottom: 12px; }
-  .home-hero-title { font-size: 2.5rem; text-align: center; margin: 0 0 12px; }
-  .home-hero-sub { font-size: 1.0625rem; line-height: 1.55; color: var(--text-secondary); margin: 0 0 28px; }
-  .home-hero-ctas { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  /* 홈 — 흑백 에디토리얼 타이포그래피. 색으로 위계를 만들지 않고
+     크기/굵기/여백으로만 만든다. 히어로와 푸터는 뷰포트 끝까지 채우는
+     검은 띠(풀블리드)로 나머지 흰 바탕 사이를 감싼다. */
+  .home-hero {
+    background: #000;
+    color: #fff;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding: 108px 24px 88px;
+  }
+  .home-hero-inner { max-width: 1120px; margin: 0 auto; }
+  .home-hero-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.5rem, 6.4vw, 5.25rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    max-width: 17ch;
+    margin: 0 0 32px;
+  }
+  .home-hero-sub {
+    font-family: var(--font-editorial);
+    font-size: clamp(1rem, 1.6vw, 1.1875rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.68);
+    max-width: 44ch;
+    margin: 0 0 44px;
+  }
+  .home-hero-ctas { display: flex; gap: 32px; flex-wrap: wrap; }
+  /* 히어로 전용 밑줄 텍스트 링크 — 검은 배경 위에서만 쓰는 스타일이라
+     흰 배경에서 쓰는 .home-cta(알약 버튼, 관리자모드 등)와는 별도 이름을 쓴다. */
+  .home-hero-cta {
+    font-family: var(--font-editorial);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #fff;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 0 0 5px;
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease;
+  }
+  .home-hero-cta-secondary { color: rgba(255, 255, 255, 0.68); }
+  @media (hover: hover) and (pointer: fine) {
+    .home-hero-cta:hover { border-color: #fff; }
+    .home-hero-cta-secondary:hover { color: #fff; }
+  }
+
+  /* 흰 배경 위에서 쓰는 알약 버튼(관리자모드 저장/확인 등) — bg-accent가
+     이제 검정이라 자연스럽게 흑백 버튼이 된다. */
   .home-cta {
     padding: 12px 26px;
     font-size: 0.9375rem;
@@ -264,76 +315,79 @@
     .home-cta-secondary:hover { background: var(--surface-1); }
   }
 
-  .home-section { max-width: 1120px; margin: 0 auto 44px; }
-  .home-section-title { font-size: 1.375rem; font-weight: 600; letter-spacing: -0.015em; text-align: center; margin: 0 0 20px; }
+  .home-section { max-width: 1120px; margin: 0 auto; padding: 72px 24px; }
+  .home-section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+  }
 
-  .home-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-  .home-feature-card {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: 26px 24px;
+  .home-feature-list { display: flex; flex-direction: column; margin-top: 28px; }
+  .home-feature-row {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 4px 24px -14px rgba(0, 0, 0, 0.12);
-    transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .home-feature-card:hover { transform: translateY(-2px); box-shadow: 0 10px 32px -14px rgba(0, 0, 0, 0.18); }
-  }
-  .home-feature-icon { font-size: 1.75rem; line-height: 1; }
-  .home-feature-title { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; }
-  .home-feature-desc { color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6; flex: 1 1 auto; }
-  .home-feature-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-  .home-feature-points li { font-size: 0.75rem; color: var(--text-primary); line-height: 1.5; padding-left: 14px; position: relative; }
-  .home-feature-points li::before { content: '•'; position: absolute; left: 0; color: var(--text-accent); }
-  .home-feature-link {
-    align-self: flex-start;
-    color: var(--text-accent);
-    font-weight: 600;
-    font-size: 0.8125rem;
+    align-items: baseline;
+    gap: 40px;
+    width: 100%;
+    padding: 32px 4px;
+    border-top: 1px solid var(--border);
     background: none;
-    border: none;
-    padding: 0;
-    margin-top: 4px;
+    border-left: none; border-right: none; border-bottom: none;
+    text-align: left;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: gap 150ms ease;
+    font: inherit;
+    color: inherit;
+    transition: background 180ms ease, padding-left 180ms ease, padding-right 180ms ease;
   }
-  @media (hover: hover) and (pointer: fine) {
-    .home-feature-link:hover { gap: 8px; }
-  }
-
-  .home-card {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    box-shadow: 0 4px 24px -14px rgba(0, 0, 0, 0.1);
-  }
-  .home-news-card { padding: 4px 20px; }
-  .home-news-row { display: flex; align-items: baseline; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
-  .home-news-row:last-child { border-bottom: none; }
-  .home-news-date {
+  .home-feature-list > :last-child { border-bottom: 1px solid var(--border); }
+  .home-feature-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.375rem, 2.8vw, 2rem);
     flex: 0 0 auto;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--surface-1);
-    padding: 3px 8px;
-    border-radius: var(--radius-pill);
-    white-space: nowrap;
+    min-width: 200px;
   }
-  .home-news-text { color: var(--text-primary); font-size: 0.8125rem; line-height: 1.5; }
+  .home-feature-body { flex: 1 1 auto; min-width: 0; }
+  .home-feature-desc { font-family: var(--font-editorial); font-size: 0.9375rem; line-height: 1.6; color: var(--text-secondary); }
+  .home-feature-points { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .home-feature-points li {
+    font-family: var(--font-editorial);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    padding-left: 14px;
+    position: relative;
+  }
+  .home-feature-points li::before { content: '–'; position: absolute; left: 0; }
+  @media (hover: hover) and (pointer: fine) {
+    .home-feature-row:hover { background: #000; color: #fff; padding-left: 20px; padding-right: 20px; }
+    .home-feature-row:hover .home-feature-desc,
+    .home-feature-row:hover .home-feature-points li { color: rgba(255, 255, 255, 0.72); }
+  }
 
-  .home-board-card { padding: 20px; }
-  .home-board-fallback { font-size: 0.8125rem; color: var(--text-secondary); text-align: center; padding: 20px 0; }
+  .home-news-list { display: flex; flex-direction: column; margin-top: 28px; }
+  .home-news-row { display: flex; align-items: baseline; gap: 24px; padding: 16px 4px; border-top: 1px solid var(--border); }
+  .home-news-list > :last-child { border-bottom: 1px solid var(--border); }
+  .home-news-date { font-family: var(--font-editorial); font-size: 0.8125rem; color: var(--text-muted); flex: 0 0 92px; }
+  .home-news-text { font-family: var(--font-editorial); font-size: 0.9375rem; line-height: 1.55; color: var(--text-primary); }
 
-  .home-footer { max-width: 1120px; margin: 8px auto 0; padding: 28px 0 0; border-top: 1px solid var(--border); text-align: center; }
-  .home-footer-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 8px; }
-  .home-footer-body { font-size: 0.8125rem; line-height: 1.7; color: var(--text-primary); }
+  .home-board-wrap { margin-top: 28px; }
+  .home-board-fallback { font-family: var(--font-editorial); font-size: 0.875rem; color: var(--text-secondary); padding: 8px 0; }
+
+  .home-footer {
+    background: #000;
+    color: rgba(255, 255, 255, 0.75);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding: 48px 24px;
+  }
+  .home-footer-inner { max-width: 1120px; margin: 0 auto; }
+  .home-footer-label { font-family: var(--font-editorial); font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 10px; }
+  .home-footer-body { font-family: var(--font-editorial); font-size: 0.9375rem; line-height: 1.7; color: #fff; }
+  .home-footer-body a { color: #fff; text-decoration-color: rgba(255, 255, 255, 0.5); text-underline-offset: 3px; }
 
   /* 광고 배너 자리 — 본문 좌우 여백에 뜨는 고정 레일. 화면이 충분히
      넓을 때만(대형 모니터) 보이고, 노트북/태블릿/모바일에서는 숨겨서
@@ -484,10 +538,13 @@
     #page-content { padding: 16px 10px 0; }
     #app, #app-progression { padding: 20px 18px; border-radius: 14px; }
     h1 { font-size: 1.5rem; }
-    .home-hero { padding: 32px 0 32px; }
-    .home-hero-title { font-size: 1.875rem; }
-    .home-hero-sub { font-size: 0.9375rem; }
-    .home-section { margin-bottom: 32px; }
+    .home-hero { padding: 64px 20px 56px; }
+    .home-hero-ctas { gap: 22px; }
+    .home-section { padding: 48px 20px; }
+    .home-feature-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .home-feature-name { min-width: 0; }
+    .home-news-row { gap: 4px 16px; flex-wrap: wrap; }
+    .home-footer { padding: 36px 20px; }
   }
 </style>
 </head>
@@ -529,28 +586,29 @@
 <div id="page-content">
 <div id="app-home" style="display:none;">
   <section class="home-hero">
-    <div class="home-hero-icon">🎸</div>
-    <h1 id="home-h1" class="home-hero-title">기타 코드 지판 뷰어</h1>
-    <p id="home-hero-sub" class="home-hero-sub"></p>
-    <div class="home-hero-ctas">
-      <button id="home-cta-code" class="home-cta home-cta-primary"></button>
-      <button id="home-cta-scale" class="home-cta home-cta-secondary"></button>
+    <div class="home-hero-inner">
+      <h1 id="home-h1" class="home-hero-title">기타 코드 지판 뷰어</h1>
+      <p id="home-hero-sub" class="home-hero-sub"></p>
+      <div class="home-hero-ctas">
+        <button id="home-cta-code" class="home-hero-cta"></button>
+        <button id="home-cta-scale" class="home-hero-cta home-hero-cta-secondary"></button>
+      </div>
     </div>
   </section>
 
   <section class="home-section">
-    <h2 class="home-section-title" id="home-features-label">주요 기능</h2>
-    <div class="home-feature-grid" id="home-features"></div>
+    <h2 class="home-section-title" id="home-features-label">기능</h2>
+    <div class="home-feature-list" id="home-features"></div>
   </section>
 
   <section class="home-section">
     <h2 class="home-section-title" id="home-news-label">공지사항</h2>
-    <div class="home-card home-news-card" id="home-news"></div>
+    <div class="home-news-list" id="home-news"></div>
   </section>
 
   <section class="home-section">
     <h2 class="home-section-title" id="home-board-label">자유게시판</h2>
-    <div class="home-card home-board-card">
+    <div class="home-board-wrap">
       <script src="https://giscus.app/client.js"
         data-repo="qoqmffh/guitar-chordviewer"
         data-repo-id="R_kgDOUQy_CA"
@@ -574,9 +632,11 @@
   </section>
 
   <footer class="home-footer">
-    <div class="home-footer-label" id="home-creator-label">제작자 정보</div>
-    <div class="home-footer-body">
-      박태준 · <span id="home-creator-contact">광고문의</span> <a href="mailto:etude_8838@naver.com" style="color:var(--text-accent);">etude_8838@naver.com</a>
+    <div class="home-footer-inner">
+      <div class="home-footer-label" id="home-creator-label">제작자 정보</div>
+      <div class="home-footer-body">
+        박태준 · <span id="home-creator-contact">광고문의</span> <a href="mailto:etude_8838@naver.com">etude_8838@naver.com</a>
+      </div>
     </div>
   </footer>
 </div>
@@ -803,34 +863,34 @@ try {
       navHome: '홈', navCode: '코드', navProgression: '코드진행', navProgressionBadge: '개발중', navScale: '스케일',
 
       homeTitle: '기타 코드 지판 뷰어',
-      homeHeroSub: '루트음과 코드 종류만 고르면, 지판 전체에서 실제로 잡을 수 있는 그립을 바로 보여드려요.',
-      homeCtaCode: '코드 보러 가기',
-      homeCtaScale: '스케일 살펴보기',
-      homeFeaturesLabel: '주요 기능',
+      homeHeroTitle: '코드를 외우지 말고, 지판에서 보세요.',
+      homeHeroSub: '루트음과 코드 종류만 고르면 지판 전체에서 손으로 잡을 수 있는 그립을 그대로 보여드립니다.',
+      homeCtaCode: '코드 보기',
+      homeCtaScale: '스케일 보기',
+      homeFeaturesLabel: '기능',
       homeNews: '공지사항',
       homeBoard: '자유게시판',
       homeBoardFallback: '댓글판을 여는 중이에요. 잠시만 기다려주세요 — 안 뜨면 새로고침 해보세요.',
       homeCreator: '제작자 정보',
       homeCreatorContact: '광고문의',
       homeFeatureCode: {
-        icon: '🎸', title: '코드',
+        title: '코드',
         desc: '루트음과 코드 종류를 고르면 지판 전체에서 구성음 위치를 바로 보여줘요.',
         points: [
           '전체 지판 — 구성음이 나오는 모든 자리를 한눈에',
           '멜로디 보이싱 — 탑노트를 고정한 그립, "프렛 묶기"로 손이 닿는 구간만 표시',
           '오픈 보이싱 — 조성별 다이아토닉/추가 코드를 실제 손가락으로 누를 수 있는 그립으로'
-        ],
-        link: '코드로 이동 →'
+        ]
       },
       homeFeatureProgression: {
-        icon: '🎶', title: '코드진행',
+        title: '코드진행',
         desc: '코드를 순서대로 넣고 프렛 범위를 지정하면, 그 구간 안에서만 그립을 찾아줘요.',
-        points: [], link: '코드진행으로 이동 →'
+        points: []
       },
       homeFeatureScale: {
-        icon: '🎼', title: '스케일',
+        title: '스케일',
         desc: '루트음과 스케일 종류를 고르면 지판 전체에 스케일 음을 표시하고, 어떻게 쓰면 좋은지도 정리해뒀어요.',
-        points: [], link: '스케일로 이동 →'
+        points: []
       },
 
       modeRoot: '전체 지판', modeTop: '멜로디 보이싱', modeOpen: '오픈 보이싱', badgeWip: '공사중',
@@ -930,34 +990,34 @@ try {
       navHome: 'Home', navCode: 'Chords', navProgression: 'Progression', navProgressionBadge: 'WIP', navScale: 'Scale',
 
       homeTitle: 'Guitar Chord Fretboard Viewer',
-      homeHeroSub: 'Pick a root and a chord type — see every real, playable grip across the whole neck, instantly.',
-      homeCtaCode: 'Explore Chords',
-      homeCtaScale: 'Browse Scales',
-      homeFeaturesLabel: 'Key Features',
+      homeHeroTitle: 'Stop memorizing chords. See them on the fretboard.',
+      homeHeroSub: 'Pick a root and a chord type — see every real, playable grip across the whole neck.',
+      homeCtaCode: 'View Chords',
+      homeCtaScale: 'View Scales',
+      homeFeaturesLabel: 'Features',
       homeNews: 'Announcements',
       homeBoard: 'Discussion Board',
       homeBoardFallback: 'Loading the comment board — if it doesn\'t appear, try refreshing.',
       homeCreator: 'About the Creator',
       homeCreatorContact: 'Business inquiries',
       homeFeatureCode: {
-        icon: '🎸', title: 'Chords',
+        title: 'Chords',
         desc: 'Pick a root and chord type and instantly see every instance of its notes across the fretboard.',
         points: [
           'Full Fretboard — every spot the chord tones appear, at a glance',
           'Melody Voicing — a grip with a fixed top note; "Fret Grouping" boxes off what your hand can reach',
           'Open Voicing — diatonic/extra chords per key, shown as real, playable open-chord grips'
-        ],
-        link: 'Go to Chords →'
+        ]
       },
       homeFeatureProgression: {
-        icon: '🎶', title: 'Progression',
+        title: 'Progression',
         desc: 'Enter chords in order and set a fret range — it finds grips that fit within it.',
-        points: [], link: 'Go to Progression →'
+        points: []
       },
       homeFeatureScale: {
-        icon: '🎼', title: 'Scale',
+        title: 'Scale',
         desc: 'Pick a root and a scale type to see it across the whole neck, plus notes on how to actually use it.',
-        points: [], link: 'Go to Scale →'
+        points: []
       },
 
       modeRoot: 'Full Fretboard', modeTop: 'Melody Voicing', modeOpen: 'Open Voicing', badgeWip: 'WIP',
@@ -2957,8 +3017,9 @@ try {
     }
   }
 
-  // 히어로 CTA 밑에 나오는 3개 기능 카드. i18n의 homeFeature* 객체를 그대로 사용하고,
-  // "이동" 링크를 누르면 실제로 해당 메뉴로 전환한다 (단순 설명이 아니라 진짜 내비게이션).
+  // 히어로 밑에 나오는 3개 기능 목록. i18n의 homeFeature* 객체를 그대로 쓰고,
+  // 행 전체가 버튼이라 어디를 눌러도 실제로 해당 메뉴로 이동한다(카드/화살표
+  // 없이 hover 시 행 전체가 반전되는 것만으로 클릭 가능함을 알림).
   function renderHomeFeatures() {
     var el = document.getElementById('home-features');
     el.innerHTML = '';
@@ -2969,23 +3030,22 @@ try {
     ];
     defs.forEach(function (d) {
       var f = I18N[state.lang][d.key] || I18N.ko[d.key];
-      var card = document.createElement('div');
-      card.className = 'home-feature-card';
+      var row = document.createElement('button');
+      row.className = 'home-feature-row';
+      row.onclick = function () { state.activeView = d.view; renderApp(); };
 
-      var icon = document.createElement('div');
-      icon.className = 'home-feature-icon';
-      icon.textContent = f.icon;
-      card.appendChild(icon);
+      var name = document.createElement('div');
+      name.className = 'home-feature-name';
+      name.textContent = f.title;
+      row.appendChild(name);
 
-      var title = document.createElement('div');
-      title.className = 'home-feature-title';
-      title.textContent = f.title;
-      card.appendChild(title);
+      var body = document.createElement('div');
+      body.className = 'home-feature-body';
 
       var desc = document.createElement('div');
       desc.className = 'home-feature-desc';
       desc.textContent = f.desc;
-      card.appendChild(desc);
+      body.appendChild(desc);
 
       if (f.points && f.points.length) {
         var ul = document.createElement('ul');
@@ -2995,21 +3055,16 @@ try {
           li.textContent = p;
           ul.appendChild(li);
         });
-        card.appendChild(ul);
+        body.appendChild(ul);
       }
 
-      var link = document.createElement('button');
-      link.className = 'home-feature-link';
-      link.textContent = f.link;
-      link.onclick = function () { state.activeView = d.view; renderApp(); };
-      card.appendChild(link);
-
-      el.appendChild(card);
+      row.appendChild(body);
+      el.appendChild(row);
     });
   }
 
   function renderHomeStatic() {
-    document.getElementById('home-h1').textContent = t('homeTitle');
+    document.getElementById('home-h1').textContent = t('homeHeroTitle');
     document.getElementById('home-hero-sub').textContent = t('homeHeroSub');
     document.getElementById('home-cta-code').textContent = t('homeCtaCode');
     document.getElementById('home-cta-code').onclick = function () { state.activeView = 'code'; renderApp(); };
