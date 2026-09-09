@@ -303,8 +303,12 @@
   .bl-annotation.right { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
   .bl-tag { display: block; font-size: 0.875rem; font-weight: 400; color: rgba(0, 0, 0, 0.45); margin-bottom: 10px; }
   .bl-body { font-size: clamp(1.125rem, 1.8vw, 1.5rem); line-height: 1.35; color: #1a1a1a; text-wrap: balance; }
-  /* "더더더 키워달라"는 요청 — 왼쪽 문구는 훨씬 큰 별도 크기 */
-  .bl-annotation.left .bl-body { font-weight: 700; font-size: clamp(1.875rem, 3.4vw, 3rem); line-height: 1.2; }
+  /* "더더더 키워달라"는 요청 — 왼쪽 문구는 훨씬 큰 별도 크기. 폰트가 커지면
+     줄높이의 여백(half-leading)도 같이 커져서 태그-본문 간격이 오른쪽보다
+     넓어 보이므로, 왼쪽은 줄높이를 좁히고 태그 여백도 줄여서 맞춘다. */
+  .bl-annotation.left .bl-tag { margin-bottom: 2px; }
+  .bl-annotation.left .bl-body { font-weight: 700; font-size: clamp(1.875rem, 3.4vw, 3rem); line-height: 1.05; }
+  .bl-annotation.right .bl-tag { margin-bottom: 16px; }
   .bl-annotation.right .bl-body { font-weight: 400; color: rgba(0, 0, 0, 0.75); font-size: clamp(1rem, 1.5vw, 1.1875rem); }
 
   /* 흰 배경 위에서 쓰는 알약 버튼(관리자모드 저장/확인 등) — bg-accent가
