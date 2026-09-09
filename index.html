@@ -395,10 +395,10 @@
   .ad-rail {
     display: none;
     position: fixed;
-    top: 88px;
+    top: 64px;
     width: 240px;
     height: 640px;
-    max-height: calc(100vh - 104px);
+    max-height: calc(100vh - 80px);
     border: 1px dashed var(--border-strong);
     border-radius: var(--radius);
     background: var(--surface-2);
@@ -421,10 +421,16 @@
     background: none;
     padding: 0;
     height: auto;
-    max-height: calc(100vh - 104px);
+    max-height: calc(100vh - 80px);
   }
   .ad-rail.has-ad a { display: block; line-height: 0; }
-  .ad-rail.has-ad img { display: block; width: 100%; height: auto; max-height: calc(100vh - 104px); object-fit: contain; }
+  /* width:100%인데 img에 max-height까지 걸면, 세로로 긴 이미지에서
+     max-height가 먼저 적용되면서 가로폭이 100%보다 줄어들어 옆에 배경색
+     여백이 남는 문제가 있었다(브라우저가 종횡비 유지하려고 폭을 다시
+     계산함). 그래서 img 자체엔 높이 제한을 걸지 않고 항상 폭 100%를
+     채우게 하고, 뷰포트보다 길 때는 컨테이너 쪽 overflow:hidden으로
+     아래를 잘라내는 방식으로 바꿈 — 옆 여백 없이 항상 꽉 채워진다. */
+  .ad-rail.has-ad img { display: block; width: 100%; height: auto; }
   #ad-rail-left { left: 16px; }
   #ad-rail-right { right: 16px; }
   @media (min-width: 1900px) {
