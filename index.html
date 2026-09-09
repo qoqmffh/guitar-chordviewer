@@ -28,8 +28,14 @@
        한글은 자동으로 Pretendard로 폴백(두 폰트 다 한글 글리프가 없음) */
     --font-display: 'Clash Display', 'Pretendard', var(--font-sans);
     --font-editorial: 'General Sans', 'Pretendard', var(--font-sans);
+    /* board-labs 히어로 전용 — Chakra Petch(자체 호스팅, fonts/) */
+    --font-chakra: 'Chakra Petch', 'Pretendard', var(--font-sans);
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   }
+  @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
   * { box-sizing: border-box; }
   html { font-size: 100%; } /* 사용자 브라우저 글자크기 설정 존중 (rem 기준) */
   body {
@@ -247,55 +253,57 @@
   }
   .gt-flex { display: flex; flex-wrap: wrap; gap: 6px; }
 
-  /* 홈 — 흑백 에디토리얼 타이포그래피. 색으로 위계를 만들지 않고
-     크기/굵기/여백으로만 만든다. 히어로와 푸터는 뷰포트 끝까지 채우는
-     검은 띠(풀블리드)로 나머지 흰 바탕 사이를 감싼다. */
-  .home-hero {
-    background: #000;
-    color: #fff;
+  /* 홈 히어로 — "board-labs" 브랜드 컨셉(Figma Frame 27 재현).
+     Chakra Petch 타이포 + 기타 8뷰 스케치 시트 + 좌우 코너 주석 문구.
+     언어 토글과 무관하게 항상 이 영문 카피로 고정(브랜드 아이덴티티). */
+  .bl-hero {
+    background: #f6f4ee url('imagedata/bg-cream.png');
+    background-size: 1100px auto;
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
-    padding: 108px 24px 88px;
+    padding: 56px 24px 80px;
   }
-  .home-hero-inner { max-width: 1120px; margin: 0 auto; }
-  .home-hero-title {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: clamp(2.5rem, 6.4vw, 5.25rem);
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-    max-width: 17ch;
-    margin: 0 0 32px;
+  .bl-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  .home-hero-sub {
-    font-family: var(--font-editorial);
-    font-size: clamp(1rem, 1.6vw, 1.1875rem);
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.68);
-    max-width: 44ch;
-    margin: 0 0 44px;
+  .bl-headline {
+    font-family: var(--font-chakra);
+    font-weight: 600;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 1;
+    text-align: center;
+    color: #1a1a1a;
+    margin: 8px 0 16px;
   }
-  .home-hero-ctas { display: flex; gap: 32px; flex-wrap: wrap; }
-  /* 히어로 전용 밑줄 텍스트 링크 — 검은 배경 위에서만 쓰는 스타일이라
-     흰 배경에서 쓰는 .home-cta(알약 버튼, 관리자모드 등)와는 별도 이름을 쓴다. */
-  .home-hero-cta {
-    font-family: var(--font-editorial);
-    font-size: 0.9375rem;
-    font-weight: 500;
-    color: #fff;
-    background: none;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-    padding: 0 0 5px;
-    cursor: pointer;
-    transition: border-color 150ms ease, color 150ms ease;
+  .bl-sub {
+    font-family: var(--font-chakra);
+    font-weight: 400;
+    font-size: clamp(0.9375rem, 1.6vw, 1.125rem);
+    color: rgba(0, 0, 0, 0.65);
+    text-align: center;
+    margin: 0 0 28px;
   }
-  .home-hero-cta-secondary { color: rgba(255, 255, 255, 0.68); }
-  @media (hover: hover) and (pointer: fine) {
-    .home-hero-cta:hover { border-color: #fff; }
-    .home-hero-cta-secondary:hover { color: #fff; }
+  .bl-guitar-row { width: 100%; max-width: 1000px; margin: 0 auto; }
+  .bl-guitar-row img { display: block; width: 100%; height: auto; }
+  .bl-annotation-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-top: 48px;
   }
+  .bl-annotation { max-width: 440px; font-family: var(--font-chakra); }
+  .bl-annotation.right { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+  .bl-tag { display: block; font-size: 0.875rem; font-weight: 400; color: rgba(0, 0, 0, 0.45); margin-bottom: 10px; }
+  .bl-body { font-size: clamp(1.125rem, 1.8vw, 1.5rem); line-height: 1.35; color: #1a1a1a; }
+  .bl-annotation.left .bl-body { font-weight: 700; }
+  .bl-annotation.right .bl-body { font-weight: 400; color: rgba(0, 0, 0, 0.75); font-size: clamp(1rem, 1.5vw, 1.1875rem); }
 
   /* 흰 배경 위에서 쓰는 알약 버튼(관리자모드 저장/확인 등) — bg-accent가
      이제 검정이라 자연스럽게 흑백 버튼이 된다. */
@@ -538,8 +546,9 @@
     #page-content { padding: 16px 10px 0; }
     #app, #app-progression { padding: 20px 18px; border-radius: 14px; }
     h1 { font-size: 1.5rem; }
-    .home-hero { padding: 64px 20px 56px; }
-    .home-hero-ctas { gap: 22px; }
+    .bl-hero { padding: 40px 20px 56px; }
+    .bl-annotation-row { flex-direction: column; gap: 32px; }
+    .bl-annotation.right { align-items: flex-start; text-align: left; }
     .home-section { padding: 48px 20px; }
     .home-feature-row { flex-direction: column; align-items: flex-start; gap: 10px; }
     .home-feature-name { min-width: 0; }
@@ -585,13 +594,24 @@
 </div>
 <div id="page-content">
 <div id="app-home" style="display:none;">
-  <section class="home-hero">
-    <div class="home-hero-inner">
-      <h1 id="home-h1" class="home-hero-title">기타 코드 지판 뷰어</h1>
-      <p id="home-hero-sub" class="home-hero-sub"></p>
-      <div class="home-hero-ctas">
-        <button id="home-cta-code" class="home-hero-cta"></button>
-        <button id="home-cta-scale" class="home-hero-cta home-hero-cta-secondary"></button>
+  <section class="bl-hero">
+    <div class="bl-hero-inner">
+      <h1 id="home-h1" class="bl-headline">board&nbsp;-&nbsp;labs</h1>
+      <p class="bl-sub">&quot;Chords, scales &mdash; and everything else about the guitar.&quot;</p>
+
+      <div class="bl-guitar-row">
+        <img src="imagedata/strat-sheet.png" alt="Fender Stratocaster sketch shown from 8 angles, 45 degrees apart">
+      </div>
+
+      <div class="bl-annotation-row">
+        <div class="bl-annotation left">
+          <span class="bl-tag">//board - labs</span>
+          <div class="bl-body">knowing your chords fuels how you play.</div>
+        </div>
+        <div class="bl-annotation right">
+          <span class="bl-tag">//our mission</span>
+          <div class="bl-body">this site exists to give everyone the fretboard help they need. got an idea for a better feature? let us know</div>
+        </div>
       </div>
     </div>
   </section>
@@ -3064,12 +3084,8 @@ try {
   }
 
   function renderHomeStatic() {
-    document.getElementById('home-h1').textContent = t('homeHeroTitle');
-    document.getElementById('home-hero-sub').textContent = t('homeHeroSub');
-    document.getElementById('home-cta-code').textContent = t('homeCtaCode');
-    document.getElementById('home-cta-code').onclick = function () { state.activeView = 'code'; renderApp(); };
-    document.getElementById('home-cta-scale').textContent = t('homeCtaScale');
-    document.getElementById('home-cta-scale').onclick = function () { state.activeView = 'scale'; renderApp(); };
+    // 히어로(headline/subhead/코너 문구)는 board-labs 브랜드 카피로 고정 —
+    // 언어 토글과 무관하게 항상 영문. i18n을 거치지 않는다.
     document.getElementById('home-features-label').textContent = t('homeFeaturesLabel');
     document.getElementById('home-news-label').textContent = t('homeNews');
     document.getElementById('home-board-label').textContent = t('homeBoard');
