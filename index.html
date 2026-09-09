@@ -299,10 +299,12 @@
     margin-top: 48px;
   }
   .bl-annotation { max-width: 440px; font-family: var(--font-chakra); }
+  .bl-annotation.left { max-width: 560px; }
   .bl-annotation.right { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
   .bl-tag { display: block; font-size: 0.875rem; font-weight: 400; color: rgba(0, 0, 0, 0.45); margin-bottom: 10px; }
-  .bl-body { font-size: clamp(1.125rem, 1.8vw, 1.5rem); line-height: 1.35; color: #1a1a1a; }
-  .bl-annotation.left .bl-body { font-weight: 700; }
+  .bl-body { font-size: clamp(1.125rem, 1.8vw, 1.5rem); line-height: 1.35; color: #1a1a1a; text-wrap: balance; }
+  /* "더더더 키워달라"는 요청 — 왼쪽 문구는 훨씬 큰 별도 크기 */
+  .bl-annotation.left .bl-body { font-weight: 700; font-size: clamp(1.875rem, 3.4vw, 3rem); line-height: 1.2; }
   .bl-annotation.right .bl-body { font-weight: 400; color: rgba(0, 0, 0, 0.75); font-size: clamp(1rem, 1.5vw, 1.1875rem); }
 
   /* 흰 배경 위에서 쓰는 알약 버튼(관리자모드 저장/확인 등) — bg-accent가
@@ -573,7 +575,7 @@
         </div>
         <div class="bl-annotation right">
           <span class="bl-tag">//our mission</span>
-          <div class="bl-body">this site exists to give everyone the fretboard help they need. got an idea for a better feature? let us know</div>
+          <div class="bl-body">this site exists to give everyone the fretboard help they need. got an idea for a better feature? let us&nbsp;know</div>
         </div>
       </div>
     </div>
