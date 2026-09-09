@@ -497,7 +497,7 @@
       <button id="nav-code" class="nav-btn">코드</button>
       <button id="nav-progression" class="nav-btn"><span id="nav-progression-text">코드진행</span><span class="nav-badge" id="nav-progression-badge">개발중</span></button>
       <button id="nav-scale" class="nav-btn">스케일</button>
-      <button id="nav-admin" class="nav-btn">🔒 <span id="nav-admin-text">광고관리자모드</span></button>
+      <button id="nav-admin" class="nav-btn" hidden>🔒 <span id="nav-admin-text">광고관리자모드</span></button>
     </div>
   </div>
 </nav>
@@ -3415,6 +3415,9 @@ try {
     document.getElementById('nav-progression').className = 'nav-btn' + (state.activeView === 'progression' ? ' active' : '');
     document.getElementById('nav-scale').className = 'nav-btn' + (state.activeView === 'scale' ? ' active' : '');
     document.getElementById('nav-admin').className = 'nav-btn' + (state.activeView === 'admin' ? ' active' : '');
+    // 로그인 전엔 메뉴 자체를 숨긴다 — 일반 방문자는 "광고관리자모드"가
+    // 있는지조차 모르게. 로그인하면(이번 세션 한정) 다시 보여서 오갈 수 있게.
+    document.getElementById('nav-admin').hidden = !state.adAuthed;
 
     if (state.activeView === 'home') {
       renderHomeStatic();
@@ -3435,15 +3438,26 @@ try {
   document.getElementById('nav-code').onclick = function () { state.activeView = 'code'; renderApp(); };
   document.getElementById('nav-progression').onclick = function () { state.activeView = 'progression'; renderApp(); };
   document.getElementById('nav-scale').onclick = function () { state.activeView = 'scale'; renderApp(); };
-  document.getElementById('nav-admin').onclick = function () {
-    if (state.adAuthed) { state.activeView = 'admin'; renderApp(); } else { openAdminModal(); }
-  };
+  document.getElementById('nav-admin').onclick = function () { tryOpenAdminEntry(); };
   document.getElementById('lang-toggle').onclick = function () { state.lang = state.lang === 'ko' ? 'en' : 'ko'; renderApp(); };
 
   document.getElementById('admin-modal-cancel').onclick = closeAdminModal;
   document.getElementById('admin-modal-submit').onclick = submitAdminPassword;
   document.getElementById('admin-pw-input').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') { submitAdminPassword(); }
+  });
+
+  // "광고관리자모드" 메뉴는 로그인 전엔 숨겨져 있어서(위 renderApp 참고),
+  // 관리자 본인은 URL 뒤에 #admin을 붙이거나 단축키(Ctrl+Alt+A)로 들어온다.
+  function tryOpenAdminEntry() {
+    if (state.adAuthed) { state.activeView = 'admin'; renderApp(); } else { openAdminModal(); }
+  }
+  if (window.location.hash === '#admin') {
+    tryOpenAdminEntry();
+    try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* 무시 */ }
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.altKey && (e.key === 'a' || e.key === 'A')) { tryOpenAdminEntry(); }
   });
 
   renderApp();
