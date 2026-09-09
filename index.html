@@ -341,10 +341,10 @@
   .ad-rail {
     display: none;
     position: fixed;
-    top: 96px;
-    width: 160px;
-    height: 600px;
-    max-height: calc(100vh - 116px);
+    top: 88px;
+    width: 240px;
+    height: 640px;
+    max-height: calc(100vh - 104px);
     border: 1px dashed var(--border-strong);
     border-radius: var(--radius);
     background: var(--surface-2);
@@ -359,9 +359,9 @@
     overflow: hidden;
   }
   .ad-rail img { max-width: 100%; max-height: 100%; border-radius: calc(var(--radius) - 2px); }
-  #ad-rail-left { left: 24px; }
-  #ad-rail-right { right: 24px; }
-  @media (min-width: 1760px) {
+  #ad-rail-left { left: 16px; }
+  #ad-rail-right { right: 16px; }
+  @media (min-width: 1900px) {
     .ad-rail { display: flex; }
   }
 
@@ -437,6 +437,20 @@
   .admin-fb-status.on { background: rgba(52, 199, 89, 0.14); color: #248a3d; }
   .admin-fb-status.off { background: var(--bg-danger); color: var(--text-danger); }
   .admin-click-stat { font-size: 0.75rem; color: var(--text-secondary); margin-top: -2px; }
+  .admin-img-preview {
+    display: block;
+    max-width: 200px;
+    max-height: 160px;
+    object-fit: contain;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-1);
+    margin: 4px 0 10px;
+    padding: 4px;
+  }
+  .admin-upload-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+  .admin-upload-row input[type="file"] { font-size: 0.75rem; color: var(--text-secondary); max-width: 220px; }
+  .admin-upload-hint { font-size: 0.6875rem; color: var(--text-muted); margin: -2px 0 10px; }
 
   /* 재질(반투명/블러)을 지원하지 않거나 원치 않는 환경 — 불투명 표면으로 대체 */
   @media (prefers-reduced-transparency: reduce) {
@@ -662,6 +676,12 @@
     <div class="gt-label" id="admin-left-label">왼쪽 배너</div>
     <div class="admin-field-label" id="admin-img-label-1">이미지 URL</div>
     <input id="admin-left-img" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-upload-row">
+      <span class="admin-field-label" id="admin-upload-label-1" style="margin:0;">또는 이미지 파일 업로드</span>
+      <input id="admin-left-file" type="file" accept="image/*">
+    </div>
+    <div class="admin-upload-hint" id="admin-upload-hint-1">업로드하면 자동으로 압축해서 위 URL 칸에 채워져요.</div>
+    <img id="admin-left-preview" class="admin-img-preview" alt="" hidden>
     <div class="admin-field-label" id="admin-link-label-1">클릭 시 이동할 링크 URL</div>
     <input id="admin-left-link" class="admin-input" type="text" placeholder="https://...">
     <div class="admin-click-stat" id="admin-left-clicks"></div>
@@ -671,6 +691,12 @@
     <div class="gt-label" id="admin-right-label">오른쪽 배너</div>
     <div class="admin-field-label" id="admin-img-label-2">이미지 URL</div>
     <input id="admin-right-img" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-upload-row">
+      <span class="admin-field-label" id="admin-upload-label-2" style="margin:0;">또는 이미지 파일 업로드</span>
+      <input id="admin-right-file" type="file" accept="image/*">
+    </div>
+    <div class="admin-upload-hint" id="admin-upload-hint-2">업로드하면 자동으로 압축해서 위 URL 칸에 채워져요.</div>
+    <img id="admin-right-preview" class="admin-img-preview" alt="" hidden>
     <div class="admin-field-label" id="admin-link-label-2">클릭 시 이동할 링크 URL</div>
     <input id="admin-right-link" class="admin-input" type="text" placeholder="https://...">
     <div class="admin-click-stat" id="admin-right-clicks"></div>
@@ -875,6 +901,10 @@ try {
       adminLeftLabel: '왼쪽 배너',
       adminRightLabel: '오른쪽 배너',
       adminImgLabel: '이미지 URL',
+      adminUploadLabel: '또는 이미지 파일 업로드',
+      adminUploadHint: '업로드하면 자동으로 압축해서 위 URL 칸에 채워져요.',
+      adminImgTooBig: '이미지가 너무 커요. 더 작은 파일로 시도해주세요.',
+      adminUploadFailed: '이미지를 처리하지 못했어요. 다른 파일로 시도해주세요.',
       adminLinkLabel: '클릭 시 이동할 링크 URL',
       adminSave: '저장',
       adminClear: '전체 초기화',
@@ -998,6 +1028,10 @@ try {
       adminLeftLabel: 'Left Banner',
       adminRightLabel: 'Right Banner',
       adminImgLabel: 'Image URL',
+      adminUploadLabel: 'Or upload an image file',
+      adminUploadHint: 'Uploading auto-compresses it and fills the URL field above.',
+      adminImgTooBig: 'That image is too large. Try a smaller file.',
+      adminUploadFailed: 'Could not process that image. Try a different file.',
       adminLinkLabel: 'Link URL (opens on click)',
       adminSave: 'Save',
       adminClear: 'Clear All',
@@ -1663,6 +1697,38 @@ try {
     return window.crypto.subtle.digest('SHA-256', enc).then(function (buf) {
       var bytes = Array.from(new Uint8Array(buf));
       return bytes.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
+
+  // 관리자모드에서 파일로 올린 이미지를 압축해서 data URI로 반환.
+  // Realtime Database에 이미지 자체를 저장하는 방식이라(Storage 없이) 용량이
+  // 커지지 않도록 배너 크기(가로 240px 레일의 2배)에 맞춰 리사이즈+재인코딩한다.
+  // 투명도가 필요할 수 있는 PNG는 PNG로, 그 외(사진 등)는 JPEG로 압축.
+  function compressImageFile(file, maxW, maxH, quality) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error('read failed')); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { reject(new Error('decode failed')); };
+        img.onload = function () {
+          var w = img.naturalWidth || img.width;
+          var h = img.naturalHeight || img.height;
+          var scale = Math.min(1, maxW / w, maxH / h);
+          var outW = Math.max(1, Math.round(w * scale));
+          var outH = Math.max(1, Math.round(h * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = outW; canvas.height = outH;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, outW, outH);
+          var isPng = file.type === 'image/png';
+          try {
+            resolve(isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', quality || 0.85));
+          } catch (e) { reject(e); }
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
     });
   }
 
@@ -3269,8 +3335,12 @@ try {
     document.getElementById('admin-right-label').textContent = t('adminRightLabel');
     document.getElementById('admin-img-label-1').textContent = t('adminImgLabel');
     document.getElementById('admin-link-label-1').textContent = t('adminLinkLabel');
+    document.getElementById('admin-upload-label-1').textContent = t('adminUploadLabel');
+    document.getElementById('admin-upload-hint-1').textContent = t('adminUploadHint');
     document.getElementById('admin-img-label-2').textContent = t('adminImgLabel');
     document.getElementById('admin-link-label-2').textContent = t('adminLinkLabel');
+    document.getElementById('admin-upload-label-2').textContent = t('adminUploadLabel');
+    document.getElementById('admin-upload-hint-2').textContent = t('adminUploadHint');
     document.getElementById('admin-save-btn').textContent = t('adminSave');
     document.getElementById('admin-clear-btn').textContent = t('adminClear');
     document.getElementById('admin-logout-btn').textContent = t('adminLogout');
@@ -3280,6 +3350,33 @@ try {
     document.getElementById('admin-left-link').value = state.adConfig.left.link || '';
     document.getElementById('admin-right-img').value = state.adConfig.right.img || '';
     document.getElementById('admin-right-link').value = state.adConfig.right.link || '';
+
+    // 이미지 URL 입력칸의 현재 값으로 미리보기 썸네일을 갱신 (직접 URL을 타이핑하거나
+    // 파일 업로드로 data URI가 채워졌을 때 모두 이 함수 하나로 처리).
+    function refreshPreview(side) {
+      var url = document.getElementById('admin-' + side + '-img').value.trim();
+      var preview = document.getElementById('admin-' + side + '-preview');
+      if (url) { preview.src = url; preview.hidden = false; } else { preview.hidden = true; preview.src = ''; }
+    }
+    ['left', 'right'].forEach(function (side) {
+      refreshPreview(side);
+      document.getElementById('admin-' + side + '-img').oninput = function () { refreshPreview(side); };
+      document.getElementById('admin-' + side + '-file').onchange = function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) { return; }
+        compressImageFile(file, 480, 1400, 0.85).then(function (dataUrl) {
+          if (dataUrl.length > 900000) {
+            document.getElementById('admin-save-msg').textContent = t('adminImgTooBig');
+            return;
+          }
+          document.getElementById('admin-' + side + '-img').value = dataUrl;
+          refreshPreview(side);
+          document.getElementById('admin-save-msg').textContent = '';
+        }).catch(function () {
+          document.getElementById('admin-save-msg').textContent = t('adminUploadFailed');
+        });
+      };
+    });
 
     document.getElementById('admin-save-btn').onclick = function () {
       state.adConfig.left.img = document.getElementById('admin-left-img').value.trim();
