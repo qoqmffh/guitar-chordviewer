@@ -458,37 +458,36 @@
   }
 
   /* 좁은 화면(양옆 세로 레일이 안 뜨는 폭)용 가로형 광고 — 세로 레일을
-     억지로 줄이지 않고, 관리자가 따로 올린 가로형 이미지를 본문 흐름
-     안에 넣는다. 가로형 이미지가 없으면 빈 placeholder만 보임. */
-  .ad-inline-row {
+     억지로 줄이지 않고, 관리자가 따로 올린 가로형 이미지를 화면 맨 아래에
+     내비게이션 바처럼 항상 붙어 따라다니는 슬림한 띠로 보여준다.
+     광고가 하나도 없으면(양쪽 다 imgWide 미설정) 아예 안 보임 —
+     빈 placeholder 박스를 방문자에게 보여주지 않는다. */
+  .ad-sticky-bar {
     display: none;
-    gap: 16px;
-    max-width: 1120px;
-    margin: 0 auto 8px;
-    padding: 0 24px;
-    flex-wrap: wrap;
-    justify-content: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+    flex-direction: column;
+    gap: 1px;
   }
-  .ad-inline {
-    flex: 1 1 280px;
-    max-width: 480px;
-    min-height: 80px;
-    border: 1px dashed var(--border-strong);
-    border-radius: var(--radius);
+  .ad-sticky-bar.has-any-ad { display: flex; }
+  @media (min-width: 1900px) {
+    .ad-sticky-bar { display: none !important; } /* 이 폭부터는 옆 세로 레일이 대신함 */
+  }
+  .ad-inline { display: none; }
+  .ad-inline.has-ad {
+    display: block;
     background: var(--surface-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    line-height: 1.5;
-    overflow: hidden;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.12);
   }
-  .ad-inline.has-ad { border: none; background: none; display: block; }
   .ad-inline.has-ad a { display: block; line-height: 0; }
-  .ad-inline.has-ad img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
+  .ad-inline.has-ad img { display: block; width: 100%; height: 72px; object-fit: cover; }
+  /* 광고 바가 화면 아래에 고정되면 그만큼 본문 맨 아래가 가려지니
+     띄운 만큼 페이지 하단에 여백을 더해 실제로는 안 가려지게 한다. */
   @media (max-width: 1899px) {
-    .ad-inline-row { display: flex; }
+    body.has-sticky-ad { padding-bottom: 76px; }
   }
 
   /* 광고관리자모드 진입용 비밀번호 모달 */
@@ -616,6 +615,10 @@
 <body>
 <div id="ad-rail-left" class="ad-rail">광고 영역</div>
 <div id="ad-rail-right" class="ad-rail">광고 영역</div>
+<div id="ad-sticky-bar" class="ad-sticky-bar">
+  <div id="ad-inline-left" class="ad-inline"></div>
+  <div id="ad-inline-right" class="ad-inline"></div>
+</div>
 <nav id="topnav">
   <div id="topnav-inner">
     <div id="topnav-left">
@@ -671,11 +674,6 @@
       </div>
     </div>
   </section>
-
-  <div class="ad-inline-row" id="ad-inline-row">
-    <div id="ad-inline-left" class="ad-inline">광고 영역</div>
-    <div id="ad-inline-right" class="ad-inline">광고 영역</div>
-  </div>
 
   <section class="home-section">
     <div class="home-section-inner">
@@ -3383,9 +3381,12 @@ try {
 
   // 좌우 배너 자리 — state.adConfig에 이미지/링크가 있으면 그 광고를,
   // 없으면 자리표시자 텍스트를 보여준다. nav/뷰와 무관하게 항상 최신 상태로 갱신.
-  // 넓은 화면(세로 레일)과 좁은 화면(본문 안 가로형, imgWide)을 각각 채운다 —
-  // 어느 쪽이 실제로 보이는지는 CSS 미디어쿼리가 정한다.
+  // 넓은 화면(세로 레일)과 좁은 화면(화면 아래 고정된 가로형 띠, imgWide)을
+  // 각각 채운다 — 어느 쪽이 실제로 보이는지는 CSS 미디어쿼리가 정한다.
+  // 가로형 광고 자리는 설정이 없으면 placeholder도 없이 완전히 숨긴다
+  // (빈 상자가 화면 아래에 계속 붙어있으면 방문자 입장에서 지저분해 보임).
   function renderAdRails() {
+    var anyInlineAd = false;
     ['left', 'right'].forEach(function (side) {
       var cfg = state.adConfig[side];
 
@@ -3402,18 +3403,21 @@ try {
       }
 
       var inlineEl = document.getElementById('ad-inline-' + side);
-      if (!inlineEl) { return; } // 홈 화면 전용 요소 — 아직 안 그려졌을 수도 있음
       if (cfg && cfg.imgWide) {
         inlineEl.classList.add('has-ad');
+        anyInlineAd = true;
         var inlineImg = '<img src="' + cfg.imgWide.replace(/"/g, '&quot;') + '" alt="">';
         inlineEl.innerHTML = cfg.link
           ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored" onclick="window.__gtAdClick && window.__gtAdClick(\'' + side + '\')">' + inlineImg + '</a>'
           : inlineImg;
       } else {
         inlineEl.classList.remove('has-ad');
-        inlineEl.textContent = t('adRailPlaceholder');
+        inlineEl.innerHTML = '';
       }
     });
+    var stickyBar = document.getElementById('ad-sticky-bar');
+    stickyBar.classList.toggle('has-any-ad', anyInlineAd);
+    document.body.classList.toggle('has-sticky-ad', anyInlineAd);
   }
 
   // --- 광고관리자모드 비밀번호 모달 ---
