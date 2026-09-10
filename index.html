@@ -449,6 +449,36 @@
   .home-news-date { font-family: var(--font-chakra); font-weight: 300; font-size: 0.8125rem; color: rgba(0, 0, 0, 0.45); flex: 0 0 92px; }
   .home-news-text { font-family: var(--font-chakra); font-weight: 300; font-size: 0.9375rem; line-height: 1.55; color: #1a1a1a; }
 
+  /* 자유게시판 — 뉴스 섹션과 같은 크림 배경/한 줄 목록 형태를 그대로 따르되,
+     날짜 대신 이름/메시지/시간 3칸으로 구성. 이름은 그때그때 입력(로그인
+     없음), Firebase에 그대로 저장돼 모든 방문자가 실시간으로 같이 본다. */
+  .fb-form { margin-top: 28px; }
+  .fb-input-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .fb-name-input, .fb-message-input {
+    font-family: var(--font-chakra);
+    font-size: 0.875rem;
+    padding: 10px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: #fff;
+    color: #1a1a1a;
+    transition: border-color 150ms ease;
+  }
+  .fb-name-input::placeholder, .fb-message-input::placeholder { color: rgba(0, 0, 0, 0.35); }
+  .fb-name-input:focus, .fb-message-input:focus { outline: none; border-color: rgba(0, 0, 0, 0.5); }
+  .fb-name-input { flex: 0 0 120px; min-width: 0; }
+  .fb-message-input { flex: 1 1 260px; min-width: 0; }
+  .fb-form .home-cta { flex: 0 0 auto; }
+  .fb-error { min-height: 1.2em; margin-top: 8px; font-size: 0.75rem; color: #b3261e; }
+
+  .fb-list { display: flex; flex-direction: column; margin-top: 24px; }
+  .fb-row { display: flex; align-items: baseline; gap: 20px; padding: 14px 4px; border-top: 1px solid rgba(0, 0, 0, 0.12); }
+  .fb-list > :last-child { border-bottom: 1px solid rgba(0, 0, 0, 0.12); }
+  .fb-name { font-family: var(--font-chakra); font-weight: 600; font-size: 0.8125rem; color: rgba(0, 0, 0, 0.65); flex: 0 0 88px; overflow-wrap: break-word; }
+  .fb-message { font-family: var(--font-chakra); font-weight: 300; font-size: 0.9375rem; line-height: 1.55; color: #1a1a1a; flex: 1 1 auto; overflow-wrap: break-word; white-space: pre-wrap; }
+  .fb-time { font-family: var(--font-chakra); font-weight: 300; font-size: 0.75rem; color: rgba(0, 0, 0, 0.4); flex: 0 0 auto; white-space: nowrap; }
+  .fb-empty { font-family: var(--font-chakra); font-size: 0.875rem; color: rgba(0, 0, 0, 0.45); margin-top: 24px; }
+
   .home-footer {
     background: #000;
     color: rgba(255, 255, 255, 0.75);
@@ -692,6 +722,8 @@
     .bl-hero { padding: 40px 20px 56px; }
     .home-section { padding: 40px 20px 48px; }
     .home-news-row { gap: 4px 16px; flex-wrap: wrap; }
+    .fb-row { gap: 4px 16px; flex-wrap: wrap; }
+    .fb-name-input, .fb-message-input { flex-basis: 100%; }
     .home-footer { padding: 36px 20px; }
   }
 </style>
@@ -770,6 +802,21 @@
     <div class="home-section-inner">
       <h2 class="home-section-title" id="home-news-label">News</h2>
       <div class="home-news-list" id="home-news"></div>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="home-section-inner">
+      <h2 class="home-section-title" id="home-freeboard-label">Free Board</h2>
+      <div class="fb-form">
+        <div class="fb-input-row">
+          <input id="fb-name-input" class="fb-name-input" type="text" maxlength="20" placeholder="이름">
+          <input id="fb-message-input" class="fb-message-input" type="text" maxlength="300" placeholder="메시지를 입력하세요">
+          <button id="fb-submit-btn" class="home-cta home-cta-primary">등록</button>
+        </div>
+        <div id="fb-error" class="fb-error"></div>
+      </div>
+      <div class="fb-list" id="home-freeboard"></div>
     </div>
   </section>
 
@@ -1142,6 +1189,16 @@ try {
       navAdmin: '광고관리자모드',
       navMenuOpenLabel: '메뉴 열기', navMenuCloseLabel: '메뉴 닫기',
       wipText: '개발중입니다.',
+      fbNamePlaceholder: '이름',
+      fbMessagePlaceholder: '메시지를 입력하세요',
+      fbSubmit: '등록',
+      fbNameRequired: '이름을 입력해주세요.',
+      fbMessageRequired: '메시지를 입력해주세요.',
+      fbNameTooLong: '이름은 20자 이내로 입력해주세요.',
+      fbMessageTooLong: '메시지는 300자 이내로 입력해주세요.',
+      fbPostFailed: '등록에 실패했어요. 잠시 후 다시 시도해주세요.',
+      fbUnavailable: '지금은 자유게시판을 이용할 수 없어요.',
+      fbEmpty: '아직 등록된 글이 없어요. 첫 글을 남겨보세요!',
       adRailPlaceholder: '광고 영역',
       adminModalTitle: '광고관리자모드',
       adminModalDesc: '비밀번호를 입력하세요.',
@@ -1278,6 +1335,16 @@ try {
       navAdmin: 'Ad Admin',
       navMenuOpenLabel: 'Open menu', navMenuCloseLabel: 'Close menu',
       wipText: 'Under construction.',
+      fbNamePlaceholder: 'Name',
+      fbMessagePlaceholder: 'Write a message',
+      fbSubmit: 'Post',
+      fbNameRequired: 'Please enter a name.',
+      fbMessageRequired: 'Please enter a message.',
+      fbNameTooLong: 'Name must be 20 characters or fewer.',
+      fbMessageTooLong: 'Message must be 300 characters or fewer.',
+      fbPostFailed: 'Failed to post. Please try again in a moment.',
+      fbUnavailable: 'Free Board is unavailable right now.',
+      fbEmpty: 'No posts yet — be the first to write one!',
       adRailPlaceholder: 'Ad Space',
       adminModalTitle: 'Ad Admin Mode',
       adminModalDesc: 'Enter the password.',
@@ -2077,7 +2144,8 @@ try {
     // 좁은 화면에서 본문 안에 대신 넣는 이미지)를 따로 관리
     adConfig: { left: { img: '', imgWide: '', link: '' }, right: { img: '', imgWide: '', link: '' } },
     adClicks: { left: 0, right: 0 }, // 배너별 클릭수 (Firebase 연결 시에만 실제 값)
-    liveVisitors: 0        // 실시간 접속자 수 (Firebase 연결 시에만 의미 있는 값)
+    liveVisitors: 0,       // 실시간 접속자 수 (Firebase 연결 시에만 의미 있는 값)
+    freeboardPosts: []      // 자유게시판 글 목록, 최신순 (Firebase 연결 시에만 실제 값)
   };
 
   // ---------------------------------------------------------------
@@ -2106,9 +2174,25 @@ try {
   //       "left":  { ".write": true, ".validate": "newData.isNumber() && newData.val() >= 0" },
   //       "right": { ".write": true, ".validate": "newData.isNumber() && newData.val() >= 0" }
   //     }},
-  //     "presence": { ".read": true, "$id": { ".write": true } }
+  //     "presence": { ".read": true, "$id": { ".write": true } },
+  //     "freeboard": { "posts": {
+  //       ".read": true,
+  //       ".indexOn": ["ts"],
+  //       "$postId": {
+  //         ".write": "!data.exists() && newData.hasChildren(['name','message','ts'])",
+  //         "name":    { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20" },
+  //         "message": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 300" },
+  //         "ts":      { ".validate": "newData.isNumber()" },
+  //         "$other":  { ".validate": false }
+  //       }
+  //     }}
   //   }
   // }
+  // 자유게시판은 로그인 없이 "이름을 그때그때 입력"하는 방식이라 관리자
+  // 비밀번호 같은 쓰기 제한을 걸 수 없다(전 방문자가 자유롭게 씀) — 위
+  // 규칙은 글을 새로 "추가"만 허용하고(기존 글 수정/삭제 불가), 이름/메시지
+  // 길이만 강제하는 최소한의 안전장치다. 진짜 스팸/도배 방지(요청 빈도 제한,
+  // 신고/삭제 등)는 서버(Cloud Functions) 없이는 못 만든다는 한계는 남는다.
   // ---------------------------------------------------------------
   var AD_STORAGE_KEY = 'gt-ad-config';
   var AD_AUTH_KEY = 'gt-ad-authed';
@@ -2165,6 +2249,89 @@ try {
       state.adClicks = { left: val.left || 0, right: val.right || 0 };
       if (state.activeView === 'admin') { renderAdminClickStats(); }
     });
+    // 자유게시판: 최근 100개까지만 구독(무한정 다 불러오지 않도록). 새 글이
+    // 올라오면(다른 방문자가 썼든 내가 썼든) 실시간으로 목록이 갱신된다.
+    fbDb.ref('freeboard/posts').orderByKey().limitToLast(100).on('value', function (snap) {
+      var val = snap.val() || {};
+      var list = [];
+      for (var key in val) { list.push({ id: key, name: val[key].name, message: val[key].message, ts: val[key].ts }); }
+      list.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); }); // 최신순
+      state.freeboardPosts = list;
+      if (state.activeView === 'home') { renderHomeFreeboard(); }
+    });
+  }
+
+  // 자유게시판 글 등록 — 이름/메시지를 검증하고 Firebase에 새 글로 추가한다
+  // (기존 글 수정/삭제는 규칙상 불가). 이름은 다음 글을 쓸 때도 남겨두고
+  // (연속으로 채팅하듯 쓰는 흐름), 메시지 입력칸만 비운다.
+  function submitFreeboardPost() {
+    var nameEl = document.getElementById('fb-name-input');
+    var msgEl = document.getElementById('fb-message-input');
+    var errorEl = document.getElementById('fb-error');
+    var name = nameEl.value.trim();
+    var message = msgEl.value.trim();
+    errorEl.textContent = '';
+    if (!fbEnabled) { errorEl.textContent = t('fbUnavailable'); return; }
+    if (!name) { errorEl.textContent = t('fbNameRequired'); nameEl.focus(); return; }
+    if (name.length > 20) { errorEl.textContent = t('fbNameTooLong'); nameEl.focus(); return; }
+    if (!message) { errorEl.textContent = t('fbMessageRequired'); msgEl.focus(); return; }
+    if (message.length > 300) { errorEl.textContent = t('fbMessageTooLong'); msgEl.focus(); return; }
+
+    var submitBtn = document.getElementById('fb-submit-btn');
+    submitBtn.disabled = true;
+    fbDb.ref('freeboard/posts').push({ name: name, message: message, ts: Date.now() })
+      .then(function () {
+        msgEl.value = '';
+        submitBtn.disabled = false;
+        msgEl.focus();
+      })
+      .catch(function () {
+        errorEl.textContent = t('fbPostFailed');
+        submitBtn.disabled = false;
+      });
+  }
+
+  function formatFbTime(ts) {
+    if (!ts) { return ''; }
+    var d = new Date(ts);
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    return pad(d.getMonth() + 1) + '.' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  // 자유게시판 목록 렌더 — 이름/메시지는 사용자가 직접 입력한 값이라
+  // innerHTML이 아니라 textContent로만 넣어서 스크립트 삽입(XSS) 걱정 없게 한다.
+  function renderHomeFreeboard() {
+    document.getElementById('fb-name-input').placeholder = t('fbNamePlaceholder');
+    document.getElementById('fb-message-input').placeholder = t('fbMessagePlaceholder');
+    document.getElementById('fb-submit-btn').textContent = t('fbSubmit');
+
+    var el = document.getElementById('home-freeboard');
+    el.innerHTML = '';
+    if (!state.freeboardPosts.length) {
+      var empty = document.createElement('div');
+      empty.className = 'fb-empty';
+      empty.textContent = fbEnabled ? t('fbEmpty') : t('fbUnavailable');
+      el.appendChild(empty);
+      return;
+    }
+    for (var i = 0; i < state.freeboardPosts.length; i++) {
+      var post = state.freeboardPosts[i];
+      var row = document.createElement('div');
+      row.className = 'fb-row';
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'fb-name';
+      nameSpan.textContent = post.name || '';
+      var msgSpan = document.createElement('span');
+      msgSpan.className = 'fb-message';
+      msgSpan.textContent = post.message || '';
+      var timeSpan = document.createElement('span');
+      timeSpan.className = 'fb-time';
+      timeSpan.textContent = formatFbTime(post.ts);
+      row.appendChild(nameSpan);
+      row.appendChild(msgSpan);
+      row.appendChild(timeSpan);
+      el.appendChild(row);
+    }
   }
 
   // 배너 저장: Firebase가 켜져 있으면 그쪽이 "진짜" — 모든 방문자가 공유해서 보게 됨.
@@ -4075,6 +4242,7 @@ try {
     if (state.activeView === 'home') {
       renderHomeStatic();
       renderHomeNews();
+      renderHomeFreeboard();
     } else if (state.activeView === 'code') {
       render();
     } else if (state.activeView === 'progression') {
@@ -4123,6 +4291,16 @@ try {
   document.getElementById('admin-modal-submit').onclick = submitAdminPassword;
   document.getElementById('admin-pw-input').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') { submitAdminPassword(); }
+  });
+
+  // 자유게시판: 등록 버튼, 메시지 입력칸에서 Enter로도 바로 등록(채팅 입력
+  // 느낌). 이름 입력칸에서 Enter를 치면 메시지 칸으로 포커스만 넘겨준다.
+  document.getElementById('fb-submit-btn').onclick = submitFreeboardPost;
+  document.getElementById('fb-message-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { submitFreeboardPost(); }
+  });
+  document.getElementById('fb-name-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { document.getElementById('fb-message-input').focus(); }
   });
 
   // "광고관리자모드" 메뉴는 로그인 전엔 숨겨져 있어서(위 renderApp 참고),
