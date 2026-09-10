@@ -2423,10 +2423,14 @@ try {
     }
     if (bassFret === -1) { return null; } // 이 범위에서는 이 현으로 베이스를 못 짚음
 
-    // 어떤 현이든 코드음이 나오는 후보 프렛 전부(0~15, 개방현 포함, 범위 제한 적용)를 구한다.
+    // 어떤 현이든 코드음이 나오는 후보 프렛 전부를 구한다. 오픈코드
+    // (requireOpen=true)는 0~15프렛(개방현 포함, 범위 제한 적용), 바레코드
+    // (requireOpen=false)는 개방현을 아예 후보에서 뺀다 — 바레는 어느 프렛으로
+    // 옮겨도 그대로 짚어야 하는 클로즈드 셰이프라 특정 개방현에 의존하면 안 됨.
     function candidatesFor(s) {
       var arr = [];
       for (var f = 0; f <= 15; f++) {
+        if (!requireOpen && f === 0) { continue; }
         if (!inRange(f)) { continue; }
         var pc = (OPEN[s] + f) % 12;
         if (toneLabel[pc] !== undefined) { arr.push({ fret: f, label: toneLabel[pc] }); }
@@ -2435,10 +2439,14 @@ try {
     }
 
     // bassString보다 얇은(음높은) 현들은 전부 반드시 소리 나야 하는 필수 현.
-    // bassString보다 굵은(음낮은) 현들은 "개방현으로 포함" 또는 "생략(뮤트)" 중
-    // 하나를 고르는 보조 현 — 예: 베이스=5번줄(A)이면 6번줄(E) 하나가 보조 현,
-    // 베이스=4번줄(D)이면 6·5번줄 둘 다 보조 현이 되어 D-shape(6·5번줄 뮤트)
-    // 오픈코드까지 이 함수 하나로 커버한다.
+    // bassString보다 굵은(음낮은) 현들은 보조 현 — 예: 베이스=5번줄(A)이면
+    // 6번줄(E) 하나가 보조 현, 베이스=4번줄(D)이면 6·5번줄 둘 다 보조 현.
+    // requireOpen(오픈코드)일 땐 이 보조 현을 "개방현으로 포함" 또는 "생략
+    // (뮤트)" 중 고른다(D-shape 등 오픈코드 커버). 바레코드(requireOpen=false)는
+    // 애초에 개방현을 안 쓰므로, 보조 현을 "바레 프렛(=베이스 프렛)에서 같이
+    // 짚어 바레 손가락 하나로 공짜로 커버"(코드음과 맞아떨어질 때만) 또는
+    // "생략(뮤트)" 중 고른다 — 예: C 바레코드(5번줄 베이스, 3프렛)에서 6번줄도
+    // 3프렛이면 5도(G)가 나와 그대로 같이 바레된다(335553).
     var mandatory = [];
     for (var mi = bassString + 1; mi < 6; mi++) { mandatory.push(mi); }
     var lowerStrings = [];
@@ -2450,8 +2458,13 @@ try {
     var lowerOptions = [];
     for (var lsi = 0; lsi < lowerStrings.length; lsi++) {
       var s = lowerStrings[lsi];
-      var pc0 = OPEN[s];
-      lowerOptions.push(toneLabel[pc0] !== undefined ? [{ idx: s, fret: 0, label: toneLabel[pc0] }, null] : [null]);
+      if (requireOpen) {
+        var pc0 = OPEN[s];
+        lowerOptions.push(toneLabel[pc0] !== undefined ? [{ idx: s, fret: 0, label: toneLabel[pc0] }, null] : [null]);
+      } else {
+        var pcBarre = (OPEN[s] + bassFret) % 12;
+        lowerOptions.push(toneLabel[pcBarre] !== undefined ? [{ idx: s, fret: bassFret, label: toneLabel[pcBarre] }, null] : [null]);
+      }
     }
 
     var best = null; // {score:[...], strings:[...]}
@@ -2472,22 +2485,24 @@ try {
       }
       if (requireOpen && !hasOpen) { return; }                    // 개방현이 하나도 없으면 오픈 보이싱 아님
 
-      if (requireOpen) {
-        if (pressedFrets.length > MAX_FRETTED_STRINGS) { return; }  // 손가락 개수 초과 (바레 없음 전제)
-      } else {
-        // 바레코드: 베이스 프렛(=바레 프렛)을 2개 이상의 현이 함께 누르면 바레
-        // 손가락 하나로 한번에 커버된다고 보고 그 현들은 손가락 예산에서 빼주고,
-        // 나머지(바레 프렛이 아닌 다른 프렛을 누르는) 현만 각각 별도 손가락
-        // 하나씩 쓴다고 계산한다 — 인덱스 손가락이 바레를 맡으면 나머지 3개
-        // 손가락(중지/약지/새끼)만 남는다.
+      // chargedFingers: 실제로 쓰는 손가락 개수. 오픈코드는 눌리는 현 개수
+      // 그대로(바레 없음 전제). 바레코드는 베이스 프렛(=바레 프렛)을 2개 이상의
+      // 현이 함께 누르면 바레 손가락 하나로 한번에 커버된다고 보고 그 현들은
+      // 손가락 예산에서 빼주고, 나머지(바레 프렛이 아닌 다른 프렛을 누르는)
+      // 현만 각각 별도 손가락 하나씩 쓴다고 계산한다 — 인덱스 손가락이 바레를
+      // 맡으면 나머지 3개 손가락(중지/약지/새끼)만 남는다.
+      var chargedFingers = pressedFrets.length;
+      if (!requireOpen) {
         var barreFret = bassFret;
         var atBarreCount = 0, otherFingerFrets = 0;
         for (var pfi = 0; pfi < pressedFrets.length; pfi++) {
           if (barreFret > 0 && pressedFrets[pfi] === barreFret) { atBarreCount++; } else { otherFingerFrets++; }
         }
         var barreFingerUsed = atBarreCount >= 2;
-        var chargedFingers = otherFingerFrets + (barreFingerUsed ? 0 : atBarreCount);
+        chargedFingers = otherFingerFrets + (barreFingerUsed ? 0 : atBarreCount);
         if (chargedFingers > MAX_FRETTED_STRINGS - (barreFingerUsed ? 1 : 0)) { return; }
+      } else if (chargedFingers > MAX_FRETTED_STRINGS) {
+        return;                                                    // 손가락 개수 초과 (바레 없음 전제)
       }
 
       // 1번줄과 6번줄을 동시에 누르면서 다른 현도 누르는 건 서로 다른 프렛일 때만
@@ -2518,8 +2533,14 @@ try {
 
       // 손가락으로 실제로 되는 조합을 최우선으로 고른다 (안 되면 후보에서
       // 완전히 빼지는 않고, 차선책으로만 남겨서 검토용 빨간 표시가 뜨게 함).
+      // 오픈코드는 기존 그대로(눌리는 현 개수 최소화). 바레코드는 실제 손가락
+      // 개수(chargedFingers, 바레는 무료)를 기준으로 삼고, 그게 같으면(바레로
+      // 이미 커버되는 현을 추가로 같이 눌러도 손가락 개수가 그대로인 경우)
+      // 더 많은 현이 울리는 꽉 찬 셰이프를 우선한다(예: x35553보다 335553).
       var unplayablePenalty = isStructurallyPlayable({ strings: list }) ? 0 : 1;
-      var score = [unplayablePenalty, pressedFrets.length, span, maxFret];
+      var score = requireOpen
+        ? [unplayablePenalty, pressedFrets.length, span, maxFret]
+        : [unplayablePenalty, chargedFingers, span, maxFret, -list.length];
       if (!best || better(score, best.score)) {
         list.sort(function (a, b) { return a.idx - b.idx; });
         best = { score: score, strings: list };
