@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>기타 코드 뷰어</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600&display=swap">
 <style>
   :root {
@@ -23,17 +22,20 @@
     --radius: 12px;               /* 카드 안쪽 요소 */
     --radius-card: 18px;          /* 큰 카드/네비 */
     --radius-pill: 980px;         /* 알약 버튼 */
-    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    /* 기본 폰트 — 한글은 전부 Orbit(자체 호스팅, fonts/)로 통일. 라틴 문자엔
+       Orbit에 없는 글리프라 시스템 산세리프로 자연 폴백됨 */
+    --font-sans: 'Orbit', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     /* 홈 화면 전용 에디토리얼 타이포 — 라틴 문자는 Clash Display/General Sans,
-       한글은 자동으로 Pretendard로 폴백(두 폰트 다 한글 글리프가 없음) */
-    --font-display: 'Clash Display', 'Pretendard', var(--font-sans);
-    --font-editorial: 'General Sans', 'Pretendard', var(--font-sans);
+       한글은 전부 Orbit으로 폴백(라틴 전용 폰트라 한글 글리프가 없음) */
+    --font-display: 'Clash Display', 'Orbit', var(--font-sans);
+    --font-editorial: 'General Sans', 'Orbit', var(--font-sans);
     /* board-labs 히어로 전용 — Chakra Petch(자체 호스팅, fonts/) */
-    --font-chakra: 'Chakra Petch', 'Pretendard', var(--font-sans);
+    --font-chakra: 'Chakra Petch', 'Orbit', var(--font-sans);
     /* 공지사항(한글) 전용 — HiKR(자체 호스팅, fonts/, ExtraBold 한 웨이트만 있음) */
-    --font-hikr: 'HiKR', 'Pretendard', var(--font-sans);
+    --font-hikr: 'HiKR', 'Orbit', var(--font-sans);
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   }
+  @font-face { font-family: 'Orbit'; src: url('fonts/Orbit-Regular.TTF') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
   @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
