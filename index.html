@@ -720,7 +720,7 @@
 
 <div id="app">
   <h1 id="code-h1">기타 코드 지판 뷰어</h1>
-  <h2 class="sr-only" id="code-sr-desc">기타 지판 위 트라이어드/4화음 위치와 멜로디 보이싱, 오픈 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
+  <h2 class="sr-only" id="code-sr-desc">기타 지판 위 바레코드/오픈코드 기본코드와 멜로디 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
 
   <div id="gt-error"></div>
 
@@ -733,6 +733,11 @@
     <div style="margin-bottom:12px;">
       <div class="gt-label" id="label-root-top">루트음 / 탑노트</div>
       <div id="gt-roots" class="gt-flex gt-grid-fixed"></div>
+    </div>
+
+    <div id="gt-basictype-wrap" style="margin-bottom:12px;">
+      <div class="gt-label" id="label-basic-type">코드 형태</div>
+      <div id="gt-basictypes" class="gt-flex gt-segmented"></div>
     </div>
 
     <div id="gt-topstring-wrap" style="margin-bottom:12px;">
@@ -748,24 +753,6 @@
     <div style="margin-bottom:16px;">
       <div class="gt-label" id="label-quality">코드 종류</div>
       <div id="gt-qualities" class="gt-flex"></div>
-    </div>
-  </div>
-
-  <div id="gt-open-controls" style="display:none;">
-    <div id="open-wip-banner" style="margin-bottom:16px; padding:10px 14px; background:var(--surface-1); border-radius:var(--radius); font-size:0.75rem; color:var(--text-secondary);">
-      🚧 오픈 보이싱은 아직 공사중이에요 — 계속 손보고 있습니다.
-    </div>
-    <div style="margin-bottom:12px;">
-      <div class="gt-label" id="label-key">조성 (키)</div>
-      <div id="gt-openkeys" class="gt-flex gt-grid-fixed"></div>
-    </div>
-    <div style="margin-bottom:16px;">
-      <div class="gt-label" id="label-diatonic">다이아토닉 코드</div>
-      <div id="gt-opendegrees" class="gt-flex"></div>
-    </div>
-    <div id="gt-openquality-wrap" style="margin-bottom:16px; display:none;">
-      <div class="gt-label" id="label-open-quality">코드 종류 (선택한 다이아토닉 코드의 루트 기준)</div>
-      <div id="gt-openqualities" class="gt-flex"></div>
     </div>
   </div>
 
@@ -802,18 +789,40 @@
 <div id="app-scale" style="display:none;">
   <h1 id="scale-h1">스케일</h1>
 
-  <div style="margin-bottom:16px;">
-    <div class="gt-label" id="label-scale-root">루트음</div>
-    <div id="scale-roots" class="gt-flex gt-grid-fixed"></div>
+  <div style="margin-bottom:12px;">
+    <div class="gt-label" id="label-scale-view">보기 모드</div>
+    <div id="scale-view-modes" class="gt-flex gt-segmented"></div>
   </div>
 
-  <div id="scale-groups" style="margin-bottom:16px;"></div>
+  <div id="scale-view-scale-controls">
+    <div style="margin-bottom:16px;">
+      <div class="gt-label" id="label-scale-root">루트음</div>
+      <div id="scale-roots" class="gt-flex gt-grid-fixed"></div>
+    </div>
+
+    <div id="scale-groups" style="margin-bottom:16px;"></div>
+  </div>
+
+  <div id="scale-view-chordtone-controls" style="display:none;">
+    <div style="margin-bottom:16px;">
+      <div class="gt-label" id="label-chordtone-root">루트음</div>
+      <div id="scale-chordtone-roots" class="gt-flex gt-grid-fixed"></div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div class="gt-label" id="label-chordtone-quality">코드 종류</div>
+      <div id="scale-chordtone-qualities" class="gt-flex"></div>
+    </div>
+  </div>
 
   <div id="scale-fretboard"></div>
 
   <div id="scale-legend" class="gt-flex" style="margin:10px 0 16px; font-size:12px;"></div>
 
   <div id="scale-usage"></div>
+
+  <div id="scale-chordtone-grips-title" style="display:none; font-size:1rem; font-weight:600; letter-spacing:-0.005em; margin-bottom:8px;"></div>
+  <div id="scale-chordtone-grips"></div>
 </div>
 
 <div id="app-admin" style="display:none;">
@@ -998,9 +1007,12 @@ try {
         points: []
       },
 
-      modeRoot: '전체 지판', modeTop: '멜로디 보이싱', modeOpen: '오픈 보이싱', badgeWip: '공사중',
+      modeBasic: '기본코드', modeTop: '멜로디 보이싱',
       labelModes: '보기 모드',
       labelRootTop: '루트음 / 탑노트',
+      labelBasicType: '코드 형태',
+      basicTypeBarre: '바레코드', basicTypeOpen: '오픈코드',
+      noBasicChordFound: '이 루트음/코드 종류로는 이 형태의 기본코드를 찾지 못했어요.',
       labelTopString: '탑노트가 있는 줄',
       labelFretGroup: '프렛 묶기',
       fretGroupOn: '켜짐 (탑노트 주변만 표시)', fretGroupOff: '꺼짐 (전체 프렛 표시)',
@@ -1011,15 +1023,8 @@ try {
       melodyFixedGripTitle: '멜로디 보이싱 고정 그립 ({n}번줄 최상단 = 루트)',
       string: '번줄', stringN: '{n}번줄', top: '탑',
       fret: '프렛', openString: '개방현', mute: 'X',
-      openWip: '🚧 오픈 보이싱은 아직 공사중이에요 — 계속 손보고 있습니다.',
-      labelKey: '조성 (키)',
-      labelDiatonicChord: '다이아토닉 코드',
-      labelOpenQuality: '코드 종류 (선택한 다이아토닉 코드의 루트 기준)',
-      defaultForm: '기본형',
-      noDiatonicInKey: '이 조성에서는 오픈 보이싱이 가능한 다이아토닉 코드가 없어요.',
-      openTitle: '오픈 보이싱',
-      selectKeyDegree: '위에서 조성과 다이아토닉 코드를 선택하세요.',
-      bass6: '6번줄 베이스', bass5: '5번줄 베이스',
+      bass6: '6번줄 베이스', bass5: '5번줄 베이스', bass4: '4번줄 베이스',
+      scaleViewScale: '스케일', scaleViewChordTone: '코드톤',
       unplayableBanner: '⚠ 왼손 4개 손가락으로 구조상 누를 수 없는 모양 (검토용, 아직 삭제 안 함)',
       unplayableTag: ' — ⚠ 손가락 구조상 불가 (검토용)',
 
@@ -1136,9 +1141,12 @@ try {
         points: []
       },
 
-      modeRoot: 'Full Fretboard', modeTop: 'Melody Voicing', modeOpen: 'Open Voicing', badgeWip: 'WIP',
+      modeBasic: 'Basic Chords', modeTop: 'Melody Voicing',
       labelModes: 'View Mode',
       labelRootTop: 'Root / Top Note',
+      labelBasicType: 'Chord Shape',
+      basicTypeBarre: 'Barre Chords', basicTypeOpen: 'Open Chords',
+      noBasicChordFound: "Couldn't find a chord of this shape for the selected root/quality.",
       labelTopString: 'Top Note String',
       labelFretGroup: 'Fret Grouping',
       fretGroupOn: 'On (near top note only)', fretGroupOff: 'Off (show all frets)',
@@ -1149,15 +1157,8 @@ try {
       melodyFixedGripTitle: 'Melody voicing fixed grip (string {n} top = root)',
       string: 'string', stringN: 'String {n}', top: 'top',
       fret: 'fret', openString: 'open', mute: 'X',
-      openWip: '🚧 Open Voicing is still a work in progress — actively being refined.',
-      labelKey: 'Key',
-      labelDiatonicChord: 'Diatonic Chords',
-      labelOpenQuality: 'Chord Type (based on selected diatonic root)',
-      defaultForm: 'Default',
-      noDiatonicInKey: 'No diatonic chord in this key has a valid open voicing.',
-      openTitle: 'Open Voicing',
-      selectKeyDegree: 'Select a key and a diatonic chord above.',
-      bass6: 'String 6 bass', bass5: 'String 5 bass',
+      bass6: 'String 6 bass', bass5: 'String 5 bass', bass4: 'String 4 bass',
+      scaleViewScale: 'Scale', scaleViewChordTone: 'Chord Tones',
       unplayableBanner: '⚠ Structurally unplayable with 4 left-hand fingers (under review, not removed yet)',
       unplayableTag: ' — ⚠ unplayable shape (under review)',
 
@@ -1283,18 +1284,6 @@ try {
     aug7:     { label: '어그먼트7',           intervals: [[0,'R'],[4,'3'],[8,'#5'],[11,'7']],       type: 'chord4', required: ['R','3','#5'] }
   };
 
-  // 오픈 보이싱 전용 추가 코드 종류(다이아토닉 아래 별도 섹션). 조성의 으뜸음을
-  // 루트로 삼아 계산한다. 여기 등장하는 확장음(2,9,4)은 그 코드의 정체성 그
-  // 자체라서 required에 포함 — 생략하면 다른 코드가 돼버리기 때문.
-  var EXTRA_OPEN_QUALITIES = {
-    add2: { label: 'add2', intervals: [[0,'R'],[4,'3'],[7,'5'],[2,'2']],            required: ['R','3','2'] },
-    add9: { label: 'add9', intervals: [[0,'R'],[4,'3'],[7,'5'],[2,'9']],            required: ['R','3','9'] },
-    dom9: { label: '9',    intervals: [[0,'R'],[4,'3'],[7,'5'],[10,'b7'],[2,'9']],  required: ['R','3','b7','9'] },
-    m9:   { label: 'm9',   intervals: [[0,'R'],[3,'b3'],[7,'5'],[10,'b7'],[2,'9']], required: ['R','b3','b7','9'] },
-    M9:   { label: 'M9',   intervals: [[0,'R'],[4,'3'],[7,'5'],[11,'7'],[2,'9']],   required: ['R','3','7','9'] },
-    sus2: { label: 'sus2', intervals: [[0,'R'],[2,'2'],[7,'5']],                    required: ['R','2'] },
-    sus4: { label: 'sus4', intervals: [[0,'R'],[5,'4'],[7,'5']],                    required: ['R','4'] }
-  };
 
   // 인터벌 라벨별 색상 (지판 위 점 색상)
   var LABEL_COLOR = {
@@ -1985,15 +1974,12 @@ try {
   // 2. 상태
   // ---------------------------------------------------------------
   var state = {
-    mode: 'root',       // 'root' | 'top' | 'open'
+    mode: 'basic',       // 'basic' | 'top'
+    basicType: 'barre',   // '기본코드' 모드에서 선택한 형태: 'barre'(바레코드) | 'open'(오픈코드)
     root: 0,             // 0~11 (C=0)
     quality: 'major',    // QUALITIES 키
     topString: 1,        // 탑노트 기준 모드에서 선택한 줄 번호
     fretGroup: false,     // 탑노트 기준 모드에서 프렛 묶기 켜짐/꺼짐
-    openKey: 0,           // 오픈 보이싱 모드: 조성(키), 0~11 (C=0)
-    openDegree: null,     // 오픈 보이싱 모드: 선택한 다이아토닉 코드 인덱스 (0~6)
-    openQualityOverride: null, // 선택한 다이아토닉 코드의 루트를 그대로 쓰되, 코드 종류만
-                               // 다이아토닉 기본형 대신 EXTRA_OPEN_QUALITIES 키로 바꿔치기
     activeView: 'home',   // 'home' | 'code' | 'progression' | 'scale' | 'admin' (왼쪽 메뉴)
     progression: [{ root: 0, quality: 'major' }], // 코드진행: 코드 슬롯 목록
     progFretMin: 4,       // 코드진행: 프렛 범위 시작
@@ -2001,6 +1987,7 @@ try {
     progVoicingMode: 'closed', // 코드진행 보이싱 방식: 'closed'(트라이어드/4화음) | 'open'(오픈 보이싱)
     scaleRoot: 0,          // 스케일 모드: 루트음 (0~11, C=0)
     scaleKey: 'ionian',    // 스케일 모드: 선택한 스케일 (SCALE_GROUPS 키)
+    scaleView: 'scale',    // 스케일 페이지 보기 모드: 'scale'(스케일) | 'chordTone'(코드톤 — 옛 "전체 지판")
     lang: 'ko',            // 'ko' | 'en' — UI 언어 (스케일 운용법 설명 본문은 아직 한글 전용)
     adAuthed: false,       // 광고관리자모드 비밀번호 인증 여부 (세션 한정, sessionStorage에 저장)
     // 좌우 배너 설정 — img(세로형, 넓은 화면용 사이드 레일)와 imgWide(가로형,
@@ -2409,8 +2396,12 @@ try {
   // fretRange: null(제한 없음) 또는 [min,max] — 개방현(0프렛)은 항상 허용하고,
   // 그 외 눌리는 프렛은 이 범위 안에서만 찾는다 (코드진행 "이 구간 안에서만
   // 보기" 기능용).
-  function computeOpenVoicing(rootPC, qualityKey, bassString, fretRange) {
-    var q = QUALITIES[qualityKey] || EXTRA_OPEN_QUALITIES[qualityKey];
+  // requireOpen: true(기본값)면 기존 그대로 "진짜 개방현이 최소 하나 있어야
+  // 성립"(오픈 보이싱/오픈코드용). false면 그 제약을 풀어서 전부 눌러 짚는
+  // 클로즈드(바레) 셰이프도 허용한다 — 기본코드 > 바레코드류에서 사용.
+  function computeOpenVoicing(rootPC, qualityKey, bassString, fretRange, requireOpen) {
+    if (requireOpen === undefined) { requireOpen = true; }
+    var q = QUALITIES[qualityKey];
     var toneLabel = {};   // pitch class -> label
     var required = {};    // label -> true (커버해야 하는 라벨), 코드 정의의 required 배열 그대로 사용
     for (var i = 0; i < q.intervals.length; i++) {
@@ -2439,42 +2430,76 @@ try {
       return arr;
     }
 
-    var mandatory = bassString === 0 ? [1, 2, 3, 4, 5] : [2, 3, 4, 5];
-    var candList = [];
-    for (var mi = 0; mi < mandatory.length; mi++) { candList.push(candidatesFor(mandatory[mi])); }
+    // bassString보다 얇은(음높은) 현들은 전부 반드시 소리 나야 하는 필수 현.
+    // bassString보다 굵은(음낮은) 현들은 "개방현으로 포함" 또는 "생략(뮤트)" 중
+    // 하나를 고르는 보조 현 — 예: 베이스=5번줄(A)이면 6번줄(E) 하나가 보조 현,
+    // 베이스=4번줄(D)이면 6·5번줄 둘 다 보조 현이 되어 D-shape(6·5번줄 뮤트)
+    // 오픈코드까지 이 함수 하나로 커버한다.
+    var mandatory = [];
+    for (var mi = bassString + 1; mi < 6; mi++) { mandatory.push(mi); }
+    var lowerStrings = [];
+    for (var li = 0; li < bassString; li++) { lowerStrings.push(li); }
 
-    var sixOptions = null; // 베이스=5번줄일 때만: [{개방현으로 포함}, null(생략)]
-    if (bassString === 1) {
-      var pc0 = OPEN[0];
-      sixOptions = toneLabel[pc0] !== undefined ? [{ fret: 0, label: toneLabel[pc0] }, null] : [null];
+    var candList = [];
+    for (var ci = 0; ci < mandatory.length; ci++) { candList.push(candidatesFor(mandatory[ci])); }
+
+    var lowerOptions = [];
+    for (var lsi = 0; lsi < lowerStrings.length; lsi++) {
+      var s = lowerStrings[lsi];
+      var pc0 = OPEN[s];
+      lowerOptions.push(toneLabel[pc0] !== undefined ? [{ idx: s, fret: 0, label: toneLabel[pc0] }, null] : [null]);
     }
 
     var best = null; // {score:[...], strings:[...]}
 
-    function evaluate(mandChoices, sixChoice) {
+    function evaluate(mandChoices, lowerChoices) {
       var list = [{ idx: bassString, fret: bassFret, label: toneLabel[rootPC] }];
       for (var i2 = 0; i2 < mandatory.length; i2++) {
         list.push({ idx: mandatory[i2], fret: mandChoices[i2].fret, label: mandChoices[i2].label });
       }
-      if (sixChoice) { list.push({ idx: 0, fret: sixChoice.fret, label: sixChoice.label }); }
+      for (var i2b = 0; i2b < lowerChoices.length; i2b++) {
+        if (lowerChoices[i2b]) { list.push(lowerChoices[i2b]); }
+      }
 
       var pressedFrets = [];
       var hasOpen = false;
       for (var i3 = 0; i3 < list.length; i3++) {
         if (list[i3].fret === 0) { hasOpen = true; } else { pressedFrets.push(list[i3].fret); }
       }
-      if (!hasOpen) { return; }                                  // 개방현이 하나도 없으면 오픈 보이싱 아님
-      if (pressedFrets.length > MAX_FRETTED_STRINGS) { return; }  // 손가락 개수 초과
+      if (requireOpen && !hasOpen) { return; }                    // 개방현이 하나도 없으면 오픈 보이싱 아님
 
-      // 1번줄과 6번줄을 동시에 누르면서 다른 현도 누르는 건 불가능 (손가락이 안 닿음)
+      if (requireOpen) {
+        if (pressedFrets.length > MAX_FRETTED_STRINGS) { return; }  // 손가락 개수 초과 (바레 없음 전제)
+      } else {
+        // 바레코드: 베이스 프렛(=바레 프렛)을 2개 이상의 현이 함께 누르면 바레
+        // 손가락 하나로 한번에 커버된다고 보고 그 현들은 손가락 예산에서 빼주고,
+        // 나머지(바레 프렛이 아닌 다른 프렛을 누르는) 현만 각각 별도 손가락
+        // 하나씩 쓴다고 계산한다 — 인덱스 손가락이 바레를 맡으면 나머지 3개
+        // 손가락(중지/약지/새끼)만 남는다.
+        var barreFret = bassFret;
+        var atBarreCount = 0, otherFingerFrets = 0;
+        for (var pfi = 0; pfi < pressedFrets.length; pfi++) {
+          if (barreFret > 0 && pressedFrets[pfi] === barreFret) { atBarreCount++; } else { otherFingerFrets++; }
+        }
+        var barreFingerUsed = atBarreCount >= 2;
+        var chargedFingers = otherFingerFrets + (barreFingerUsed ? 0 : atBarreCount);
+        if (chargedFingers > MAX_FRETTED_STRINGS - (barreFingerUsed ? 1 : 0)) { return; }
+      }
+
+      // 1번줄과 6번줄을 동시에 누르면서 다른 현도 누르는 건 서로 다른 프렛일 때만
+      // 불가능(손가락이 안 닿음) — 정확히 같은 프렛이면 바레든 아니든(예: 오픈 G
+      // 메이저의 320003 모양처럼 손가락 2개가 각자 같은 프렛을 짚는 것도 포함)
+      // 손 안에서 자연스럽게 커버되므로 이 제약을 적용하지 않는다.
       var pressed6 = false, pressed1 = false, pressedOther = false;
+      var fret6 = null, fret1 = null;
       for (var pi = 0; pi < list.length; pi++) {
         if (list[pi].fret === 0) { continue; }
-        if (list[pi].idx === 0) { pressed6 = true; }
-        else if (list[pi].idx === 5) { pressed1 = true; }
+        if (list[pi].idx === 0) { pressed6 = true; fret6 = list[pi].fret; }
+        else if (list[pi].idx === 5) { pressed1 = true; fret1 = list[pi].fret; }
         else { pressedOther = true; }
       }
-      if (pressed6 && pressed1 && pressedOther) { return; }
+      var sameFretBothEnds = pressed6 && pressed1 && fret6 === fret1;
+      if (pressed6 && pressed1 && pressedOther && !sameFretBothEnds) { return; }
 
       var span = 0, maxFret = 0;
       if (pressedFrets.length) {
@@ -2504,8 +2529,11 @@ try {
 
     (function search(idx, chosen) {
       if (idx === candList.length) {
-        var sixList = sixOptions || [undefined];
-        for (var si = 0; si < sixList.length; si++) { evaluate(chosen, sixList[si]); }
+        (function searchLower(li2, lchosen) {
+          if (li2 === lowerOptions.length) { evaluate(chosen, lchosen); return; }
+          var lopts = lowerOptions[li2];
+          for (var loi = 0; loi < lopts.length; loi++) { searchLower(li2 + 1, lchosen.concat([lopts[loi]])); }
+        })(0, []);
         return;
       }
       var opts = candList[idx];
@@ -2517,7 +2545,7 @@ try {
   }
 
   // 루트음+코드 종류에 대해 가능한 오픈 보이싱을 6번/5번 베이스 각각
-  // 계산해서, 성립하는 것만 반환한다 (최대 2개).
+  // 계산해서, 성립하는 것만 반환한다 (최대 2개). 코드진행 페이지에서 사용.
   function computeOpenVoicingsForQuality(rootPC, qualityKey, fretRange) {
     var results = [];
     var v6 = computeOpenVoicing(rootPC, qualityKey, 0, fretRange);
@@ -2527,11 +2555,29 @@ try {
     return results;
   }
 
-  // 조성(key)에서 다이아토닉 코드 하나(degreeIdx)에 대해 계산.
-  function computeOpenVoicingsForDegree(key, degreeIdx) {
-    var deg = DIATONIC_DEGREES[degreeIdx];
-    var rootPC = (key + deg.offset) % 12;
-    return computeOpenVoicingsForQuality(rootPC, deg.qual);
+  // 기본코드 > 바레코드류: 5번·6번줄이 베이스가 되는 클로즈드(무버블) 셰이프.
+  // 개방현을 요구하지 않아서(requireOpen=false) 어느 루트에서도 바로 위/아래로
+  // 옮겨 짚을 수 있는 진짜 "바레" 포지션을 찾아낸다.
+  function computeClosedVoicingsForQuality(rootPC, qualityKey) {
+    var results = [];
+    var v6 = computeOpenVoicing(rootPC, qualityKey, 0, null, false);
+    if (v6) { results.push(v6); }
+    var v5 = computeOpenVoicing(rootPC, qualityKey, 1, null, false);
+    if (v5) { results.push(v5); }
+    return results;
+  }
+
+  // 기본코드 > 오픈코드류: 통기타에서 흔히 쓰는 개방현 포함 코드. 6·5번줄뿐
+  // 아니라 D-shape(4번줄 베이스, 6·5번줄 뮤트)까지 포함해 3가지 베이스를 다
+  // 시도하고, 0~4프렛(개방현은 항상 허용) 안에서만 찾는다.
+  function computeBasicOpenVoicings(rootPC, qualityKey) {
+    var results = [];
+    var bassStrings = [0, 1, 2];
+    for (var i = 0; i < bassStrings.length; i++) {
+      var v = computeOpenVoicing(rootPC, qualityKey, bassStrings[i], [0, 4], true);
+      if (v) { results.push(v); }
+    }
+    return results;
   }
 
   // ---------------------------------------------------------------
@@ -2541,18 +2587,12 @@ try {
   function renderModes() {
     var el = document.getElementById('gt-modes');
     el.innerHTML = '';
-    var modes = [['root', t('modeRoot')], ['top', t('modeTop')], ['open', t('modeOpen')]];
+    var modes = [['basic', t('modeBasic')], ['top', t('modeTop')]];
     for (var i = 0; i < modes.length; i++) {
       (function (m) {
         var b = document.createElement('button');
         b.className = 'gt-btn' + (state.mode === m[0] ? ' active' : '');
         b.textContent = m[1];
-        if (m[0] === 'open') {
-          var badge = document.createElement('span');
-          badge.className = 'nav-badge';
-          badge.textContent = t('badgeWip');
-          b.appendChild(badge);
-        }
         b.onclick = function () {
           state.mode = m[0];
           ensureValidTopString();
@@ -2612,97 +2652,28 @@ try {
 
   var QUALITY_SHORT = { maj7: 'maj7', min7: 'm7', dom7: '7', halfdim7: 'm7♭5', aug7: 'maj7#5', dim7: 'dim7' };
 
-  function renderOpenKeys() {
-    var el = document.getElementById('gt-openkeys');
+  // 기본코드 모드 안의 형태 선택: 바레코드(클로즈드) / 오픈코드.
+  function renderBasicTypeToggle() {
+    var wrap = document.getElementById('gt-basictype-wrap');
+    wrap.style.display = state.mode === 'basic' ? 'block' : 'none';
+    var el = document.getElementById('gt-basictypes');
     el.innerHTML = '';
-    for (var i = 0; i < NOTES.length; i++) {
-      (function (idx) {
+    var types = [['barre', t('basicTypeBarre')], ['open', t('basicTypeOpen')]];
+    for (var i = 0; i < types.length; i++) {
+      (function (ty) {
         var b = document.createElement('button');
-        b.className = 'gt-btn' + (state.openKey === idx ? ' active' : '');
-        b.textContent = NOTES[idx];
-        b.onclick = function () { state.openKey = idx; state.openDegree = null; state.openQualityOverride = null; render(); };
+        b.className = 'gt-btn' + (state.basicType === ty[0] ? ' active' : '');
+        b.textContent = ty[1];
+        b.onclick = function () { state.basicType = ty[0]; render(); };
         el.appendChild(b);
-      })(i);
+      })(types[i]);
     }
   }
 
-  function renderOpenDegrees() {
-    var el = document.getElementById('gt-opendegrees');
-    el.innerHTML = '';
-    var any = false;
-    for (var i = 0; i < DIATONIC_DEGREES.length; i++) {
-      var voicings = computeOpenVoicingsForDegree(state.openKey, i);
-      if (voicings.length === 0) { continue; }
-      any = true;
-      (function (idx, deg) {
-        var rootPC = (state.openKey + deg.offset) % 12;
-        var b = document.createElement('button');
-        b.className = 'gt-btn' + (state.openDegree === idx ? ' active' : '');
-        b.textContent = deg.label + ' (' + NOTES[rootPC] + QUALITY_SHORT[deg.qual] + ')';
-        b.onclick = function () { state.openDegree = idx; state.openQualityOverride = null; render(); };
-        el.appendChild(b);
-      })(i, DIATONIC_DEGREES[i]);
-    }
-    if (!any) {
-      var span = document.createElement('span');
-      span.style.fontSize = '12px';
-      span.style.color = 'var(--text-secondary)';
-      span.textContent = t('noDiatonicInKey');
-      el.appendChild(span);
-    }
-  }
-
-  // 선택된 다이아토닉 코드의 루트를 그대로 쓰고, 코드 종류만 기본형 또는
-  // 추가 코드(add2/add9/9/m9/M9/sus2/sus4) 중 하나로 바꿔서 보여준다.
-  function renderOpenQualityOverrides() {
-    var wrap = document.getElementById('gt-openquality-wrap');
-    if (state.openDegree === null) { wrap.style.display = 'none'; return; }
-    wrap.style.display = 'block';
-
-    var deg = DIATONIC_DEGREES[state.openDegree];
-    var rootPC = (state.openKey + deg.offset) % 12;
-    var el = document.getElementById('gt-openqualities');
-    el.innerHTML = '';
-
-    var defaultBtn = document.createElement('button');
-    defaultBtn.className = 'gt-btn' + (state.openQualityOverride === null ? ' active' : '');
-    defaultBtn.textContent = t('defaultForm') + ' (' + NOTES[rootPC] + QUALITY_SHORT[deg.qual] + ')';
-    defaultBtn.onclick = function () { state.openQualityOverride = null; render(); };
-    el.appendChild(defaultBtn);
-
-    var keys = Object.keys(EXTRA_OPEN_QUALITIES);
-    for (var i = 0; i < keys.length; i++) {
-      var voicings = computeOpenVoicingsForQuality(rootPC, keys[i]);
-      if (voicings.length === 0) { continue; }
-      (function (qk) {
-        var b = document.createElement('button');
-        b.className = 'gt-btn' + (state.openQualityOverride === qk ? ' active' : '');
-        b.textContent = NOTES[rootPC] + EXTRA_OPEN_QUALITIES[qk].label;
-        b.onclick = function () { state.openQualityOverride = qk; render(); };
-        el.appendChild(b);
-      })(keys[i]);
-    }
-  }
-
-  function ensureValidOpenDegree() {
-    if (state.openDegree === null) { return; }
-    var voicings = computeOpenVoicingsForDegree(state.openKey, state.openDegree);
-    if (voicings.length === 0) { state.openDegree = null; state.openQualityOverride = null; return; }
-    if (state.openQualityOverride !== null) {
-      var deg = DIATONIC_DEGREES[state.openDegree];
-      var rootPC = (state.openKey + deg.offset) % 12;
-      var voicings2 = computeOpenVoicingsForQuality(rootPC, state.openQualityOverride);
-      if (voicings2.length === 0) { state.openQualityOverride = null; }
-    }
-  }
-
-  // 현재 선택(다이아토닉 코드 + 코드 종류 오버라이드)에 해당하는 오픈 보이싱들
-  function currentOpenVoicings() {
-    if (state.openDegree === null) { return []; }
-    var deg = DIATONIC_DEGREES[state.openDegree];
-    var rootPC = (state.openKey + deg.offset) % 12;
-    var qualityKey = state.openQualityOverride !== null ? state.openQualityOverride : deg.qual;
-    return computeOpenVoicingsForQuality(rootPC, qualityKey);
+  function bassLabelFor(bassString) {
+    if (bassString === 0) { return t('bass6'); }
+    if (bassString === 1) { return t('bass5'); }
+    return t('bass4');
   }
 
   function renderQualities() {
@@ -2959,32 +2930,39 @@ try {
     return svg;
   }
 
+  // 기본코드(바레코드/오픈코드) 보드 — 발견된 보이싱마다 한 칸씩 다이어그램을 쌓는다.
+  function renderBasicChordBoard(container) {
+    container.innerHTML = '';
+    var voicings = state.basicType === 'barre'
+      ? computeClosedVoicingsForQuality(state.root, state.quality)
+      : computeBasicOpenVoicings(state.root, state.quality);
+    if (voicings.length === 0) {
+      var msg = document.createElement('div');
+      msg.className = 'gt-label';
+      msg.textContent = t('noBasicChordFound');
+      container.appendChild(msg);
+      return;
+    }
+    for (var i = 0; i < voicings.length; i++) {
+      var v = voicings[i];
+      var col = document.createElement('div');
+      col.style.marginBottom = '18px';
+      var label = document.createElement('div');
+      label.className = 'gt-label';
+      label.textContent = bassLabelFor(v.bassString);
+      col.appendChild(label);
+      var holder = document.createElement('div');
+      holder.innerHTML = buildOpenVoicingBoardSVG(v);
+      col.appendChild(holder);
+      container.appendChild(col);
+    }
+  }
+
   function renderFretboard() {
     var container = document.getElementById('gt-fretboard');
 
-    if (state.mode === 'open') {
-      container.innerHTML = '';
-      if (state.openDegree === null) {
-        var msg = document.createElement('div');
-        msg.className = 'gt-label';
-        msg.textContent = t('selectKeyDegree');
-        container.appendChild(msg);
-        return;
-      }
-      var voicings = currentOpenVoicings();
-      for (var i = 0; i < voicings.length; i++) {
-        var v = voicings[i];
-        var col = document.createElement('div');
-        col.style.marginBottom = '18px';
-        var label = document.createElement('div');
-        label.className = 'gt-label';
-        label.textContent = (v.bassString === 0 ? t('bass6') : t('bass5'));
-        col.appendChild(label);
-        var holder = document.createElement('div');
-        holder.innerHTML = buildOpenVoicingBoardSVG(v);
-        col.appendChild(holder);
-        container.appendChild(col);
-      }
+    if (state.mode === 'basic') {
+      renderBasicChordBoard(container);
       return;
     }
 
@@ -3072,68 +3050,41 @@ try {
       var best = bestGrip(strings, q.intervals, state.root, function (perm) { return perm[topPos][0] === 0; });
       el.appendChild(buildGripCard(strings, best, topPos, NOTES[state.root] + ' ' + tQualityName(state.quality)));
 
-    } else if (state.mode === 'open') {
-      if (state.openDegree === null) {
-        titleEl.textContent = t('openTitle');
-      } else {
-        var deg = DIATONIC_DEGREES[state.openDegree];
-        var rootPC2 = (state.openKey + deg.offset) % 12;
-        var qualLabel = state.openQualityOverride !== null
-          ? EXTRA_OPEN_QUALITIES[state.openQualityOverride].label
-          : QUALITY_SHORT[deg.qual];
-        var keyPhrase = state.lang === 'ko' ? (NOTES[state.openKey] + ' 조성') : ('Key of ' + NOTES[state.openKey]);
-        titleEl.textContent = keyPhrase + ' — ' + deg.label + ' (' + NOTES[rootPC2] + qualLabel + ')';
-        var voicings = currentOpenVoicings();
-        for (var vi = 0; vi < voicings.length; vi++) {
-          var v = voicings[vi];
-          var playable = isStructurallyPlayable(v);
-          var card = document.createElement('div');
-          card.className = 'gt-grip';
-          if (!playable) { card.style.background = 'var(--bg-danger)'; }
-          var title = document.createElement('div');
-          title.className = 'gt-grip-title';
-          if (!playable) { title.style.color = 'var(--text-danger)'; }
-          title.textContent = (v.bassString === 0 ? t('bass6') : t('bass5')) +
-            (playable ? '' : t('unplayableTag'));
-          card.appendChild(title);
-          for (var si = 0; si < v.strings.length; si++) {
-            var st = v.strings[si];
-            var note = noteName(OPEN[st.idx] + st.fret);
-            var row = document.createElement('div');
-            row.className = 'gt-row';
-            if (!playable) { row.style.color = 'var(--text-danger)'; }
-            row.innerHTML = '<span>' + stringLabel(STRING_NAMES[st.idx]) + '</span><span>' +
-              (st.fret === 0 ? t('openString') : fretLabel(st.fret)) + ' (' + st.label + ', ' + note + ')</span>';
-            card.appendChild(row);
-          }
-          el.appendChild(card);
-        }
+    } else if (state.mode === 'basic') {
+      var typeLabel = state.basicType === 'barre' ? t('basicTypeBarre') : t('basicTypeOpen');
+      titleEl.textContent = NOTES[state.root] + ' ' + tQualityName(state.quality) + ' — ' + typeLabel;
+      var voicings = state.basicType === 'barre'
+        ? computeClosedVoicingsForQuality(state.root, state.quality)
+        : computeBasicOpenVoicings(state.root, state.quality);
+      if (voicings.length === 0) {
+        var emptyMsg = document.createElement('div');
+        emptyMsg.style.color = 'var(--text-secondary)';
+        emptyMsg.style.fontSize = '0.8125rem';
+        emptyMsg.textContent = t('noBasicChordFound');
+        el.appendChild(emptyMsg);
       }
-
-    } else {
-      titleEl.textContent = t('recommendedGripNarrow');
-      var sets = STRING_SETS[q.type];
-      var setNums = SET_STRING_NUMS[q.type];
-      for (var si = 0; si < sets.length; si++) {
-        var strings2 = sets[si];
-        var best2 = bestGrip(strings2, q.intervals, state.root);
-        var card2 = document.createElement('div');
-        card2.className = 'gt-grip';
-        var title3 = document.createElement('div');
-        title3.className = 'gt-grip-title';
-        title3.textContent = stringSetLabel(setNums[si]);
-        card2.appendChild(title3);
-        for (var i3 = 0; i3 < strings2.length; i3++) {
-          var s4 = strings2[i3];
-          var fret2 = best2.frets[i3];
-          var label2 = best2.perm[i3][1];
-          var note3 = noteName(OPEN[s4] + fret2);
-          var row2 = document.createElement('div');
-          row2.className = 'gt-row';
-          row2.innerHTML = '<span>' + stringLabel(STRING_NAMES[s4]) + '</span><span>' + fretLabel(fret2) + ' (' + label2 + ', ' + note3 + ')</span>';
-          card2.appendChild(row2);
+      for (var vi = 0; vi < voicings.length; vi++) {
+        var v = voicings[vi];
+        var playable = isStructurallyPlayable(v);
+        var card = document.createElement('div');
+        card.className = 'gt-grip';
+        if (!playable) { card.style.background = 'var(--bg-danger)'; }
+        var title = document.createElement('div');
+        title.className = 'gt-grip-title';
+        if (!playable) { title.style.color = 'var(--text-danger)'; }
+        title.textContent = bassLabelFor(v.bassString) + (playable ? '' : t('unplayableTag'));
+        card.appendChild(title);
+        for (var si = 0; si < v.strings.length; si++) {
+          var st = v.strings[si];
+          var note = noteName(OPEN[st.idx] + st.fret);
+          var row = document.createElement('div');
+          row.className = 'gt-row';
+          if (!playable) { row.style.color = 'var(--text-danger)'; }
+          row.innerHTML = '<span>' + stringLabel(STRING_NAMES[st.idx]) + '</span><span>' +
+            (st.fret === 0 ? t('openString') : fretLabel(st.fret)) + ' (' + st.label + ', ' + note + ')</span>';
+          card.appendChild(row);
         }
-        el.appendChild(card2);
+        el.appendChild(card);
       }
     }
   }
@@ -3143,34 +3094,21 @@ try {
     document.getElementById('code-sr-desc').textContent = t('codeSrDesc');
     document.getElementById('label-modes').textContent = t('labelModes');
     document.getElementById('label-root-top').textContent = t('labelRootTop');
+    document.getElementById('label-basic-type').textContent = t('labelBasicType');
     document.getElementById('label-topstring').textContent = t('labelTopString');
     document.getElementById('label-fretgroup').textContent = t('labelFretGroup');
     document.getElementById('label-quality').textContent = t('labelQuality');
-    document.getElementById('open-wip-banner').textContent = t('openWip');
-    document.getElementById('label-key').textContent = t('labelKey');
-    document.getElementById('label-diatonic').textContent = t('labelDiatonicChord');
-    document.getElementById('label-open-quality').textContent = t('labelOpenQuality');
   }
 
   function render() {
     renderCodeStatic();
-    document.getElementById('gt-standard-controls').style.display = state.mode === 'open' ? 'none' : 'block';
-    document.getElementById('gt-open-controls').style.display = state.mode === 'open' ? 'block' : 'none';
-
     renderModes();
-    if (state.mode === 'open') {
-      ensureValidOpenDegree();
-      renderOpenKeys();
-      renderOpenDegrees();
-      renderOpenQualityOverrides();
-      document.getElementById('gt-legend').innerHTML = '';
-    } else {
-      renderRoots();
-      renderTopStrings();
-      renderFretGroupToggle();
-      renderQualities();
-      renderLegend();
-    }
+    renderRoots();
+    renderBasicTypeToggle();
+    renderTopStrings();
+    renderFretGroupToggle();
+    renderQualities();
+    renderLegend();
     renderFretboard();
     renderGrips();
   }
@@ -3655,16 +3593,139 @@ try {
 
   function renderScaleStatic() {
     document.getElementById('scale-h1').textContent = t('scaleTitle');
+    document.getElementById('label-scale-view').textContent = t('labelModes');
     document.getElementById('label-scale-root').textContent = t('labelScaleRoot');
+    document.getElementById('label-chordtone-root').textContent = t('labelScaleRoot');
+    document.getElementById('label-chordtone-quality').textContent = t('labelQuality');
+  }
+
+  // 스케일 페이지 상단 "보기 모드" — 스케일 / 코드톤(옛 코드 페이지의 "전체
+  // 지판"을 옮겨온 것: 선택한 루트음+코드 종류의 코드톤이 지판 전체에서
+  // 어디에 있는지 보여준다).
+  function renderScaleViewModes() {
+    var el = document.getElementById('scale-view-modes');
+    el.innerHTML = '';
+    var views = [['scale', t('scaleViewScale')], ['chordTone', t('scaleViewChordTone')]];
+    for (var i = 0; i < views.length; i++) {
+      (function (v) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.scaleView === v[0] ? ' active' : '');
+        b.textContent = v[1];
+        b.onclick = function () { state.scaleView = v[0]; renderScale(); };
+        el.appendChild(b);
+      })(views[i]);
+    }
+  }
+
+  function renderScaleChordToneRoots() {
+    var el = document.getElementById('scale-chordtone-roots');
+    el.innerHTML = '';
+    for (var i = 0; i < NOTES.length; i++) {
+      (function (idx) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.root === idx ? ' active' : '');
+        b.textContent = NOTES[idx];
+        b.onclick = function () { state.root = idx; renderScale(); };
+        el.appendChild(b);
+      })(i);
+    }
+  }
+
+  function renderScaleChordToneQualities() {
+    var el = document.getElementById('scale-chordtone-qualities');
+    el.innerHTML = '';
+    var keys = Object.keys(QUALITIES);
+    for (var i = 0; i < keys.length; i++) {
+      (function (k) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.quality === k ? ' active' : '');
+        b.textContent = tQualityName(k);
+        b.onclick = function () { state.quality = k; renderScale(); };
+        el.appendChild(b);
+      })(keys[i]);
+    }
+  }
+
+  function renderScaleChordToneFretboard() {
+    document.getElementById('scale-fretboard').innerHTML = buildFretboardSVG(null, null);
+  }
+
+  function renderScaleChordToneLegend() {
+    var q = QUALITIES[state.quality];
+    var el = document.getElementById('scale-legend');
+    el.innerHTML = '';
+    for (var i = 0; i < q.intervals.length; i++) {
+      var label = q.intervals[i][1];
+      var color = LABEL_COLOR[label];
+      var d = document.createElement('div');
+      d.style.display = 'flex'; d.style.alignItems = 'center'; d.style.gap = '5px';
+      var dot = document.createElement('span');
+      dot.style.width = '11px'; dot.style.height = '11px'; dot.style.borderRadius = '50%';
+      dot.style.background = color; dot.style.display = 'inline-block';
+      var txt = document.createElement('span');
+      txt.style.color = 'var(--text-secondary)';
+      txt.textContent = label;
+      d.appendChild(dot); d.appendChild(txt);
+      el.appendChild(d);
+    }
+  }
+
+  // 옛 코드 페이지 "전체 지판"의 "추천 그립" 목록 — 인접 현 조합(3현/4현
+  // 세트)마다 가장 좁은 그립을 하나씩 보여준다.
+  function renderScaleChordToneGrips() {
+    document.getElementById('scale-chordtone-grips-title').textContent = t('recommendedGripNarrow');
+    var el = document.getElementById('scale-chordtone-grips');
+    el.innerHTML = '';
+    var q = QUALITIES[state.quality];
+    var sets = STRING_SETS[q.type];
+    var setNums = SET_STRING_NUMS[q.type];
+    for (var si = 0; si < sets.length; si++) {
+      var strings2 = sets[si];
+      var best2 = bestGrip(strings2, q.intervals, state.root);
+      var card2 = document.createElement('div');
+      card2.className = 'gt-grip';
+      var title3 = document.createElement('div');
+      title3.className = 'gt-grip-title';
+      title3.textContent = stringSetLabel(setNums[si]);
+      card2.appendChild(title3);
+      for (var i3 = 0; i3 < strings2.length; i3++) {
+        var s4 = strings2[i3];
+        var fret2 = best2.frets[i3];
+        var label2 = best2.perm[i3][1];
+        var note3 = noteName(OPEN[s4] + fret2);
+        var row2 = document.createElement('div');
+        row2.className = 'gt-row';
+        row2.innerHTML = '<span>' + stringLabel(STRING_NAMES[s4]) + '</span><span>' + fretLabel(fret2) + ' (' + label2 + ', ' + note3 + ')</span>';
+        card2.appendChild(row2);
+      }
+      el.appendChild(card2);
+    }
   }
 
   function renderScale() {
     renderScaleStatic();
-    renderScaleRoots();
-    renderScaleGroups();
-    renderScaleFretboard();
-    renderScaleLegend();
-    renderScaleUsage();
+    renderScaleViewModes();
+    var isChordTone = state.scaleView === 'chordTone';
+    document.getElementById('scale-view-scale-controls').style.display = isChordTone ? 'none' : 'block';
+    document.getElementById('scale-view-chordtone-controls').style.display = isChordTone ? 'block' : 'none';
+    document.getElementById('scale-usage').style.display = isChordTone ? 'none' : 'block';
+    document.getElementById('scale-chordtone-grips-title').style.display = isChordTone ? 'block' : 'none';
+
+    if (isChordTone) {
+      renderScaleChordToneRoots();
+      renderScaleChordToneQualities();
+      renderScaleChordToneFretboard();
+      renderScaleChordToneLegend();
+      renderScaleChordToneGrips();
+      document.getElementById('scale-usage').innerHTML = '';
+    } else {
+      renderScaleRoots();
+      renderScaleGroups();
+      renderScaleFretboard();
+      renderScaleLegend();
+      renderScaleUsage();
+      document.getElementById('scale-chordtone-grips').innerHTML = '';
+    }
   }
 
   // ---------------------------------------------------------------
