@@ -1284,6 +1284,10 @@ try {
     aug7:     { label: '어그먼트7',           intervals: [[0,'R'],[4,'3'],[8,'#5'],[11,'7']],       type: 'chord4', required: ['R','3','#5'] }
   };
 
+  // 기본코드(바레코드/오픈코드)에서만 쓰는 축소된 코드 종류 — "통기타 기본코드"는
+  // 메이저/마이너/도미넌트7 세 가지만 다룬다. 멜로디 보이싱 모드는 QUALITIES
+  // 전체를 그대로 쓴다.
+  var BASIC_QUALITIES = ['major', 'minor', 'dom7'];
 
   // 인터벌 라벨별 색상 (지판 위 점 색상)
   var LABEL_COLOR = {
@@ -2555,16 +2559,18 @@ try {
     return results;
   }
 
-  // 기본코드 > 바레코드류: 5번·6번줄이 베이스가 되는 클로즈드(무버블) 셰이프.
-  // 개방현을 요구하지 않아서(requireOpen=false) 어느 루트에서도 바로 위/아래로
-  // 옮겨 짚을 수 있는 진짜 "바레" 포지션을 찾아낸다.
+  // 기본코드 > 바레코드류: "통기타 기본코드" 관례를 그대로 따른다 — 루트마다
+  // 검색으로 더 쉬운 쪽을 알아서 골라주는 대신, F·G·A(파·솔·라)는 6번줄 베이스
+  // (E-shape 바레), 그 외 B·C·D·E(시·도·레·미, #/b 포함)는 5번줄 베이스(A-shape
+  // 바레) 하나로 고정해서 가르친다. 개방현을 요구하지 않아서(requireOpen=false)
+  // 어느 프렛으로도 그대로 옮겨 짚을 수 있는 진짜 "바레" 포지션을 찾는다.
+  function basicBarreBassString(rootPC) {
+    return (rootPC >= 5 && rootPC <= 9) ? 0 : 1; // F,F#,G,G#,A → 6번줄 / 나머지 → 5번줄
+  }
   function computeClosedVoicingsForQuality(rootPC, qualityKey) {
-    var results = [];
-    var v6 = computeOpenVoicing(rootPC, qualityKey, 0, null, false);
-    if (v6) { results.push(v6); }
-    var v5 = computeOpenVoicing(rootPC, qualityKey, 1, null, false);
-    if (v5) { results.push(v5); }
-    return results;
+    var bassString = basicBarreBassString(rootPC);
+    var v = computeOpenVoicing(rootPC, qualityKey, bassString, null, false);
+    return v ? [v] : [];
   }
 
   // 기본코드 > 오픈코드류: 통기타에서 흔히 쓰는 개방현 포함 코드. 6·5번줄뿐
@@ -2676,10 +2682,18 @@ try {
     return t('bass4');
   }
 
+  // 기본코드 모드로 들어올 때(또는 그 안에서 코드 종류가 남아있을 때) 축소된
+  // BASIC_QUALITIES 밖의 값이 남아있으면 메이저로 되돌린다.
+  function ensureValidBasicQuality() {
+    if (state.mode === 'basic' && BASIC_QUALITIES.indexOf(state.quality) === -1) {
+      state.quality = 'major';
+    }
+  }
+
   function renderQualities() {
     var el = document.getElementById('gt-qualities');
     el.innerHTML = '';
-    var keys = Object.keys(QUALITIES);
+    var keys = state.mode === 'basic' ? BASIC_QUALITIES : Object.keys(QUALITIES);
     for (var i = 0; i < keys.length; i++) {
       (function (k) {
         var b = document.createElement('button');
@@ -3102,6 +3116,7 @@ try {
 
   function render() {
     renderCodeStatic();
+    ensureValidBasicQuality();
     renderModes();
     renderRoots();
     renderBasicTypeToggle();
