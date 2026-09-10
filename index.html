@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>기타 코드 뷰어</title>
+<title>board-labs</title>
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600&display=swap">
 <style>
   :root {
@@ -712,7 +712,7 @@
     <div class="home-footer-inner">
       <div class="home-footer-label" id="home-creator-label">제작자 정보</div>
       <div class="home-footer-body">
-        박태준 · <span id="home-creator-contact">광고문의</span> <a href="mailto:etude_8838@naver.com">etude_8838@naver.com</a>
+        <span id="home-creator-name">박태준</span> · <span id="home-creator-contact">광고문의</span> <a href="mailto:etude_8838@naver.com">etude_8838@naver.com</a>
       </div>
     </div>
   </footer>
@@ -720,7 +720,7 @@
 
 <div id="app">
   <h1 id="code-h1">기타 코드 지판 뷰어</h1>
-  <h2 class="sr-only">기타 지판 위 트라이어드/4화음 위치와 멜로디 보이싱, 오픈 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
+  <h2 class="sr-only" id="code-sr-desc">기타 지판 위 트라이어드/4화음 위치와 멜로디 보이싱, 오픈 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
 
   <div id="gt-error"></div>
 
@@ -960,6 +960,13 @@ try {
       navHome: '홈', navCode: '코드', navProgression: '코드진행', navProgressionBadge: '개발중', navScale: '스케일',
 
       homeTitle: '기타 코드 지판 뷰어',
+      codeSrDesc: '기타 지판 위 트라이어드/4화음 위치와 멜로디 보이싱, 오픈 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램',
+      svgFretboardTitle: '프렛보드 다이어그램',
+      svgFretboardDesc: '선택한 루트음과 탑노트에 맞는 음정 위치, 프렛 묶기 켜짐 시 그립 구간 박스를 표시',
+      svgScaleTitle: '스케일 다이어그램',
+      svgScaleDesc: '선택한 루트음과 스케일에 맞는 음정 위치를 전체 지판에 표시',
+      svgOpenVoicingTitle: '오픈 보이싱 다이어그램',
+      svgOpenVoicingDesc: '선택한 오픈 보이싱 그립 하나를 표시 (개방현/뮤트 포함)',
       homeHeroTitle: '코드를 외우지 말고, 지판에서 보세요.',
       homeHeroSub: '루트음과 코드 종류만 고르면 지판 전체에서 손으로 잡을 수 있는 그립을 그대로 보여드립니다.',
       homeCtaCode: '코드 보기',
@@ -969,6 +976,7 @@ try {
       homeBoard: '자유게시판',
       homeBoardFallback: '댓글판을 여는 중이에요. 잠시만 기다려주세요 — 안 뜨면 새로고침 해보세요.',
       homeCreator: '제작자 정보',
+      homeCreatorName: '박태준',
       homeCreatorContact: '광고문의',
       homeFeatureCode: {
         title: '코드',
@@ -1090,6 +1098,13 @@ try {
       navHome: 'Home', navCode: 'Chords', navProgression: 'Progression', navProgressionBadge: 'WIP', navScale: 'Scale',
 
       homeTitle: 'Guitar Chord Fretboard Viewer',
+      codeSrDesc: 'An interactive diagram of triad/four-note chord positions on the guitar fretboard, with melody voicing, open voicing, and fret-grouping features',
+      svgFretboardTitle: 'Fretboard diagram',
+      svgFretboardDesc: 'Shows interval positions for the selected root and top note, with grip-range boxes when fret grouping is on',
+      svgScaleTitle: 'Scale diagram',
+      svgScaleDesc: 'Shows interval positions across the full fretboard for the selected root and scale',
+      svgOpenVoicingTitle: 'Open voicing diagram',
+      svgOpenVoicingDesc: 'Shows one selected open-voicing grip (including open/muted strings)',
       homeHeroTitle: 'Stop memorizing chords. See them on the fretboard.',
       homeHeroSub: 'Pick a root and a chord type — see every real, playable grip across the whole neck.',
       homeCtaCode: 'View Chords',
@@ -1099,6 +1114,7 @@ try {
       homeBoard: 'Discussion Board',
       homeBoardFallback: 'Loading the comment board — if it doesn\'t appear, try refreshing.',
       homeCreator: 'About the Creator',
+      homeCreatorName: 'Taejun Park',
       homeCreatorContact: 'Business inquiries',
       homeFeatureCode: {
         title: 'Chords',
@@ -1372,6 +1388,15 @@ try {
     subdominant: { label: '서브도미넌트 — 이동/준비', desc: '토닉에서 벗어나 다른 곳으로 가려는 자리. 도미넌트로 가기 전 준비 단계로도 많이 씀.' },
     dominant:    { label: '도미넌트 — 긴장→해결',    desc: '긴장감이 강해서 토닉으로 돌아가고 싶어함. 진행 끝에서 해결감을 만드는 자리.' }
   };
+  // FUNCTION_INFO의 영문판 — state.lang이 'en'일 때 functionInfo()가 이걸 골라 씀.
+  var FUNCTION_INFO_EN = {
+    tonic:       { label: 'Tonic — Stable',              desc: 'The "home" chord — feels settled and at rest. Starting or ending a progression here gives a stable resolution.' },
+    subdominant: { label: 'Subdominant — Motion/Setup',  desc: 'The spot that pulls away from the tonic toward somewhere else. Often used to set up the dominant before it resolves.' },
+    dominant:    { label: 'Dominant — Tension → Resolution', desc: 'Strong tension that wants to pull back to the tonic. Creates the sense of resolution at the end of a progression.' }
+  };
+  function functionInfo(key) {
+    return (state.lang === 'en' && FUNCTION_INFO_EN[key]) || FUNCTION_INFO[key];
+  }
 
   // QUALITIES에 없는 화음(마이너메이저7 등)을 스케일 운용법 표시에서만
   // 쓰기 위한 보조 테이블 — "코드 종류" 메뉴 등 다른 곳에는 영향 없음.
@@ -1709,6 +1734,252 @@ try {
       context: '도미넌트7(b9,#9,#11,13) 코드 위, 특히 II7이나 강한 이차 도미넌트에 사용.'
     }
   };
+
+  // SCALE_USAGE의 영문판. 구조(diatonic/roman/offset/qual, character·avoid의 label 등
+  // 음악 표기 자체는 언어와 무관하므로 중복 저장하지 않고, 설명 텍스트만 담는다.
+  // progressions/targetNotes/chordFit/usageNotes는 SCALE_USAGE와 같은 배열 순서로
+  // 텍스트만 대응시키고, scaleUsageFor()가 인덱스를 맞춰 병합한다.
+  var SCALE_USAGE_EN = {
+    ionian: {
+      progressions: [
+        'Rock/pop/country — a bright, straightforward 3-chord progression',
+        'The "four magic chords" — shows up in countless pop hits (Let It Be, Don\'t Stop Believin\', etc.)',
+        '1950s doo-wop / early rock and roll — smooth circular motion (Stand By Me, etc.)',
+        'The core jazz-standard progression — resolves with strong forward momentum'
+      ],
+      targetNotes: [
+        'Emphasize the 3rd and 7th — the most stable landing point',
+        'Emphasize the b3 to make the minor color clear',
+        'Emphasize the 5th — shared with the I chord, so it connects naturally',
+        'Emphasize the 3rd — creates a pull back toward I',
+        'Emphasize the 3rd (leading tone) and b7 — their tritone resolves strongly to I',
+        'Emphasize the b3 — feels like I\'s relative minor',
+        'Emphasize the b5 to maximize instability, then resolve to I or vi'
+      ],
+      character: { desc: 'This note is what makes it sound Ionian (major 7th)' },
+      avoid: { desc: 'Clashes a half-step against the 3rd over major-family chords — use it as a passing tone, don\'t linger' },
+      context: 'Use over major-family chords (Maj, Maj6, Maj7, Maj9, 6/9), especially across an entire major-key diatonic progression.'
+    },
+    dorian: {
+      progressions: [
+        '👉 Use it here: a modal vamp shuttling between a minor tonic and a major IV — Santana\'s "Oye Como Va" (Am7-D7) is exactly this progression',
+        'A common Dorian progression in rock/funk',
+        'A static modal sound circling the tonic — the melody of Simon & Garfunkel\'s "Scarborough Fair" is in this mode'
+      ],
+      targetNotes: [
+        'Make sure to include the 6th (major 6th) to show it\'s Dorian — a b6 would turn it into Aeolian',
+        'This chord is Dorian\'s signature. Moving to the major chord a 4th up, the 6th resolves naturally into its 3rd',
+        'Emphasize the 5th — the spot that eases smoothly back to the tonic'
+      ],
+      character: { desc: 'Major 6th — the note that distinguishes Dorian from Aeolian\'s (natural minor\'s) b6' },
+      context: 'Use over minor-7-family chords (m7, m9, m6, m11, m13). With no clear avoid note, it\'s the easiest minor mode to work with, and it\'s common in static modal vamps in funk/jazz/rock.'
+    },
+    phrygian: {
+      progressions: [
+        '👉 Use it here: a dark, exotic move up a half-step — Metallica\'s "Wherever I May Roam" main riff is in E Phrygian',
+        'A dark modal vamp circling the tonic — like the intro to Megadeth\'s "Symphony of Destruction"'
+      ],
+      targetNotes: [
+        'Brush past the b2 quickly — linger too long and it gets too unstable',
+        'This chord is Phrygian\'s signature. The half-step move up from the tonic is the whole point of the tension'
+      ],
+      character: { desc: 'Minor 2nd — the half-step attack unique to Phrygian among minor modes' },
+      avoid: { desc: 'The b2 clashes with the root, and the b6 clashes with the 5th (both a half-step) — it\'s the character note and the caution note at once' },
+      context: 'Use over minor-family chords when you want a dark, exotic sound (flamenco, metal, Middle Eastern/Spanish flavors).'
+    },
+    lydian: {
+      progressions: [
+        '👉 Use it here: moving to a major chord a whole step up, a floating, dreamlike feel — Joe Satriani\'s "Flying in a Blue Dream" (C Lydian) is the textbook example',
+        'A static Lydian vamp common in film scores/ambient music — the opening of The Simpsons theme'
+      ],
+      targetNotes: [
+        'Actively emphasize the #4 (#11) — this note is basically the whole point of Lydian',
+        'This chord is Lydian\'s signature. The #4 of the I chord becomes this chord\'s root'
+      ],
+      character: { desc: 'Augmented 4th — Lydian\'s identity itself' },
+      context: 'Use over major-7-family chords (especially Maj7#11). With no avoid note, it\'s far more freely usable than Ionian, and suits dreamy, cinematic sounds.'
+    },
+    mixolydian: {
+      progressions: [
+        '👉 Use it here: Lynyrd Skynyrd\'s "Sweet Home Alabama" is exactly this progression (D-C-G)',
+        'A dominant-tonic vamp common in blues/rock'
+      ],
+      targetNotes: [
+        'Emphasize the b7 to make the dominant quality clear (a major 7th would turn it into Ionian)',
+        'Emphasize the 5th — the spot that eases smoothly back to the tonic'
+      ],
+      character: { desc: 'Minor 7th — the point where it splits from Ionian, giving it a dominant quality' },
+      avoid: { desc: 'Clashes a half-step against the 3rd (same reason as Ionian) — use only as a passing tone' },
+      context: 'Use over dominant-7-family chords — a very common sound in rock/blues/country/funk.'
+    },
+    aeolian: {
+      progressions: [
+        '👉 Use it here: Bob Dylan\'s "All Along the Watchtower" (famously the Jimi Hendrix version) repeats exactly this progression throughout',
+        'The basic natural-minor cadence (v is minor, so the pull is weak — for a stronger resolution use harmonic minor\'s V7)',
+        'A rock progression in the style of Ozzy Osbourne\'s "Crazy Train"'
+      ],
+      targetNotes: [
+        'Emphasize the b3/b7 — a natural minor feel',
+        'Use as a color chord that steps slightly away from the tonic',
+        'The path back to the tonic — emphasize the 5th'
+      ],
+      character: { desc: 'Minor 6th — the darkness unique to Aeolian, distinguishing it from Dorian\'s major 6th' },
+      avoid: { desc: 'Clashes a half-step against the 5th — it\'s the character note and the caution note at once' },
+      context: 'Use over minor-7-family chords — the most common "minor" sound in pop/rock.'
+    },
+    locrian: {
+      progressions: [
+        '👉 Use it here: far more common as a brief passing spot at the ii° of a minor-key ii-V-i (e.g. Dm7b5 - G7 - Cm) than as a standalone progression. There\'s essentially no famous song carried by Locrian alone for its whole duration'
+      ],
+      targetNotes: [
+        'Emphasize the b5 (a chord tone) and the b3. Only brush past the b2 — it clashes directly with the root'
+      ],
+      character: { desc: 'Diminished 5th — the identity of the half-diminished (m7b5) chord' },
+      avoid: { desc: 'Clashes directly a half-step against the root — lingering on it sounds very unstable' },
+      context: 'Use over m7b5 chords. Most commonly appears briefly at the ii° spot of a minor-key ii-V-i progression, and is rarely used as a standalone tonal center.'
+    },
+    harmonicMinor: {
+      progressions: [
+        'The core reason harmonic minor exists — in a minor key the V7 resolves strongly to i (a much stronger cadence than plain m7-m)',
+        'A tense progression where the fully-diminished vii°7 resolves by half-steps to the tonic'
+      ],
+      targetNotes: [
+        'Emphasize the major 7th (leading tone) — this is what makes the V7 possible and gives it that harmonic-minor character',
+        'The tritone between the 3rd (leading tone) and b7 resolves strongly to i — the core of jazz/classical cadences',
+        'A fully-diminished 7th chord — every note resolves upward by a half-step to a chord tone'
+      ],
+      character: { desc: 'The major 7th (leading tone) missing from natural minor — this note is what makes the V7 chord possible' },
+      context: 'Use when you want a strong V7→i resolution in a minor key, or over a minor tonic (m/maj7) or vii°7 chord. The augmented 2nd between b6 and 7 can make phrasing sound slightly exotic (which is part of the appeal).'
+    },
+    melodicMinor: {
+      chordFit: ['Minor tonic chords — why jazz calls this the "jazz minor"'],
+      usageNotes: [
+        'Descending, it\'s often reverted to natural minor — this tool only covers the ascending form.',
+        'Starting from the 2nd through 7th degrees of this scale gives the 6 "melodic minor modes" below — each is more practical used separately over its own specific chord.'
+      ],
+      character: { desc: 'Minor scale with a major 7th — this combination is "jazz minor"\'s identity' },
+      context: 'Use directly over minor-tonic chords (m/maj7, m6), or via the 6 modes below over their respective chords (dominant7#11, altered, etc.).'
+    },
+    dorianB2: {
+      chordFit: ['Minor-sus family — when you want a b9 color'],
+      usageNotes: ['The 2nd mode of melodic minor. Dorian plus a b2, so it\'s used to add a bit of extra tension over minor-sus chords.'],
+      character: { desc: 'The note where it splits from Dorian' },
+      context: 'Use over m7(b9)-family chords. In practice, the least-used of the 6 melodic-minor modes.'
+    },
+    lydianAug: {
+      chordFit: ['Major-7 family with an augmented 5th'],
+      usageNotes: ['The 3rd mode of melodic minor. Lydian with a #5 added — even more floating than Lydian.'],
+      character: { desc: 'The note where it splits from Lydian' },
+      context: 'Use over Maj7#5 chords, for striking color harmonies.'
+    },
+    lydianDominant: {
+      chordFit: ['Dominant-7 chords that are set aside rather than resolved'],
+      usageNotes: ['The 4th mode of melodic minor — Mixolydian with a #4 (#11) added. The classic dominant-7#11 sound of Duke Ellington\'s "Take the A Train" is this scale.'],
+      character: { desc: 'Also called #11 — the point where it splits from Mixolydian, raising the avoid-note 4 to remove the clash' },
+      context: 'Use over dominant-7#11 chords, especially dominant-7 chords like II7 or IV7 that don\'t resolve straight to I.'
+    },
+    mixolydianB6: {
+      chordFit: ['Dominant-7 family with a b13 color'],
+      usageNotes: ['The 5th mode of melodic minor — Mixolydian with a b6 (b13) added. Fits naturally over a V7 resolving to a minor key (the b6 overlaps the destination minor key\'s b6).'],
+      character: { desc: 'Also called b13 — the point where it splits from Mixolydian' },
+      context: 'Use over a V7(b13) that resolves to a minor key.'
+    },
+    locrianSharp2: {
+      chordFit: ['Half-diminished chords — hence also called the "half-diminished scale"'],
+      usageNotes: ['The 6th mode of melodic minor. It raises Locrian\'s avoid note b2 to a natural 2nd, making it far easier to work with than Locrian. The standard choice for the ii° (m7b5) spot in a minor-key ii-V-i.'],
+      character: { desc: 'Natural 2nd — the point where it splits from Locrian, removing the avoid-note b2' },
+      context: 'Use over m7b5 chords, most standardly at the ii° spot of a minor-key ii-V-i progression.'
+    },
+    altered: {
+      chordFit: [{ label: '7alt (7b9, 7#9, 7#11, 7#5, etc.)', desc: 'Altered dominant — jazz\'s most tension-heavy dominant sound' }],
+      usageNotes: [
+        'The 7th mode of melodic minor (super Locrian). It contains every b9/#9/b5/#5 tension, so the approach is to pick whichever of these you want.',
+        'In practice, keep the chord itself (R-3-b7) and freely choose the remaining tensions — stacking the scale tones in strict order won\'t match the chord.'
+      ],
+      character: { desc: 'The #5 (b13) is used alongside it — the core of altered tensions' },
+      context: 'Use over V7alt chords, especially the standard choice for a V7 resolving to minor in a jazz ii-V-i.'
+    },
+    majorPent: {
+      chordFit: [{ label: 'Maj, Maj6, Maj7, 6/9, dominant-7 family', desc: 'Missing the 3rd and 4th, so it can be used safely without worrying about Ionian\'s avoid note (the 4)' }],
+      usageNotes: ['With no avoid note built in at all, it\'s the safest scale to use from total beginner to advanced level.', 'The go-to weapon for rock/country/pop lead guitar.'],
+      character: { desc: 'The major 6th creates its signature bright, upbeat feel' },
+      context: 'Use over major-family chords — safely usable, in effect, across an entire major-key diatonic progression.'
+    },
+    minorPent: {
+      chordFit: [{ label: 'm, m7, m9, dominant-7 (blues progressions)', desc: 'The basic scale for rock/blues lead' }],
+      usageNotes: ['Missing the 2nd and 6th, so phrasing feels natural with no notes to trip over.', 'In blues progressions it\'s also common practice to lay the minor pentatonic over major chords to get that "bluesy" feel.'],
+      character: { desc: 'The minor 3rd creates the minor/bluesy color' },
+      context: 'Use over minor-family chords, and conventionally over an entire blues/rock progression (even when major chords are mixed in).'
+    },
+    blues: {
+      chordFit: [{ label: 'Dominant 7 (12-bar blues), m7', desc: 'Minor pentatonic plus a b5 (blue note)' }],
+      usageNotes: ['The standard is to treat the b5 (blue note) as a passing tone — lingering on it can sound awkward.', 'The traditional approach is to ride out a single blues scale across an entire 12-bar blues progression even as the chords change.'],
+      character: { desc: 'The blue note — blues scale\'s identity' },
+      context: 'Traditionally used straight through a 12-bar blues, rock, or blues-rock progression regardless of the chord changes.'
+    },
+    wholeTone: {
+      chordFit: [{ label: '7(#5), 7(#11), augmented', desc: 'Unresolved (floating) dominant/augmented family' }],
+      usageNotes: ['Every interval is a whole step, so it feels directionless and dreamlike — a favorite of impressionist composers like Debussy.', 'There are only 2 distinct whole-tone scales, so starting from any root you\'ll often overlap notes with another.'],
+      character: { desc: 'The augmented 5th creates the augmented/floating feel' },
+      context: 'Use over augmented chords or dominant-7#5/#11 chords that defer resolution, when a dreamy, impressionistic color is needed.'
+    },
+    dimWH: {
+      chordFit: [{ label: 'Fully-diminished 7th (dim7)', desc: 'A symmetrical scale alternating whole-step, half-step' }],
+      usageNotes: ['A symmetrical structure — the exact same scale repeats every minor 3rd (every 4th root).'],
+      character: { desc: 'Along with the b5 and 6, matches the tones of a fully-diminished 7th chord' },
+      context: 'Use over fully-diminished 7th (dim7) chords, in passages where a diminished chord passes through in classical/jazz.'
+    },
+    dimHW: {
+      chordFit: ['Dominant 7 with altered tensions — the "dominant diminished scale"'],
+      usageNotes: ['A symmetrical scale alternating half-step, whole-step. Along with the altered scale, treated as one of the two main color scales for jazz dominant 7 chords.'],
+      character: { desc: 'The #9 appears too — matches altered-dominant tensions' },
+      context: 'Use over dominant-7(b9,#9,#11,13) chords, especially strong secondary dominants or II7.'
+    }
+  };
+
+  // SCALE_USAGE(한글 원본)의 구조(diatonic/roman/offset/qual, label 등)는 그대로 두고,
+  // state.lang==='en'일 때만 SCALE_USAGE_EN의 설명 텍스트를 같은 배열 인덱스에 맞춰
+  // 덮어씌운 사본을 돌려준다. 영문 항목이 비어있으면(누락 방지) 한글 원문으로 폴백.
+  function scaleUsageFor(key) {
+    var base = SCALE_USAGE[key];
+    if (!base) { return null; }
+    if (state.lang !== 'en') { return base; }
+    var en = SCALE_USAGE_EN[key];
+    if (!en) { return base; }
+    var merged = {
+      kind: base.kind,
+      diatonic: base.diatonic,
+      useFunction: base.useFunction,
+      character: { label: base.character.label, desc: (en.character && en.character.desc) || base.character.desc },
+      avoid: base.avoid ? { label: base.avoid.label, desc: (en.avoid && en.avoid.desc) || base.avoid.desc } : null,
+      context: en.context || base.context
+    };
+    if (base.kind === 'modal') {
+      merged.progressions = base.progressions.map(function (p, i) {
+        return { roman: p.roman, vibe: (en.progressions && en.progressions[i]) || p.vibe };
+      });
+      if (base.targetNotes) {
+        merged.targetNotes = base.targetNotes.map(function (tn, i) {
+          return { roman: tn.roman, tip: (en.targetNotes && en.targetNotes[i]) || tn.tip };
+        });
+      }
+    } else {
+      merged.chordFit = base.chordFit.map(function (cf, i) {
+        // chordFit 라벨 자체(코드 표기)엔 한글 설명(예: "도미넌트7 계열")이 섞인
+        // 경우가 있어 라벨도 번역이 필요할 수 있다 — 그런 항목만 EN 쪽에
+        // {label, desc} 객체로 저장하고, 순수 코드 표기뿐인 라벨은 문자열(desc만)로 둔다.
+        var enEntry = en.chordFit && en.chordFit[i];
+        if (enEntry && typeof enEntry === 'object') {
+          return { label: enEntry.label || cf.label, desc: enEntry.desc || cf.desc };
+        }
+        return { label: cf.label, desc: enEntry || cf.desc };
+      });
+      merged.usageNotes = base.usageNotes ? base.usageNotes.map(function (note, i) {
+        return (en.usageNotes && en.usageNotes[i]) || note;
+      }) : base.usageNotes;
+    }
+    return merged;
+  }
 
   // ---------------------------------------------------------------
   // 2. 상태
@@ -2467,8 +2738,8 @@ try {
     var maxFret = 15, x0 = 110, dx = 68, y0 = 40, dy = 30;
 
     var svg = '<svg width="100%" viewBox="0 0 1164 240" role="img">' +
-      '<title>프렛보드 다이어그램</title>' +
-      '<desc>선택한 루트음과 탑노트에 맞는 음정 위치, 프렛 묶기 켜짐 시 그립 구간 박스를 표시</desc>';
+      '<title>' + t('svgFretboardTitle') + '</title>' +
+      '<desc>' + t('svgFretboardDesc') + '</desc>';
 
     if (boxes) {
       for (var bi = 0; bi < boxes.length; bi++) {
@@ -2551,8 +2822,8 @@ try {
     var maxFret = 15, x0 = 110, dx = 68, y0 = 40, dy = 30;
 
     var svg = '<svg width="100%" viewBox="0 0 1164 240" role="img">' +
-      '<title>스케일 다이어그램</title>' +
-      '<desc>선택한 루트음과 스케일에 맞는 음정 위치를 전체 지판에 표시</desc>';
+      '<title>' + t('svgScaleTitle') + '</title>' +
+      '<desc>' + t('svgScaleDesc') + '</desc>';
 
     svg += '<rect x="' + x0 + '" y="' + (y0 - 2) + '" width="4" height="' + (dy * 5 + 4) +
       '" fill="var(--text-primary)" opacity="0.6"/>';
@@ -2624,8 +2895,8 @@ try {
     var playable = isStructurallyPlayable(shape);
 
     var svg = '<svg width="100%" viewBox="0 0 1164 240" role="img">' +
-      '<title>오픈 보이싱 다이어그램</title>' +
-      '<desc>선택한 오픈 보이싱 그립 하나를 표시 (개방현/뮤트 포함)</desc>';
+      '<title>' + t('svgOpenVoicingTitle') + '</title>' +
+      '<desc>' + t('svgOpenVoicingDesc') + '</desc>';
 
     if (!playable) {
       svg += '<text x="' + x0 + '" y="14" font-size="13" font-weight="600" fill="var(--text-danger)" style="font-family:var(--font-sans)">' + t('unplayableBanner') + '</text>';
@@ -2730,7 +3001,7 @@ try {
         boxes.push({
           start: Math.max(1, minF),
           end: Math.max(1, maxF),
-          label: state.topString + '번줄=' + g.topLabel,
+          label: t('stringN', { n: state.topString }) + '=' + g.topLabel,
           color: LABEL_COLOR[g.topLabel]
         });
       }
@@ -2869,6 +3140,7 @@ try {
 
   function renderCodeStatic() {
     document.getElementById('code-h1').textContent = t('homeTitle');
+    document.getElementById('code-sr-desc').textContent = t('codeSrDesc');
     document.getElementById('label-modes').textContent = t('labelModes');
     document.getElementById('label-root-top').textContent = t('labelRootTop');
     document.getElementById('label-topstring').textContent = t('labelTopString');
@@ -3129,6 +3401,7 @@ try {
     // 언어 토글과 무관하게 항상 영문. i18n을 거치지 않는다. 공지사항 라벨도
     // 마찬가지(HTML에 "News"로 이미 고정 표기, 여기서 덮어쓰지 않음).
     document.getElementById('home-creator-label').textContent = t('homeCreator');
+    document.getElementById('home-creator-name').textContent = t('homeCreatorName');
     document.getElementById('home-creator-contact').textContent = t('homeCreatorContact');
   }
 
@@ -3205,7 +3478,7 @@ try {
   function renderScaleUsage() {
     var el = document.getElementById('scale-usage');
     el.innerHTML = '';
-    var usage = SCALE_USAGE[state.scaleKey];
+    var usage = scaleUsageFor(state.scaleKey);
     if (!usage) { return; } // 아직 정리 안 된 스케일은 섹션 자체를 숨김
 
     var heading = document.createElement('div');
@@ -3258,7 +3531,7 @@ try {
           fnLabel.style.fontWeight = '600';
           fnLabel.style.color = 'var(--text-secondary)';
           fnLabel.style.marginBottom = '4px';
-          fnLabel.textContent = FUNCTION_INFO[fnKey].label + ' — ' + FUNCTION_INFO[fnKey].desc;
+          fnLabel.textContent = functionInfo(fnKey).label + ' — ' + functionInfo(fnKey).desc;
           fnWrap.appendChild(fnLabel);
           var row = document.createElement('div');
           row.className = 'gt-flex';
