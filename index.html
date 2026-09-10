@@ -457,6 +457,40 @@
     .ad-rail { display: flex; }
   }
 
+  /* 좁은 화면(양옆 세로 레일이 안 뜨는 폭)용 가로형 광고 — 세로 레일을
+     억지로 줄이지 않고, 관리자가 따로 올린 가로형 이미지를 본문 흐름
+     안에 넣는다. 가로형 이미지가 없으면 빈 placeholder만 보임. */
+  .ad-inline-row {
+    display: none;
+    gap: 16px;
+    max-width: 1120px;
+    margin: 0 auto 8px;
+    padding: 0 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ad-inline {
+    flex: 1 1 280px;
+    max-width: 480px;
+    min-height: 80px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    overflow: hidden;
+  }
+  .ad-inline.has-ad { border: none; background: none; display: block; }
+  .ad-inline.has-ad a { display: block; line-height: 0; }
+  .ad-inline.has-ad img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
+  @media (max-width: 1899px) {
+    .ad-inline-row { display: flex; }
+  }
+
   /* 광고관리자모드 진입용 비밀번호 모달 */
   #admin-modal-overlay {
     display: none;
@@ -543,6 +577,7 @@
   .admin-upload-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
   .admin-upload-row input[type="file"] { font-size: 0.75rem; color: var(--text-secondary); max-width: 220px; }
   .admin-upload-hint { font-size: 0.6875rem; color: var(--text-muted); margin: -2px 0 10px; }
+  .admin-wide-label { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--border); }
 
   /* 재질(반투명/블러)을 지원하지 않거나 원치 않는 환경 — 불투명 표면으로 대체 */
   @media (prefers-reduced-transparency: reduce) {
@@ -636,6 +671,11 @@
       </div>
     </div>
   </section>
+
+  <div class="ad-inline-row" id="ad-inline-row">
+    <div id="ad-inline-left" class="ad-inline">광고 영역</div>
+    <div id="ad-inline-right" class="ad-inline">광고 영역</div>
+  </div>
 
   <section class="home-section">
     <div class="home-section-inner">
@@ -767,6 +807,16 @@
     </div>
     <div class="admin-upload-hint" id="admin-upload-hint-1">업로드하면 자동으로 압축해서 위 URL 칸에 채워져요.</div>
     <img id="admin-left-preview" class="admin-img-preview" alt="" hidden>
+
+    <div class="admin-field-label admin-wide-label" id="admin-wide-img-label-1">가로형 이미지 URL (좁은 화면용)</div>
+    <input id="admin-left-img-wide" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-upload-row">
+      <span class="admin-field-label" id="admin-wide-upload-label-1" style="margin:0;">또는 가로형 이미지 파일 업로드</span>
+      <input id="admin-left-file-wide" type="file" accept="image/*">
+    </div>
+    <div class="admin-upload-hint" id="admin-wide-upload-hint-1">화면이 좁으면(양옆 세로 배너가 안 뜨는 크기) 세로형 대신 이 이미지가 본문 안에 보여요. 안 넣으면 좁은 화면엔 광고가 안 보여요.</div>
+    <img id="admin-left-preview-wide" class="admin-img-preview" alt="" hidden>
+
     <div class="admin-field-label" id="admin-link-label-1">클릭 시 이동할 링크 URL</div>
     <input id="admin-left-link" class="admin-input" type="text" placeholder="https://...">
     <div class="admin-click-stat" id="admin-left-clicks"></div>
@@ -782,6 +832,16 @@
     </div>
     <div class="admin-upload-hint" id="admin-upload-hint-2">업로드하면 자동으로 압축해서 위 URL 칸에 채워져요.</div>
     <img id="admin-right-preview" class="admin-img-preview" alt="" hidden>
+
+    <div class="admin-field-label admin-wide-label" id="admin-wide-img-label-2">가로형 이미지 URL (좁은 화면용)</div>
+    <input id="admin-right-img-wide" class="admin-input" type="text" placeholder="https://...">
+    <div class="admin-upload-row">
+      <span class="admin-field-label" id="admin-wide-upload-label-2" style="margin:0;">또는 가로형 이미지 파일 업로드</span>
+      <input id="admin-right-file-wide" type="file" accept="image/*">
+    </div>
+    <div class="admin-upload-hint" id="admin-wide-upload-hint-2">화면이 좁으면(양옆 세로 배너가 안 뜨는 크기) 세로형 대신 이 이미지가 본문 안에 보여요. 안 넣으면 좁은 화면엔 광고가 안 보여요.</div>
+    <img id="admin-right-preview-wide" class="admin-img-preview" alt="" hidden>
+
     <div class="admin-field-label" id="admin-link-label-2">클릭 시 이동할 링크 URL</div>
     <input id="admin-right-link" class="admin-input" type="text" placeholder="https://...">
     <div class="admin-click-stat" id="admin-right-clicks"></div>
@@ -990,6 +1050,9 @@ try {
       adminUploadHint: '업로드하면 자동으로 압축해서 위 URL 칸에 채워져요. 투명 배경 PNG가 아니면 웬만한 사진/스크린샷은 다 통과돼요.',
       adminImgTooBig: '이미지가 너무 커요 (압축해도 약 1.1MB 초과). 투명 배경이 꼭 필요한 게 아니면 JPG로, 혹은 더 작은/단순한 이미지로 시도해주세요.',
       adminUploadFailed: '이미지를 처리하지 못했어요. 다른 파일로 시도해주세요.',
+      adminWideImgLabel: '가로형 이미지 URL (좁은 화면용)',
+      adminWideUploadLabel: '또는 가로형 이미지 파일 업로드',
+      adminWideUploadHint: '화면이 좁으면(양옆 세로 배너가 안 뜨는 크기) 세로형 대신 이 이미지가 본문 안에 보여요. 안 넣으면 좁은 화면엔 광고가 안 보여요.',
       adminLinkLabel: '클릭 시 이동할 링크 URL',
       adminSave: '저장',
       adminClear: '전체 초기화',
@@ -1117,6 +1180,9 @@ try {
       adminUploadHint: 'Uploading auto-compresses it and fills the URL field above. Any photo or screenshot works unless it needs a transparent PNG background.',
       adminImgTooBig: 'That image is too large even compressed (over ~1.1MB). If it doesn\'t need a transparent background, try a JPG, or a smaller/simpler image.',
       adminUploadFailed: 'Could not process that image. Try a different file.',
+      adminWideImgLabel: 'Landscape image URL (for narrow screens)',
+      adminWideUploadLabel: 'Or upload a landscape image file',
+      adminWideUploadHint: 'On narrow screens (where the side rails don\'t fit), this shows inline in the page instead of the portrait image. Leave it empty and no ad shows on narrow screens.',
       adminLinkLabel: 'Link URL (opens on click)',
       adminSave: 'Save',
       adminClear: 'Clear All',
@@ -1642,7 +1708,9 @@ try {
     scaleKey: 'ionian',    // 스케일 모드: 선택한 스케일 (SCALE_GROUPS 키)
     lang: 'ko',            // 'ko' | 'en' — UI 언어 (스케일 운용법 설명 본문은 아직 한글 전용)
     adAuthed: false,       // 광고관리자모드 비밀번호 인증 여부 (세션 한정, sessionStorage에 저장)
-    adConfig: { left: { img: '', link: '' }, right: { img: '', link: '' } }, // 좌우 배너 설정
+    // 좌우 배너 설정 — img(세로형, 넓은 화면용 사이드 레일)와 imgWide(가로형,
+    // 좁은 화면에서 본문 안에 대신 넣는 이미지)를 따로 관리
+    adConfig: { left: { img: '', imgWide: '', link: '' }, right: { img: '', imgWide: '', link: '' } },
     adClicks: { left: 0, right: 0 }, // 배너별 클릭수 (Firebase 연결 시에만 실제 값)
     liveVisitors: 0        // 실시간 접속자 수 (Firebase 연결 시에만 의미 있는 값)
   };
@@ -1720,8 +1788,8 @@ try {
     fbDb.ref('ads').on('value', function (snap) {
       var val = snap.val() || {};
       state.adConfig = {
-        left: { img: (val.left && val.left.img) || '', link: (val.left && val.left.link) || '' },
-        right: { img: (val.right && val.right.img) || '', link: (val.right && val.right.link) || '' }
+        left: { img: (val.left && val.left.img) || '', imgWide: (val.left && val.left.imgWide) || '', link: (val.left && val.left.link) || '' },
+        right: { img: (val.right && val.right.img) || '', imgWide: (val.right && val.right.imgWide) || '', link: (val.right && val.right.link) || '' }
       };
       try { localStorage.setItem(AD_STORAGE_KEY, JSON.stringify(state.adConfig)); } catch (e) { /* 무시 */ }
       renderAdRails();
@@ -1739,8 +1807,8 @@ try {
   function saveAdConfig() {
     try { localStorage.setItem(AD_STORAGE_KEY, JSON.stringify(state.adConfig)); } catch (e) { /* 무시 */ }
     if (fbEnabled) {
-      fbDb.ref('ads/left').set({ img: state.adConfig.left.img, link: state.adConfig.left.link, _secret: ADMIN_PW_HASH });
-      fbDb.ref('ads/right').set({ img: state.adConfig.right.img, link: state.adConfig.right.link, _secret: ADMIN_PW_HASH });
+      fbDb.ref('ads/left').set({ img: state.adConfig.left.img, imgWide: state.adConfig.left.imgWide, link: state.adConfig.left.link, _secret: ADMIN_PW_HASH });
+      fbDb.ref('ads/right').set({ img: state.adConfig.right.img, imgWide: state.adConfig.right.imgWide, link: state.adConfig.right.link, _secret: ADMIN_PW_HASH });
     }
   }
 
@@ -3315,19 +3383,35 @@ try {
 
   // 좌우 배너 자리 — state.adConfig에 이미지/링크가 있으면 그 광고를,
   // 없으면 자리표시자 텍스트를 보여준다. nav/뷰와 무관하게 항상 최신 상태로 갱신.
+  // 넓은 화면(세로 레일)과 좁은 화면(본문 안 가로형, imgWide)을 각각 채운다 —
+  // 어느 쪽이 실제로 보이는지는 CSS 미디어쿼리가 정한다.
   function renderAdRails() {
     ['left', 'right'].forEach(function (side) {
-      var el = document.getElementById('ad-rail-' + side);
       var cfg = state.adConfig[side];
+
+      var railEl = document.getElementById('ad-rail-' + side);
       if (cfg && cfg.img) {
-        el.classList.add('has-ad');
-        var img = '<img src="' + cfg.img.replace(/"/g, '&quot;') + '" alt="">';
-        el.innerHTML = cfg.link
-          ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored" onclick="window.__gtAdClick && window.__gtAdClick(\'' + side + '\')">' + img + '</a>'
-          : img;
+        railEl.classList.add('has-ad');
+        var railImg = '<img src="' + cfg.img.replace(/"/g, '&quot;') + '" alt="">';
+        railEl.innerHTML = cfg.link
+          ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored" onclick="window.__gtAdClick && window.__gtAdClick(\'' + side + '\')">' + railImg + '</a>'
+          : railImg;
       } else {
-        el.classList.remove('has-ad');
-        el.textContent = t('adRailPlaceholder');
+        railEl.classList.remove('has-ad');
+        railEl.textContent = t('adRailPlaceholder');
+      }
+
+      var inlineEl = document.getElementById('ad-inline-' + side);
+      if (!inlineEl) { return; } // 홈 화면 전용 요소 — 아직 안 그려졌을 수도 있음
+      if (cfg && cfg.imgWide) {
+        inlineEl.classList.add('has-ad');
+        var inlineImg = '<img src="' + cfg.imgWide.replace(/"/g, '&quot;') + '" alt="">';
+        inlineEl.innerHTML = cfg.link
+          ? '<a href="' + cfg.link.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener sponsored" onclick="window.__gtAdClick && window.__gtAdClick(\'' + side + '\')">' + inlineImg + '</a>'
+          : inlineImg;
+      } else {
+        inlineEl.classList.remove('has-ad');
+        inlineEl.textContent = t('adRailPlaceholder');
       }
     });
   }
@@ -3384,26 +3468,37 @@ try {
     document.getElementById('admin-link-label-2').textContent = t('adminLinkLabel');
     document.getElementById('admin-upload-label-2').textContent = t('adminUploadLabel');
     document.getElementById('admin-upload-hint-2').textContent = t('adminUploadHint');
+    document.getElementById('admin-wide-img-label-1').textContent = t('adminWideImgLabel');
+    document.getElementById('admin-wide-upload-label-1').textContent = t('adminWideUploadLabel');
+    document.getElementById('admin-wide-upload-hint-1').textContent = t('adminWideUploadHint');
+    document.getElementById('admin-wide-img-label-2').textContent = t('adminWideImgLabel');
+    document.getElementById('admin-wide-upload-label-2').textContent = t('adminWideUploadLabel');
+    document.getElementById('admin-wide-upload-hint-2').textContent = t('adminWideUploadHint');
     document.getElementById('admin-save-btn').textContent = t('adminSave');
     document.getElementById('admin-clear-btn').textContent = t('adminClear');
     document.getElementById('admin-logout-btn').textContent = t('adminLogout');
     document.getElementById('admin-save-msg').textContent = '';
 
     document.getElementById('admin-left-img').value = state.adConfig.left.img || '';
+    document.getElementById('admin-left-img-wide').value = state.adConfig.left.imgWide || '';
     document.getElementById('admin-left-link').value = state.adConfig.left.link || '';
     document.getElementById('admin-right-img').value = state.adConfig.right.img || '';
+    document.getElementById('admin-right-img-wide').value = state.adConfig.right.imgWide || '';
     document.getElementById('admin-right-link').value = state.adConfig.right.link || '';
 
     // 이미지 URL 입력칸의 현재 값으로 미리보기 썸네일을 갱신 (직접 URL을 타이핑하거나
     // 파일 업로드로 data URI가 채워졌을 때 모두 이 함수 하나로 처리).
-    function refreshPreview(side) {
-      var url = document.getElementById('admin-' + side + '-img').value.trim();
-      var preview = document.getElementById('admin-' + side + '-preview');
+    // variant: '' = 세로형(사이드 레일), '-wide' = 가로형(좁은 화면 본문용)
+    function refreshPreview(side, variant) {
+      var url = document.getElementById('admin-' + side + '-img' + variant).value.trim();
+      var preview = document.getElementById('admin-' + side + '-preview' + variant);
       if (url) { preview.src = url; preview.hidden = false; } else { preview.hidden = true; preview.src = ''; }
     }
     ['left', 'right'].forEach(function (side) {
-      refreshPreview(side);
-      document.getElementById('admin-' + side + '-img').oninput = function () { refreshPreview(side); };
+      refreshPreview(side, '');
+      refreshPreview(side, '-wide');
+      document.getElementById('admin-' + side + '-img').oninput = function () { refreshPreview(side, ''); };
+      document.getElementById('admin-' + side + '-img-wide').oninput = function () { refreshPreview(side, '-wide'); };
       document.getElementById('admin-' + side + '-file').onchange = function (e) {
         var file = e.target.files && e.target.files[0];
         if (!file) { return; }
@@ -3413,7 +3508,23 @@ try {
             return;
           }
           document.getElementById('admin-' + side + '-img').value = dataUrl;
-          refreshPreview(side);
+          refreshPreview(side, '');
+          document.getElementById('admin-save-msg').textContent = '';
+        }).catch(function () {
+          document.getElementById('admin-save-msg').textContent = t('adminUploadFailed');
+        });
+      };
+      // 가로형은 폭 위주(1200x600)로 압축 — 세로형(480x1400)과 다른 비율 대상
+      document.getElementById('admin-' + side + '-file-wide').onchange = function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) { return; }
+        compressImageFile(file, 1200, 600, 0.85).then(function (dataUrl) {
+          if (dataUrl.length > 1500000) {
+            document.getElementById('admin-save-msg').textContent = t('adminImgTooBig');
+            return;
+          }
+          document.getElementById('admin-' + side + '-img-wide').value = dataUrl;
+          refreshPreview(side, '-wide');
           document.getElementById('admin-save-msg').textContent = '';
         }).catch(function () {
           document.getElementById('admin-save-msg').textContent = t('adminUploadFailed');
@@ -3423,15 +3534,17 @@ try {
 
     document.getElementById('admin-save-btn').onclick = function () {
       state.adConfig.left.img = document.getElementById('admin-left-img').value.trim();
+      state.adConfig.left.imgWide = document.getElementById('admin-left-img-wide').value.trim();
       state.adConfig.left.link = document.getElementById('admin-left-link').value.trim();
       state.adConfig.right.img = document.getElementById('admin-right-img').value.trim();
+      state.adConfig.right.imgWide = document.getElementById('admin-right-img-wide').value.trim();
       state.adConfig.right.link = document.getElementById('admin-right-link').value.trim();
       saveAdConfig();
       renderAdRails();
       document.getElementById('admin-save-msg').textContent = t('adminSaved');
     };
     document.getElementById('admin-clear-btn').onclick = function () {
-      state.adConfig = { left: { img: '', link: '' }, right: { img: '', link: '' } };
+      state.adConfig = { left: { img: '', imgWide: '', link: '' }, right: { img: '', imgWide: '', link: '' } };
       saveAdConfig();
       renderAdRails();
       renderAdminView();
