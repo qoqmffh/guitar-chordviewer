@@ -590,11 +590,31 @@
     .gt-btn, .nav-btn, .prog-remove { transition: background 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
   }
 
-  /* 태블릿 폭: 좌우 코너 문구가 나란히 놓이기엔 좁아서(둘이 합쳐 최대
-     1024px) 겹치거나 너무 눌려 보일 수 있는 구간 — 모바일 전용 규칙보다
-     먼저 적용해두고, 그 안의 더 좁은 모바일 규칙이 필요하면 덮어쓴다. */
+  /* 태블릿/모바일 폭: 상단 바에 워드마크+메뉴 4개를 다 욱여넣고 가로
+     스크롤로 때우던 방식 대신, 메뉴를 오른쪽에 떠 있는 세로 독(dock)으로
+     빼서 광고 하단바처럼 스크롤해도 계속 따라다니게 한다. 상단 바에는
+     워드마크/언어토글/접속자 배지만 남아서 훨씬 여유로워진다. */
   @media (max-width: 1024px) {
-    #topnav-links { overflow-x: auto; }
+    #topnav-links {
+      position: fixed;
+      top: 70px;
+      right: 12px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      background: #f6f4ee;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: var(--radius-card);
+      padding: 8px;
+      box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.3);
+      z-index: 8;
+    }
+    #topnav-links .nav-btn {
+      padding: 7px 14px;
+      text-align: right;
+      border-radius: var(--radius);
+    }
+    #topnav-links .nav-btn.active { background: rgba(0, 0, 0, 0.07); text-decoration: none; }
     .bl-annotation-row { flex-direction: column; gap: 32px; }
     .bl-annotation.right { align-items: flex-start; text-align: left; }
     .bl-annotation, .bl-annotation.left { max-width: none; }
