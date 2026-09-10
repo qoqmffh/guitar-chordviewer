@@ -166,9 +166,22 @@
      padding 값은 그대로 두고, 홈에서만 음수 마진으로 상쇄한다. */
   #app-home { margin-top: -24px; }
   /* 흰 카드 박스 없이 스케일 페이지처럼 크림 배경 위에 내용이 바로 놓이게 */
-  #app, #app-progression, #app-admin {
+  #app, #app-progression, #app-admin, #app-wip {
     max-width: 1200px;
     margin: 0 auto;
+  }
+  /* 아직 안 만든 메뉴 자리표시자 — 이모지+한 줄 안내문 가운데 정렬 */
+  #app-wip {
+    padding: 96px 16px;
+    text-align: center;
+  }
+  .wip-emoji { font-size: 2.75rem; line-height: 1; margin-bottom: 14px; }
+  .wip-text {
+    font-family: var(--font-chakra);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
   }
   .prog-slot {
     display: flex;
@@ -658,7 +671,11 @@
     <div id="topnav-links">
       <button id="nav-product" class="nav-btn active">PRODUCT</button>
       <button id="nav-code" class="nav-btn">CHORD</button>
-      <button id="nav-scale" class="nav-btn">SCALE</button>
+      <button id="nav-scale" class="nav-btn">SCALES</button>
+      <button id="nav-tools" class="nav-btn">TOOLS <span class="nav-badge">🚧</span></button>
+      <button id="nav-major-edu" class="nav-btn">MAJOR EDU <span class="nav-badge">🚧</span></button>
+      <button id="nav-harmony" class="nav-btn">HARMONY <span class="nav-badge">🚧</span></button>
+      <button id="nav-my" class="nav-btn">MY <span class="nav-badge">🚧</span></button>
       <button id="nav-about" class="nav-btn">ABOUT</button>
       <button id="nav-admin" class="nav-btn" hidden>🔒 <span id="nav-admin-text">광고관리자모드</span></button>
     </div>
@@ -823,6 +840,13 @@
 
   <div id="scale-chordtone-grips-title" style="display:none; font-size:1rem; font-weight:600; letter-spacing:-0.005em; margin-bottom:8px;"></div>
   <div id="scale-chordtone-grips"></div>
+</div>
+
+<!-- 아직 안 만든 메뉴(TOOLS/MAJOR EDU/HARMONY/MY) 전부가 공유하는 자리표시자
+     페이지 — 어느 메뉴를 눌렀든 똑같이 "개발중입니다" 안내만 보여준다. -->
+<div id="app-wip" style="display:none;">
+  <div class="wip-emoji">🚧</div>
+  <div class="wip-text" id="wip-text">개발중입니다.</div>
 </div>
 
 <div id="app-admin" style="display:none;">
@@ -1068,6 +1092,7 @@ try {
       },
 
       navAdmin: '광고관리자모드',
+      wipText: '개발중입니다.',
       adRailPlaceholder: '광고 영역',
       adminModalTitle: '광고관리자모드',
       adminModalDesc: '비밀번호를 입력하세요.',
@@ -1202,6 +1227,7 @@ try {
       },
 
       navAdmin: 'Ad Admin',
+      wipText: 'Under construction.',
       adRailPlaceholder: 'Ad Space',
       adminModalTitle: 'Ad Admin Mode',
       adminModalDesc: 'Enter the password.',
@@ -1984,7 +2010,9 @@ try {
     quality: 'major',    // QUALITIES 키
     topString: 1,        // 탑노트 기준 모드에서 선택한 줄 번호
     fretGroup: false,     // 탑노트 기준 모드에서 프렛 묶기 켜짐/꺼짐
-    activeView: 'home',   // 'home' | 'code' | 'progression' | 'scale' | 'admin' (왼쪽 메뉴)
+    activeView: 'home',   // 'home' | 'code' | 'progression' | 'scale' | 'admin' |
+                           // 'tools' | 'majorEdu' | 'harmony' | 'my' (마지막 4개는
+                           // 아직 실제 기능 없이 #app-wip 자리표시자만 보여줌)
     progression: [{ root: 0, quality: 'major' }], // 코드진행: 코드 슬롯 목록
     progFretMin: 4,       // 코드진행: 프렛 범위 시작
     progFretMax: 7,       // 코드진행: 프렛 범위 끝
@@ -3958,17 +3986,30 @@ try {
     };
   }
 
+  // 아직 실제 기능이 없는 메뉴 4개 — 전부 #app-wip 자리표시자 하나를 공유한다.
+  var WIP_VIEWS = ['tools', 'majorEdu', 'harmony', 'my'];
+
+  function renderWipView() {
+    document.getElementById('wip-text').textContent = t('wipText');
+  }
+
   function renderApp() {
     renderTopNav();
     renderAdRails();
+    var isWip = WIP_VIEWS.indexOf(state.activeView) !== -1;
     document.getElementById('app-home').style.display = state.activeView === 'home' ? 'block' : 'none';
     document.getElementById('app').style.display = state.activeView === 'code' ? 'block' : 'none';
     document.getElementById('app-progression').style.display = state.activeView === 'progression' ? 'block' : 'none';
     document.getElementById('app-scale').style.display = state.activeView === 'scale' ? 'block' : 'none';
     document.getElementById('app-admin').style.display = state.activeView === 'admin' ? 'block' : 'none';
+    document.getElementById('app-wip').style.display = isWip ? 'block' : 'none';
     document.getElementById('nav-product').className = 'nav-btn' + (state.activeView === 'home' ? ' active' : '');
     document.getElementById('nav-code').className = 'nav-btn' + (state.activeView === 'code' ? ' active' : '');
     document.getElementById('nav-scale').className = 'nav-btn' + (state.activeView === 'scale' ? ' active' : '');
+    document.getElementById('nav-tools').className = 'nav-btn' + (state.activeView === 'tools' ? ' active' : '');
+    document.getElementById('nav-major-edu').className = 'nav-btn' + (state.activeView === 'majorEdu' ? ' active' : '');
+    document.getElementById('nav-harmony').className = 'nav-btn' + (state.activeView === 'harmony' ? ' active' : '');
+    document.getElementById('nav-my').className = 'nav-btn' + (state.activeView === 'my' ? ' active' : '');
     document.getElementById('nav-about').className = 'nav-btn' + (state.activeView === 'progression' ? ' active' : '');
     document.getElementById('nav-admin').className = 'nav-btn' + (state.activeView === 'admin' ? ' active' : '');
     // 로그인 전엔 메뉴 자체를 숨긴다 — 일반 방문자는 "광고관리자모드"가
@@ -3986,15 +4027,23 @@ try {
       renderScale();
     } else if (state.activeView === 'admin') {
       renderAdminView();
+    } else if (isWip) {
+      renderWipView();
     }
   }
 
   // board-labs 브랜드 내비 매핑: 워드마크/PRODUCT는 홈, ABOUT은 (당분간)
   // 코드진행 기능으로 연결 — 전용 About 페이지가 생기기 전까지의 임시 매핑.
+  // TOOLS/MAJOR EDU/HARMONY/MY는 메뉴만 만들어두고 전부 자리표시자로 연결
+  // (실제 기능은 아직 없음, 사용자 요청으로 메뉴 틀만 먼저 세팅).
   document.getElementById('topnav-brand').onclick = function () { state.activeView = 'home'; renderApp(); };
   document.getElementById('nav-product').onclick = function () { state.activeView = 'home'; renderApp(); };
   document.getElementById('nav-code').onclick = function () { state.activeView = 'code'; renderApp(); };
   document.getElementById('nav-scale').onclick = function () { state.activeView = 'scale'; renderApp(); };
+  document.getElementById('nav-tools').onclick = function () { state.activeView = 'tools'; renderApp(); };
+  document.getElementById('nav-major-edu').onclick = function () { state.activeView = 'majorEdu'; renderApp(); };
+  document.getElementById('nav-harmony').onclick = function () { state.activeView = 'harmony'; renderApp(); };
+  document.getElementById('nav-my').onclick = function () { state.activeView = 'my'; renderApp(); };
   document.getElementById('nav-about').onclick = function () { state.activeView = 'progression'; renderApp(); };
   document.getElementById('nav-admin').onclick = function () { tryOpenAdminEntry(); };
   document.getElementById('lang-toggle').onclick = function () { state.lang = state.lang === 'ko' ? 'en' : 'ko'; renderApp(); };
