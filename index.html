@@ -163,14 +163,10 @@
      한 줄 노출시키고 있었다 — 다른 페이지(코드/스케일 등)에 쓰는 이
      padding 값은 그대로 두고, 홈에서만 음수 마진으로 상쇄한다. */
   #app-home { margin-top: -24px; }
+  /* 흰 카드 박스 없이 스케일 페이지처럼 크림 배경 위에 내용이 바로 놓이게 */
   #app, #app-progression, #app-admin {
     max-width: 1200px;
     margin: 0 auto;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: 32px 40px;
-    box-shadow: 0 4px 24px -12px rgba(0, 0, 0, 0.1);
   }
   .prog-slot {
     display: flex;
@@ -539,7 +535,6 @@
   }
   @media (prefers-contrast: more) {
     #topnav { background: var(--surface-2); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom-color: var(--text-primary); }
-    #app, #app-progression { border: 1px solid var(--text-primary); }
     .gt-btn, .nav-btn { border-color: var(--text-primary); }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -552,7 +547,6 @@
     #topnav-links { overflow-x: auto; }
     #page-content { padding: 16px 10px 0; }
     #app-home { margin-top: -16px; }
-    #app, #app-progression { padding: 20px 18px; border-radius: 14px; }
     h1 { font-size: 1.5rem; }
     .bl-hero { padding: 40px 20px 56px; }
     .bl-annotation-row { flex-direction: column; gap: 32px; }
