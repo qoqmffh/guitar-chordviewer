@@ -159,6 +159,46 @@
     white-space: nowrap;
     vertical-align: 1px;
   }
+  /* 태블릿/모바일 전용 메뉴 열기/닫기 버튼(햄버거) — 데스크톱에선 숨김.
+     세로 독 메뉴가 8개로 늘어나서 화면을 계속 가리지 않도록, 이 버튼으로
+     펼치기 전엔 기본으로 닫혀 있게 한다. 눌러보고 싶게 확실한 입체감을
+     주기 위해 아래쪽 그림자(눌림 전)+테두리로 "떠 있는 버튼"처럼 보이게
+     하고, 누르는 순간 그림자가 줄고 살짝 눌리는 것처럼 이동한다. */
+  .nav-toggle-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 38px;
+    flex: 0 0 auto;
+    border-radius: var(--radius);
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    background: #fbfaf6;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.16), 0 5px 12px -4px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+    transition: box-shadow 120ms ease, transform 120ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-toggle-btn:hover { background: #ffffff; }
+  }
+  .nav-toggle-btn:active {
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0.16), 0 2px 5px -2px rgba(0, 0, 0, 0.2);
+    transform: translateY(2px);
+  }
+  .nav-toggle-bars { display: flex; flex-direction: column; gap: 4px; }
+  .nav-toggle-bars span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 1px;
+    background: #1a1a1a;
+    transform-origin: center;
+    transition: transform 200ms ease, opacity 150ms ease;
+  }
+  .nav-toggle-btn.open .nav-toggle-bars span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .nav-toggle-btn.open .nav-toggle-bars span:nth-child(2) { opacity: 0; }
+  .nav-toggle-btn.open .nav-toggle-bars span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
   #page-content { max-width: 1280px; margin: 0 auto; padding: 24px 16px 0; }
   /* 홈 화면 히어로는 nav 바로 밑에 크림 배경이 딱 붙어야 하는데,
      #page-content의 top padding(24px)이 그 사이에 body 배경(회색)을
@@ -609,12 +649,16 @@
     .gt-btn, .nav-btn, .prog-remove { transition: background 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
   }
 
-  /* 태블릿/모바일 폭: 상단 바에 워드마크+메뉴 4개를 다 욱여넣고 가로
+  /* 태블릿/모바일 폭: 상단 바에 워드마크+메뉴 8개를 다 욱여넣고 가로
      스크롤로 때우던 방식 대신, 메뉴를 오른쪽에 떠 있는 세로 독(dock)으로
      빼서 광고 하단바처럼 스크롤해도 계속 따라다니게 한다. 상단 바에는
-     워드마크/언어토글/접속자 배지만 남아서 훨씬 여유로워진다. */
+     워드마크/언어토글/접속자 배지+햄버거 버튼만 남아서 훨씬 여유로워진다.
+     메뉴가 8개로 늘어난 뒤로는 화면을 계속 가리지 않도록 햄버거 버튼으로
+     열고 닫게 하고, 기본은 닫힌 상태(.open 클래스가 붙어야만 보임). */
   @media (max-width: 1024px) {
+    .nav-toggle-btn { display: inline-flex; }
     #topnav-links {
+      display: none;
       position: fixed;
       top: 70px;
       right: 12px;
@@ -628,6 +672,7 @@
       box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.3);
       z-index: 8;
     }
+    #topnav-links.open { display: flex; }
     #topnav-links .nav-btn {
       padding: 7px 14px;
       text-align: right;
@@ -668,6 +713,9 @@
         <span id="live-visitor-text"></span>
       </div>
     </div>
+    <button id="nav-menu-toggle" class="nav-toggle-btn" aria-expanded="false">
+      <span class="nav-toggle-bars"><span></span><span></span><span></span></span>
+    </button>
     <div id="topnav-links">
       <button id="nav-product" class="nav-btn active">PRODUCT</button>
       <button id="nav-code" class="nav-btn">CHORD</button>
@@ -1092,6 +1140,7 @@ try {
       },
 
       navAdmin: '광고관리자모드',
+      navMenuOpenLabel: '메뉴 열기', navMenuCloseLabel: '메뉴 닫기',
       wipText: '개발중입니다.',
       adRailPlaceholder: '광고 영역',
       adminModalTitle: '광고관리자모드',
@@ -1227,6 +1276,7 @@ try {
       },
 
       navAdmin: 'Ad Admin',
+      navMenuOpenLabel: 'Open menu', navMenuCloseLabel: 'Close menu',
       wipText: 'Under construction.',
       adRailPlaceholder: 'Ad Space',
       adminModalTitle: 'Ad Admin Mode',
@@ -2013,6 +2063,7 @@ try {
     activeView: 'home',   // 'home' | 'code' | 'progression' | 'scale' | 'admin' |
                            // 'tools' | 'majorEdu' | 'harmony' | 'my' (마지막 4개는
                            // 아직 실제 기능 없이 #app-wip 자리표시자만 보여줌)
+    mobileNavOpen: false,  // 태블릿/모바일 햄버거 메뉴 열림 여부 — 기본 닫힘
     progression: [{ root: 0, quality: 'major' }], // 코드진행: 코드 슬롯 목록
     progFretMin: 4,       // 코드진행: 프렛 범위 시작
     progFretMax: 7,       // 코드진행: 프렛 범위 끝
@@ -3801,6 +3852,11 @@ try {
   function renderTopNav() {
     document.getElementById('nav-admin-text').textContent = t('navAdmin');
     document.getElementById('lang-toggle').textContent = state.lang === 'ko' ? 'EN' : '한글';
+    var toggleBtn = document.getElementById('nav-menu-toggle');
+    toggleBtn.classList.toggle('open', state.mobileNavOpen);
+    toggleBtn.setAttribute('aria-expanded', state.mobileNavOpen ? 'true' : 'false');
+    toggleBtn.setAttribute('aria-label', t(state.mobileNavOpen ? 'navMenuCloseLabel' : 'navMenuOpenLabel'));
+    document.getElementById('topnav-links').classList.toggle('open', state.mobileNavOpen);
   }
 
   // 좌우 배너 자리 — state.adConfig에 이미지/링크가 있으면 그 광고를,
@@ -4032,20 +4088,35 @@ try {
     }
   }
 
+  // 목적지로 이동 + (태블릿/모바일이면) 열려 있던 햄버거 메뉴를 자동으로
+  // 닫는다 — 메뉴에서 뭔가 고르고 나면 메뉴가 내용을 계속 가리고 있을
+  // 이유가 없으므로.
+  function goToView(view) {
+    state.activeView = view;
+    state.mobileNavOpen = false;
+    renderApp();
+  }
+
   // board-labs 브랜드 내비 매핑: 워드마크/PRODUCT는 홈, ABOUT은 (당분간)
   // 코드진행 기능으로 연결 — 전용 About 페이지가 생기기 전까지의 임시 매핑.
   // TOOLS/MAJOR EDU/HARMONY/MY는 메뉴만 만들어두고 전부 자리표시자로 연결
   // (실제 기능은 아직 없음, 사용자 요청으로 메뉴 틀만 먼저 세팅).
-  document.getElementById('topnav-brand').onclick = function () { state.activeView = 'home'; renderApp(); };
-  document.getElementById('nav-product').onclick = function () { state.activeView = 'home'; renderApp(); };
-  document.getElementById('nav-code').onclick = function () { state.activeView = 'code'; renderApp(); };
-  document.getElementById('nav-scale').onclick = function () { state.activeView = 'scale'; renderApp(); };
-  document.getElementById('nav-tools').onclick = function () { state.activeView = 'tools'; renderApp(); };
-  document.getElementById('nav-major-edu').onclick = function () { state.activeView = 'majorEdu'; renderApp(); };
-  document.getElementById('nav-harmony').onclick = function () { state.activeView = 'harmony'; renderApp(); };
-  document.getElementById('nav-my').onclick = function () { state.activeView = 'my'; renderApp(); };
-  document.getElementById('nav-about').onclick = function () { state.activeView = 'progression'; renderApp(); };
-  document.getElementById('nav-admin').onclick = function () { tryOpenAdminEntry(); };
+  document.getElementById('topnav-brand').onclick = function () { goToView('home'); };
+  document.getElementById('nav-product').onclick = function () { goToView('home'); };
+  document.getElementById('nav-code').onclick = function () { goToView('code'); };
+  document.getElementById('nav-scale').onclick = function () { goToView('scale'); };
+  document.getElementById('nav-tools').onclick = function () { goToView('tools'); };
+  document.getElementById('nav-major-edu').onclick = function () { goToView('majorEdu'); };
+  document.getElementById('nav-harmony').onclick = function () { goToView('harmony'); };
+  document.getElementById('nav-my').onclick = function () { goToView('my'); };
+  document.getElementById('nav-about').onclick = function () { goToView('progression'); };
+  document.getElementById('nav-admin').onclick = function () { state.mobileNavOpen = false; tryOpenAdminEntry(); };
+  // 햄버거 버튼: 태블릿/모바일에서만 보이고(CSS), 누르면 세로 독 메뉴를 열고
+  // 닫는다. 기본은 닫힘(state.mobileNavOpen 기본값 false).
+  document.getElementById('nav-menu-toggle').onclick = function () {
+    state.mobileNavOpen = !state.mobileNavOpen;
+    renderTopNav();
+  };
   document.getElementById('lang-toggle').onclick = function () { state.lang = state.lang === 'ko' ? 'en' : 'ko'; renderApp(); };
 
   document.getElementById('admin-modal-cancel').onclick = closeAdminModal;
