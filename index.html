@@ -164,10 +164,14 @@
     vertical-align: 1px;
   }
   /* 2단 메뉴 구조(PRODUCT/TOOLS/COMMUNITY는 하위메뉴, ABOUT은 단독 리프).
-     .nav-parent는 그 자체로는 박스가 아니라 버튼+드롭다운(또는 모바일
-     풀스크린 패널)을 감싸는 위치 기준점일 뿐이라 position:relative만 준다
-     — 데스크톱 가로줄/모바일 세로열 어느 쪽에서도 버튼 하나만큼만 차지. */
-  .nav-parent { position: relative; }
+     PRODUCT/TOOLS/COMMUNITY 버튼과 그 하위메뉴(.nav-children)는 이제 형제
+     관계로 평평하게 두고(부모 래퍼로 감싸지 않음), #nav-mobile-main /
+     #nav-megamenu 두 래퍼가 breakpoint에 따라 display:contents가 되어
+     자기 자식들을 #topnav-links의 직계 자식처럼 넘겨준다 — 그래야
+     데스크톱에서 하위메뉴 3묶음이 각자 다른 위치 기준점 없이 한 장의
+     메가메뉴 패널 안에 나란히 놓이고, 모바일에서도 각 .nav-children이
+     (버튼 크기만한 상자가 아니라) #topnav-links 전체 크기의 진짜 풀스크린
+     패널로 앉는다. */
   .nav-parent-btn { display: inline-flex; align-items: center; gap: 4px; }
   .nav-parent-chevron { display: none; } /* 데스크톱에선 안 씀(호버로 열리니까), 모바일에서만 보임 */
   .nav-mobile-back { display: none; } /* 데스크톱에선 2단 구조 자체가 없어서 항상 숨김 */
@@ -763,6 +767,13 @@
     }
     #topnav-links.open { pointer-events: auto; }
 
+    /* #nav-megamenu(데스크톱 전용 래퍼)는 모바일에선 display:contents로
+       사라지고, 그 자식인 .nav-children 3개가 #topnav-links의 직계
+       자식처럼 취급된다 — 그래야 각자 #topnav-links(position:fixed) 전체
+       크기의 진짜 풀스크린 패널로 앉는다(이전엔 작은 버튼 상자 안에 갇혀
+       있던 버그였음). */
+    #nav-megamenu, #nav-megamenu-card { display: contents; }
+
     #nav-mobile-main, .nav-children {
       position: absolute;
       inset: 0;
@@ -779,6 +790,8 @@
     #topnav-links.open #nav-mobile-main { transform: translateX(0); }
     #topnav-links.level-2 #nav-mobile-main { transform: translateX(-100%); }
     #topnav-links.level-2 .nav-children.active { transform: translateX(0); }
+
+    .nav-mega-col-title { display: none; } /* 뒤로가기 버튼이 이미 카테고리명을 보여줌 */
 
     .nav-parent-btn, #nav-about, #nav-admin {
       width: 100%;
@@ -825,36 +838,63 @@
     .bl-annotation, .bl-annotation.left { max-width: none; }
   }
 
-  /* 데스크톱(≥1025px): PRODUCT/TOOLS/COMMUNITY 위에 마우스를 올리면(또는
-     키보드로 포커스가 들어가면) 세 카테고리의 하위메뉴 전부가 각자 자기
-     버튼 밑에 동시에 펼쳐지는 메가메뉴. 위에서 아래로 살짝 미끄러지듯
-     나타나게 opacity+translateY만 쓴다(자주 여닫는 요소라 과하지 않게). */
+  /* 데스크톱(≥1025px): PRODUCT/TOOLS/COMMUNITY 중 아무거나(또는 그 하위
+     내용) 위에 마우스를 올리면 세 카테고리 하위메뉴 전부가 "한 장의 카드"
+     안에 나란히 펼쳐지는 진짜 메가메뉴 — 예전처럼 하위메뉴마다 각자
+     버튼 밑에 따로 뜨는 여러 개의 겹치는 박스가 아니라, 하나로 통합된
+     패널 하나만 뜬다.
+     .nav-megamenu(바깥, 보이지 않는 히트박스)는 top:100%로 내비 바에
+     틈 없이 바로 붙여서(패딩으로만 시각적 여백을 줌) 마우스가 버튼에서
+     패널로 내려가는 경로 전체가 항상 호버 가능하게 하고, 그 안의
+     .nav-megamenu-card(실제로 보이는 카드)만 opacity/transform으로
+     열고 닫는다 — 이렇게 분리해야 "패널에 마우스를 올리려는 순간 닫히는"
+     문제(중간에 빈틈이 있으면 호버가 끊김)가 생기지 않는다. */
   @media (min-width: 1025px) {
     #nav-mobile-main { display: contents; }
-    .nav-children {
+    #topnav-links { position: relative; }
+
+    .nav-megamenu {
       position: absolute;
-      top: calc(100% + 18px);
+      top: 100%;
       left: 50%;
-      transform: translate(-50%, -8px);
+      transform: translateX(-50%);
+      padding-top: 14px; /* 안 보이지만 항상 호버 가능한 안전지대 — 여백은 여기로 만든다 */
+      z-index: 12;
+    }
+    .nav-megamenu-card {
+      display: flex;
+      gap: 8px;
+      background: #f6f4ee;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: var(--radius-card);
+      padding: 18px 20px;
+      box-shadow: 0 16px 34px -10px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+    }
+    #topnav-links:hover .nav-megamenu-card,
+    #topnav-links:focus-within .nav-megamenu-card {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .nav-mega-col {
       display: flex;
       flex-direction: column;
       gap: 2px;
       min-width: 172px;
-      background: #f6f4ee;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      border-radius: var(--radius-card);
-      padding: 8px;
-      box-shadow: 0 14px 32px -10px rgba(0, 0, 0, 0.35);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
-      z-index: 12;
+      padding: 0 12px;
     }
-    #topnav-links:hover .nav-children,
-    #topnav-links:focus-within .nav-children {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, 0);
+    .nav-mega-col + .nav-mega-col { border-left: 1px solid rgba(0, 0, 0, 0.1); }
+    .nav-mega-col-title {
+      font-family: var(--font-chakra);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: rgba(0, 0, 0, 0.4);
+      padding: 4px 10px 8px;
     }
     .nav-child {
       display: block;
@@ -870,7 +910,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #nav-mobile-main, .nav-children { transition-duration: 1ms; }
+    #nav-mobile-main, .nav-children, .nav-megamenu-card { transition-duration: 1ms; }
   }
   /* 좁은 화면: 브랜드/탭을 살짝 줄이고 카드 여백을 좁힌다 */
   @media (max-width: 720px) {
@@ -915,38 +955,43 @@
         <span id="nav-mobile-back-label"></span>
       </button>
       <div id="nav-mobile-main" class="nav-mobile-main">
-        <div class="nav-parent">
-          <button id="nav-parent-product" class="nav-btn nav-parent-btn active" aria-haspopup="true" aria-expanded="false">
-            PRODUCT <span class="nav-parent-chevron">›</span>
-          </button>
-          <div id="nav-children-product" class="nav-children">
+        <button id="nav-parent-product" class="nav-btn nav-parent-btn active" aria-haspopup="true" aria-expanded="false">
+          PRODUCT <span class="nav-parent-chevron">›</span>
+        </button>
+        <button id="nav-parent-tools" class="nav-btn nav-parent-btn" aria-haspopup="true" aria-expanded="false">
+          TOOLS <span class="nav-parent-chevron">›</span>
+        </button>
+        <button id="nav-parent-community" class="nav-btn nav-parent-btn" aria-haspopup="true" aria-expanded="false">
+          COMMUNITY <span class="nav-parent-chevron">›</span>
+        </button>
+        <button id="nav-about" class="nav-btn nav-leaf">ABOUT</button>
+        <button id="nav-admin" class="nav-btn nav-leaf" hidden>🔒 <span id="nav-admin-text">광고관리자모드</span></button>
+      </div>
+      <!-- 데스크톱: 한 장의 메가메뉴 카드로 통합해서 보여줌(nav-megamenu가
+           보이지 않는 호버 안전지대, 그 안의 -card가 실제로 보이는 패널).
+           모바일: 이 래퍼 2개는 display:contents로 사라지고 안쪽
+           .nav-children 3개가 각자 풀스크린 드릴다운 패널이 된다. -->
+      <div id="nav-megamenu" class="nav-megamenu">
+        <div id="nav-megamenu-card" class="nav-megamenu-card">
+          <div id="nav-children-product" class="nav-children nav-mega-col">
+            <div class="nav-mega-col-title">PRODUCT</div>
             <button id="nav-home" class="nav-btn nav-child active">HOME</button>
             <button id="nav-my" class="nav-btn nav-child">MY <span class="nav-badge">🚧</span></button>
           </div>
-        </div>
-        <div class="nav-parent">
-          <button id="nav-parent-tools" class="nav-btn nav-parent-btn" aria-haspopup="true" aria-expanded="false">
-            TOOLS <span class="nav-parent-chevron">›</span>
-          </button>
-          <div id="nav-children-tools" class="nav-children">
+          <div id="nav-children-tools" class="nav-children nav-mega-col">
+            <div class="nav-mega-col-title">TOOLS</div>
             <button id="nav-code" class="nav-btn nav-child">CHORD</button>
             <button id="nav-scale" class="nav-btn nav-child">SCALES</button>
             <button id="nav-harmony" class="nav-btn nav-child">REHAMONY <span class="nav-badge">🚧</span></button>
             <button id="nav-major-edu" class="nav-btn nav-child">MAJOR EDU <span class="nav-badge">🚧</span></button>
           </div>
-        </div>
-        <div class="nav-parent">
-          <button id="nav-parent-community" class="nav-btn nav-parent-btn" aria-haspopup="true" aria-expanded="false">
-            COMMUNITY <span class="nav-parent-chevron">›</span>
-          </button>
-          <div id="nav-children-community" class="nav-children">
+          <div id="nav-children-community" class="nav-children nav-mega-col">
+            <div class="nav-mega-col-title">COMMUNITY</div>
             <button id="nav-user-community" class="nav-btn nav-child">USER COMMUNITY <span class="nav-badge">🚧</span></button>
             <button id="nav-guitar-shop" class="nav-btn nav-child">GUITAR SHOP <span class="nav-badge">🚧</span></button>
             <button id="nav-effecter" class="nav-btn nav-child">EFFECTER <span class="nav-badge">🚧</span></button>
           </div>
         </div>
-        <button id="nav-about" class="nav-btn nav-leaf">ABOUT</button>
-        <button id="nav-admin" class="nav-btn nav-leaf" hidden>🔒 <span id="nav-admin-text">광고관리자모드</span></button>
       </div>
     </div>
   </div>
