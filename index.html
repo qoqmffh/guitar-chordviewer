@@ -501,10 +501,10 @@
   .ad-rail {
     display: none;
     position: fixed;
-    top: 64px;
+    top: 88px;
     width: 240px;
     height: 640px;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 104px);
     border: 1px dashed var(--border-strong);
     border-radius: var(--radius);
     background: var(--surface-2);
@@ -527,7 +527,7 @@
     background: none;
     padding: 0;
     height: auto;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 104px);
   }
   .ad-rail.has-ad a { display: block; line-height: 0; }
   /* width:100%인데 img에 max-height까지 걸면, 세로로 긴 이미지에서
@@ -1079,6 +1079,69 @@ try {
       var t = pressTarget(e.target);
       if (t) { animateScale(t, 1); }
     });
+  })();
+
+  // ---------------------------------------------------------------
+  // 0.2. 좌우 광고 레일 지연 추종("가속개념") — 큰 모니터에서만 뜨는
+  // position:fixed 세로 레일은 원래 스크롤과 완전히 동기화돼(순간이동) 딱
+  // 붙어 보인다. 스크롤한 만큼을 그 순간 반대 방향 오프셋으로 얹어놓고,
+  // 위 프레스 피드백과 똑같은 감쇠비/응답 스프링으로 그 오프셋을 0으로
+  // 되돌리기만 하면 "화면은 먼저 움직이고 배너가 살짝 늦게 따라와 부드럽게
+  // 제자리로 안착"하는 모양이 된다. 오버슈트 없이(임계감쇠) 안착시켜서
+  // 광고판이 통통 튀는 것처럼 보이지 않게 한다.
+  // ---------------------------------------------------------------
+  (function setupAdRailLazyFollow() {
+    var DAMPING = 1.0;   // 임계감쇠 — 광고판이 튕기면 어색하니 오버슈트 없이
+    var RESPONSE = 0.4;  // 버튼 프레스(0.25초)보다 훨씬 느긋하게, 눈에 보이는 "지연" 연출
+
+    function reducedMotion() {
+      return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+    function wideEnough() {
+      return window.matchMedia && window.matchMedia('(min-width: 1900px)').matches;
+    }
+
+    var rails = [document.getElementById('ad-rail-left'), document.getElementById('ad-rail-right')].filter(Boolean);
+    if (!rails.length) { return; }
+
+    var stiffness = Math.pow((2 * Math.PI) / RESPONSE, 2);
+    var dampCoef = DAMPING * 2 * Math.sqrt(stiffness);
+    var springs = rails.map(function () { return { value: 0, velocity: 0 }; });
+    var lastScrollY = window.scrollY || 0;
+    var lastTime = null;
+    var rafId = null;
+
+    function step(now) {
+      if (lastTime === null) { lastTime = now; }
+      var dt = Math.min((now - lastTime) / 1000, 0.032);
+      lastTime = now;
+      var stillMoving = false;
+      for (var i = 0; i < rails.length; i++) {
+        var s = springs[i];
+        var accel = -stiffness * s.value - dampCoef * s.velocity; // target은 항상 0(원래 제자리)
+        s.velocity += accel * dt;
+        s.value += s.velocity * dt;
+        if (Math.abs(s.value) < 0.05 && Math.abs(s.velocity) < 0.05) {
+          s.value = 0; s.velocity = 0;
+          rails[i].style.transform = '';
+        } else {
+          stillMoving = true;
+          rails[i].style.transform = 'translateY(' + s.value.toFixed(2) + 'px)';
+        }
+      }
+      if (stillMoving) { rafId = requestAnimationFrame(step); } else { rafId = null; lastTime = null; }
+    }
+
+    window.addEventListener('scroll', function () {
+      var y = window.scrollY || 0;
+      var delta = y - lastScrollY;
+      lastScrollY = y;
+      if (!delta || reducedMotion() || !wideEnough()) { return; }
+      // 화면이 delta만큼 먼저 움직였으니, 레일은 아직 그만큼 안 움직인 것처럼
+      // 반대 방향으로 밀어둔다 — 스프링이 이걸 다시 0으로 부드럽게 당겨온다.
+      for (var i = 0; i < springs.length; i++) { springs[i].value -= delta; }
+      if (!rafId) { rafId = requestAnimationFrame(step); }
+    }, { passive: true });
   })();
 
   // ---------------------------------------------------------------
