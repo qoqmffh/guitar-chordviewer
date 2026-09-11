@@ -336,6 +336,12 @@
     min-width: 2.75rem;
     text-align: center;
   }
+  /* .gt-segmented는 흰 알약+옅은 그림자로 "선택됨"을 표시하는데, 배경이 흰색에
+     가까운 화면(크림 배경 위)에서는 대비가 너무 낮아 거의 안 보인다. 난이도
+     선택처럼 "지금 뭘 골랐는지"가 중요한 곳엔 대신 이걸 써서 기본 .gt-btn.active
+     (검정 채움+흰 글씨)의 강한 대비를 그대로 유지하면서 칸 너비만 균등하게 맞춘다. */
+  .gt-tiles { gap: 8px !important; }
+  .gt-tiles .gt-btn { flex: 1 1 0; text-align: center; }
 
   .gt-grip {
     background: var(--surface-1);
@@ -1194,12 +1200,12 @@
 
   <div style="margin-bottom:16px;">
     <div class="gt-label" id="label-major-edu-chord-tier">코드 난이도</div>
-    <div id="major-edu-chord-tiers" class="gt-flex gt-segmented"></div>
+    <div id="major-edu-chord-tiers" class="gt-flex gt-tiles"></div>
   </div>
 
   <div style="margin-bottom:20px;">
     <div class="gt-label" id="label-major-edu-rhythm-tier">리듬 난이도</div>
-    <div id="major-edu-rhythm-tiers" class="gt-flex gt-segmented"></div>
+    <div id="major-edu-rhythm-tiers" class="gt-flex gt-tiles"></div>
   </div>
 
   <button id="major-edu-generate-btn" class="home-cta home-cta-primary" style="margin-bottom:20px;">출제지 생성</button>
@@ -2046,13 +2052,20 @@ try {
   // 되기 때문에 CSS 커스텀 프로퍼티가 해석되지 않는다.
   function buildMajorEduSVG(sheet) {
     var measuresPerRow = 4;
-    var measureW = 210, measureGap = 14, rowH = 170, startX = 16, startY = 50;
+    var measureW = 210, measureGap = 14, rowH = 130, startX = 16, startY = 20;
+    var cardH = 104;      // 마디 카드 실제 높이(rowH보다 작게 둬서 줄 사이 숨통 확보)
+    var padX = 16;        // 카드 안쪽 좌우 여백 — 코드기호/음표가 테두리에 닿지 않게
     var totalW = startX * 2 + measuresPerRow * measureW + (measuresPerRow - 1) * measureGap;
-    var totalH = startY + 2 * rowH + 20;
+    var totalH = startY + 2 * rowH + 14;
     var INK = '#1a1a1a';
-    var GUIDE = '#c9c5b8';
+    var CARD_FILL = '#ffffff';
+    var CARD_BORDER = 'rgba(26,26,26,0.28)';
+    var GUIDE = 'rgba(26,26,26,0.32)';
+    var FONT = "Arial, 'Helvetica Neue', Helvetica, sans-serif"; // 페이지 CSS 변수(var(--font-sans))는
+    // PNG로 내보낼 때 분리된 문서라 해석이 안 되므로, 온스크린/내보내기 결과가
+    // 항상 똑같도록 시스템 기본 산세리프를 고정으로 쓴다.
 
-    var svg = '<svg width="100%" viewBox="0 0 ' + totalW + ' ' + totalH + '" role="img">' +
+    var svg = '<svg width="100%" viewBox="0 0 ' + totalW + ' ' + totalH + '" role="img" font-family="' + FONT + '">' +
       '<title>' + t('svgMajorEduTitle') + '</title>' +
       '<desc>' + t('svgMajorEduDesc') + '</desc>';
 
@@ -2061,34 +2074,34 @@ try {
       var col = i % measuresPerRow;
       var x0 = startX + col * (measureW + measureGap);
       var y0 = startY + row * rowH;
-      var lineY = y0 + 46;
-      var stemTopY = lineY - 34;
       var xEnd = x0 + measureW;
-      var isLastMeasure = (i === sheet.measures.length - 1);
+      var lineY = y0 + 74;   // 리듬(슬래시) 기준선
+      var stemTopY = lineY - 32;
+      var innerX0 = x0 + padX;
+      var innerXEnd = xEnd - padX;
+      var innerW = innerXEnd - innerX0;
 
-      svg += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x0 + '" y2="' + (lineY + 10) + '" stroke="' + INK + '" stroke-width="' + (col === 0 ? 2.5 : 1.25) + '"/>';
-      svg += '<line x1="' + xEnd + '" y1="' + y0 + '" x2="' + xEnd + '" y2="' + (lineY + 10) + '" stroke="' + INK + '" stroke-width="' + (isLastMeasure ? 2.5 : 1.25) + '"/>';
-      if (isLastMeasure) {
-        svg += '<line x1="' + (xEnd - 5) + '" y1="' + y0 + '" x2="' + (xEnd - 5) + '" y2="' + (lineY + 10) + '" stroke="' + INK + '" stroke-width="1.25"/>';
-      }
-      svg += '<line x1="' + x0 + '" y1="' + lineY + '" x2="' + xEnd + '" y2="' + lineY + '" stroke="' + GUIDE + '" stroke-width="1"/>';
+      // 마디 하나 = 카드 한 장. 진한 얇은 선 대신 뚜렷한 테두리+흰 배경으로
+      // 마디 경계를 훨씬 잘 보이게 한다.
+      svg += '<rect x="' + x0 + '" y="' + y0 + '" width="' + measureW + '" height="' + cardH + '" rx="10" fill="' + CARD_FILL + '" stroke="' + CARD_BORDER + '" stroke-width="1.5"/>';
+      svg += '<line x1="' + (x0 + padX * 0.5) + '" y1="' + lineY + '" x2="' + (xEnd - padX * 0.5) + '" y2="' + lineY + '" stroke="' + GUIDE + '" stroke-width="1.5"/>';
 
       var hits = sheet.measures[i].hits;
       for (var h = 0; h < hits.length; h++) {
         var hit = hits[h];
-        var cx = x0 + ((hit.unit - 0.5) / 8) * measureW;
+        var cx = innerX0 + ((hit.unit - 0.5) / 8) * innerW;
         var dur = hitDurationUnits(sheet.measures[i], h);
 
-        svg += '<text x="' + cx + '" y="' + (y0 + 14) + '" text-anchor="middle" font-size="15" font-weight="700" fill="' + INK + '" style="font-family:var(--font-sans)">' + hit.chordLabel + '</text>';
-        svg += '<line x1="' + (cx - 6) + '" y1="' + (lineY + 6) + '" x2="' + (cx + 6) + '" y2="' + (lineY - 6) + '" stroke="' + INK + '" stroke-width="3"/>';
+        svg += '<text x="' + cx + '" y="' + (y0 + 26) + '" text-anchor="middle" font-size="19" font-weight="800" fill="' + INK + '">' + hit.chordLabel + '</text>';
+        svg += '<line x1="' + (cx - 7) + '" y1="' + (lineY + 7) + '" x2="' + (cx + 7) + '" y2="' + (lineY - 7) + '" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>';
 
         if (dur !== 8) {
-          svg += '<line x1="' + (cx + 5) + '" y1="' + (lineY - 5) + '" x2="' + (cx + 5) + '" y2="' + stemTopY + '" stroke="' + INK + '" stroke-width="2"/>';
+          svg += '<line x1="' + (cx + 6) + '" y1="' + (lineY - 6) + '" x2="' + (cx + 6) + '" y2="' + stemTopY + '" stroke="' + INK + '" stroke-width="2.5"/>';
           if (dur === 1) {
-            svg += '<path d="M' + (cx + 5) + ' ' + stemTopY + ' Q' + (cx + 16) + ' ' + (stemTopY + 6) + ' ' + (cx + 14) + ' ' + (stemTopY + 16) + '" stroke="' + INK + '" stroke-width="2" fill="none"/>';
+            svg += '<path d="M' + (cx + 6) + ' ' + stemTopY + ' Q' + (cx + 18) + ' ' + (stemTopY + 6) + ' ' + (cx + 16) + ' ' + (stemTopY + 17) + '" stroke="' + INK + '" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
           }
           if (dur === 3) {
-            svg += '<circle cx="' + (cx + 12) + '" cy="' + lineY + '" r="2" fill="' + INK + '"/>';
+            svg += '<circle cx="' + (cx + 13) + '" cy="' + lineY + '" r="2.5" fill="' + INK + '"/>';
           }
         }
       }
