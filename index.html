@@ -34,6 +34,7 @@
     /* 공지사항(한글) 전용 — HiKR(자체 호스팅, fonts/, ExtraBold 한 웨이트만 있음) */
     --font-hikr: 'HiKR', 'Orbit', var(--font-sans);
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* iOS 드로어 느낌 — 모바일 메뉴 슬라이드 전용 */
   }
   @font-face { font-family: 'Orbit'; src: url('fonts/Orbit-Regular.TTF') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
   @font-face { font-family: 'Chakra Petch'; src: url('fonts/ChakraPetch-Light.ttf') format('truetype'); font-weight: 300; font-style: normal; font-display: swap; }
@@ -162,8 +163,29 @@
     white-space: nowrap;
     vertical-align: 1px;
   }
+  /* 2단 메뉴 구조(PRODUCT/TOOLS/COMMUNITY는 하위메뉴, ABOUT은 단독 리프).
+     .nav-parent는 그 자체로는 박스가 아니라 버튼+드롭다운(또는 모바일
+     풀스크린 패널)을 감싸는 위치 기준점일 뿐이라 position:relative만 준다
+     — 데스크톱 가로줄/모바일 세로열 어느 쪽에서도 버튼 하나만큼만 차지. */
+  .nav-parent { position: relative; }
+  .nav-parent-btn { display: inline-flex; align-items: center; gap: 4px; }
+  .nav-parent-chevron { display: none; } /* 데스크톱에선 안 씀(호버로 열리니까), 모바일에서만 보임 */
+  .nav-mobile-back { display: none; } /* 데스크톱에선 2단 구조 자체가 없어서 항상 숨김 */
+  /* 모바일 메뉴 열렸을 때 뒤에 까는 반투명 배경 — 탭하면 메뉴 전체 닫힘.
+     데스크톱 메가메뉴는 호버로 열고 마우스를 빼면 닫히니 배경딤이 필요 없음. */
+  .mobile-nav-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms ease;
+    z-index: 7;
+  }
+  .mobile-nav-backdrop.open { opacity: 1; pointer-events: auto; }
   /* 태블릿/모바일 전용 메뉴 열기/닫기 버튼(햄버거) — 데스크톱에선 숨김.
-     세로 독 메뉴가 8개로 늘어나서 화면을 계속 가리지 않도록, 이 버튼으로
+     2단 드릴다운 메뉴가 화면을 계속 가리지 않도록, 이 버튼으로
      펼치기 전엔 기본으로 닫혀 있게 한다. 눌러보고 싶게 확실한 입체감을
      주기 위해 아래쪽 그림자(눌림 전)+테두리로 "떠 있는 버튼"처럼 보이게
      하고, 누르는 순간 그림자가 줄고 살짝 눌리는 것처럼 이동한다. */
@@ -717,39 +739,138 @@
     .gt-btn, .nav-btn, .prog-remove { transition: background 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
   }
 
-  /* 태블릿/모바일 폭: 상단 바에 워드마크+메뉴 8개를 다 욱여넣고 가로
-     스크롤로 때우던 방식 대신, 메뉴를 오른쪽에 떠 있는 세로 독(dock)으로
-     빼서 광고 하단바처럼 스크롤해도 계속 따라다니게 한다. 상단 바에는
-     워드마크/언어토글/접속자 배지+햄버거 버튼만 남아서 훨씬 여유로워진다.
-     메뉴가 8개로 늘어난 뒤로는 화면을 계속 가리지 않도록 햄버거 버튼으로
-     열고 닫게 하고, 기본은 닫힌 상태(.open 클래스가 붙어야만 보임). */
+  /* 태블릿/모바일 폭: 메뉴가 PRODUCT/TOOLS/COMMUNITY(하위메뉴 있음)+ABOUT
+     (단독)의 2단 구조라, 화면 오른쪽에서 밀고 들어오는 "화면 1(메인메뉴)"과
+     "화면 2(하위메뉴)"를 각각 통째로 슬라이드시키는 iOS 설정 앱 같은
+     드릴다운으로 만든다. 햄버거를 누르면 화면1이 오른쪽에서 들어오고,
+     PRODUCT/TOOLS/COMMUNITY 중 하나를 탭하면 화면1은 더 왼쪽으로 밀려나며
+     그 하위메뉴(화면2)가 똑같이 오른쪽에서 들어와 자리를 채운다 — 두 화면
+     다 정확히 같은 자리(가로/세로 꽉 채움)에 겹쳐 있다가 translateX로만
+     넘나들기 때문에 화면1이 사라지자마자 화면2가 그 자리를 이어받는
+     것처럼 보인다. */
   @media (max-width: 1024px) {
     .nav-toggle-btn { display: inline-flex; }
+    .mobile-nav-backdrop { display: block; }
+
     #topnav-links {
-      display: none;
+      display: block;
       position: fixed;
-      top: 70px;
-      right: 12px;
+      top: 0; right: 0; bottom: 0;
+      width: min(82vw, 320px);
+      z-index: 9;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    #topnav-links.open { pointer-events: auto; }
+
+    #nav-mobile-main, .nav-children {
+      position: absolute;
+      inset: 0;
+      display: flex;
       flex-direction: column;
-      align-items: stretch;
       gap: 4px;
+      padding: 76px 14px 20px;
+      background: #f6f4ee;
+      border-left: 1px solid rgba(0, 0, 0, 0.15);
+      box-shadow: -10px 0 28px -10px rgba(0, 0, 0, 0.3);
+      transform: translateX(100%);
+      transition: transform 340ms var(--ease-drawer);
+    }
+    #topnav-links.open #nav-mobile-main { transform: translateX(0); }
+    #topnav-links.level-2 #nav-mobile-main { transform: translateX(-100%); }
+    #topnav-links.level-2 .nav-children.active { transform: translateX(0); }
+
+    .nav-parent-btn, #nav-about, #nav-admin {
+      width: 100%;
+      padding: 10px 12px;
+      text-align: left;
+      border-radius: var(--radius);
+    }
+    .nav-parent-btn { justify-content: space-between; }
+    .nav-parent-chevron { display: inline-block; font-size: 1rem; opacity: 0.4; }
+    #topnav-links .nav-child {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+    }
+    #topnav-links .nav-btn.active { background: rgba(0, 0, 0, 0.07); text-decoration: none; }
+
+    /* 화면2(하위메뉴) 맨 위에 떠서 "‹ 이전 카테고리명"으로 화면1로 되돌아가는
+       버튼 — 두 슬라이딩 패널 위에 항상 얹혀 있어야 해서 별도 z-index. */
+    .nav-mobile-back {
+      display: none;
+      position: absolute;
+      top: 22px; left: 14px;
+      z-index: 2;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      font-family: var(--font-chakra);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      cursor: pointer;
+      padding: 4px 6px;
+    }
+    #topnav-links.level-2 .nav-mobile-back { display: flex; }
+    .nav-mobile-back-arrow { font-size: 1.15rem; line-height: 1; }
+
+    .bl-annotation-row { flex-direction: column; gap: 32px; }
+    .bl-annotation.right { align-items: flex-start; text-align: left; }
+    .bl-annotation, .bl-annotation.left { max-width: none; }
+  }
+
+  /* 데스크톱(≥1025px): PRODUCT/TOOLS/COMMUNITY 위에 마우스를 올리면(또는
+     키보드로 포커스가 들어가면) 세 카테고리의 하위메뉴 전부가 각자 자기
+     버튼 밑에 동시에 펼쳐지는 메가메뉴. 위에서 아래로 살짝 미끄러지듯
+     나타나게 opacity+translateY만 쓴다(자주 여닫는 요소라 과하지 않게). */
+  @media (min-width: 1025px) {
+    #nav-mobile-main { display: contents; }
+    .nav-children {
+      position: absolute;
+      top: calc(100% + 18px);
+      left: 50%;
+      transform: translate(-50%, -8px);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 172px;
       background: #f6f4ee;
       border: 1px solid rgba(0, 0, 0, 0.15);
       border-radius: var(--radius-card);
       padding: 8px;
-      box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.3);
-      z-index: 8;
+      box-shadow: 0 14px 32px -10px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+      z-index: 12;
     }
-    #topnav-links.open { display: flex; }
-    #topnav-links .nav-btn {
-      padding: 7px 14px;
-      text-align: right;
+    #topnav-links:hover .nav-children,
+    #topnav-links:focus-within .nav-children {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, 0);
+    }
+    .nav-child {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
       border-radius: var(--radius);
     }
-    #topnav-links .nav-btn.active { background: rgba(0, 0, 0, 0.07); text-decoration: none; }
-    .bl-annotation-row { flex-direction: column; gap: 32px; }
-    .bl-annotation.right { align-items: flex-start; text-align: left; }
-    .bl-annotation, .bl-annotation.left { max-width: none; }
+    @media (hover: hover) and (pointer: fine) {
+      .nav-child:hover { opacity: 1; background: rgba(0, 0, 0, 0.05); }
+    }
+    .nav-child.active { background: rgba(0, 0, 0, 0.07); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #nav-mobile-main, .nav-children { transition-duration: 1ms; }
   }
   /* 좁은 화면: 브랜드/탭을 살짝 줄이고 카드 여백을 좁힌다 */
   @media (max-width: 720px) {
@@ -774,6 +895,7 @@
   <div id="ad-inline-left" class="ad-inline"></div>
   <div id="ad-inline-right" class="ad-inline"></div>
 </div>
+<div id="mobile-nav-backdrop" class="mobile-nav-backdrop"></div>
 <nav id="topnav">
   <div id="topnav-inner">
     <div id="topnav-left">
@@ -788,15 +910,44 @@
       <span class="nav-toggle-bars"><span></span><span></span><span></span></span>
     </button>
     <div id="topnav-links">
-      <button id="nav-product" class="nav-btn active">PRODUCT</button>
-      <button id="nav-code" class="nav-btn">CHORD</button>
-      <button id="nav-scale" class="nav-btn">SCALES</button>
-      <button id="nav-tools" class="nav-btn">TOOLS <span class="nav-badge">🚧</span></button>
-      <button id="nav-major-edu" class="nav-btn">MAJOR EDU <span class="nav-badge">🚧</span></button>
-      <button id="nav-harmony" class="nav-btn">HARMONY <span class="nav-badge">🚧</span></button>
-      <button id="nav-my" class="nav-btn">MY <span class="nav-badge">🚧</span></button>
-      <button id="nav-about" class="nav-btn">ABOUT</button>
-      <button id="nav-admin" class="nav-btn" hidden>🔒 <span id="nav-admin-text">광고관리자모드</span></button>
+      <button id="nav-mobile-back" class="nav-mobile-back">
+        <span class="nav-mobile-back-arrow">‹</span>
+        <span id="nav-mobile-back-label"></span>
+      </button>
+      <div id="nav-mobile-main" class="nav-mobile-main">
+        <div class="nav-parent">
+          <button id="nav-parent-product" class="nav-btn nav-parent-btn active" aria-haspopup="true" aria-expanded="false">
+            PRODUCT <span class="nav-parent-chevron">›</span>
+          </button>
+          <div id="nav-children-product" class="nav-children">
+            <button id="nav-home" class="nav-btn nav-child active">HOME</button>
+            <button id="nav-my" class="nav-btn nav-child">MY <span class="nav-badge">🚧</span></button>
+          </div>
+        </div>
+        <div class="nav-parent">
+          <button id="nav-parent-tools" class="nav-btn nav-parent-btn" aria-haspopup="true" aria-expanded="false">
+            TOOLS <span class="nav-parent-chevron">›</span>
+          </button>
+          <div id="nav-children-tools" class="nav-children">
+            <button id="nav-code" class="nav-btn nav-child">CHORD</button>
+            <button id="nav-scale" class="nav-btn nav-child">SCALES</button>
+            <button id="nav-harmony" class="nav-btn nav-child">REHAMONY <span class="nav-badge">🚧</span></button>
+            <button id="nav-major-edu" class="nav-btn nav-child">MAJOR EDU <span class="nav-badge">🚧</span></button>
+          </div>
+        </div>
+        <div class="nav-parent">
+          <button id="nav-parent-community" class="nav-btn nav-parent-btn" aria-haspopup="true" aria-expanded="false">
+            COMMUNITY <span class="nav-parent-chevron">›</span>
+          </button>
+          <div id="nav-children-community" class="nav-children">
+            <button id="nav-user-community" class="nav-btn nav-child">USER COMMUNITY <span class="nav-badge">🚧</span></button>
+            <button id="nav-guitar-shop" class="nav-btn nav-child">GUITAR SHOP <span class="nav-badge">🚧</span></button>
+            <button id="nav-effecter" class="nav-btn nav-child">EFFECTER <span class="nav-badge">🚧</span></button>
+          </div>
+        </div>
+        <button id="nav-about" class="nav-btn nav-leaf">ABOUT</button>
+        <button id="nav-admin" class="nav-btn nav-leaf" hidden>🔒 <span id="nav-admin-text">광고관리자모드</span></button>
+      </div>
     </div>
   </div>
 </nav>
@@ -2236,7 +2387,11 @@ try {
     activeView: 'home',   // 'home' | 'code' | 'progression' | 'scale' | 'admin' |
                            // 'tools' | 'majorEdu' | 'harmony' | 'my' (마지막 4개는
                            // 아직 실제 기능 없이 #app-wip 자리표시자만 보여줌)
-    mobileNavOpen: false,  // 태블릿/모바일 햄버거 메뉴 열림 여부 — 기본 닫힘
+    // 태블릿/모바일 드릴다운 메뉴: 0=닫힘, 1=메인메뉴(화면1), 2=하위메뉴(화면2).
+    // mobileNavActiveParent는 화면2에서 어느 카테고리(product/tools/community)를
+    // 보고 있는지 — 화면1로 돌아가거나 메뉴를 완전히 닫으면 null로 리셋.
+    mobileNavLevel: 0,
+    mobileNavActiveParent: null,
     progression: [{ root: 0, quality: 'major' }], // 코드진행: 코드 슬롯 목록
     progFretMin: 4,       // 코드진행: 프렛 범위 시작
     progFretMax: 7,       // 코드진행: 프렛 범위 끝
@@ -4126,14 +4281,55 @@ try {
 
   // 워드마크/PRODUCT·CHORD·SCALE·ABOUT는 board-labs 브랜드 표기라
   // 언어 토글과 무관하게 항상 영문 고정(HTML에 이미 고정 표기, 여기서 안 건드림).
+  // PRODUCT/TOOLS/COMMUNITY 하위메뉴가 있는 카테고리 3개 — 모바일 드릴다운의
+  // "화면2" 후보이자, 데스크톱 메가메뉴에서 각자 자기 자리에 펼쳐지는 패널.
+  var NAV_PARENT_KEYS = ['product', 'tools', 'community'];
+  var NAV_PARENT_LABELS = { product: 'PRODUCT', tools: 'TOOLS', community: 'COMMUNITY' };
+
   function renderTopNav() {
     document.getElementById('nav-admin-text').textContent = t('navAdmin');
     document.getElementById('lang-toggle').textContent = state.lang === 'ko' ? 'EN' : '한글';
+
+    var isOpen = state.mobileNavLevel >= 1;
+    var isLevel2 = state.mobileNavLevel === 2;
+
     var toggleBtn = document.getElementById('nav-menu-toggle');
-    toggleBtn.classList.toggle('open', state.mobileNavOpen);
-    toggleBtn.setAttribute('aria-expanded', state.mobileNavOpen ? 'true' : 'false');
-    toggleBtn.setAttribute('aria-label', t(state.mobileNavOpen ? 'navMenuCloseLabel' : 'navMenuOpenLabel'));
-    document.getElementById('topnav-links').classList.toggle('open', state.mobileNavOpen);
+    toggleBtn.classList.toggle('open', isOpen);
+    toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    toggleBtn.setAttribute('aria-label', t(isOpen ? 'navMenuCloseLabel' : 'navMenuOpenLabel'));
+
+    document.getElementById('topnav-links').classList.toggle('open', isOpen);
+    document.getElementById('topnav-links').classList.toggle('level-2', isLevel2);
+    document.getElementById('mobile-nav-backdrop').classList.toggle('open', isOpen);
+
+    NAV_PARENT_KEYS.forEach(function (key) {
+      var isActiveParent = state.mobileNavActiveParent === key;
+      document.getElementById('nav-children-' + key).classList.toggle('active', isActiveParent);
+      document.getElementById('nav-parent-' + key).setAttribute('aria-expanded', isActiveParent ? 'true' : 'false');
+    });
+
+    document.getElementById('nav-mobile-back-label').textContent = NAV_PARENT_LABELS[state.mobileNavActiveParent] || '';
+  }
+
+  // 화면1(메인메뉴)에서 PRODUCT/TOOLS/COMMUNITY를 탭하면 화면2(하위메뉴)로 이동.
+  function openMobileSubmenu(key) {
+    state.mobileNavActiveParent = key;
+    state.mobileNavLevel = 2;
+    renderTopNav();
+  }
+
+  // 화면2에서 뒤로 — 화면1로 복귀(메뉴 자체는 열어둔 채).
+  function backToMobileMain() {
+    state.mobileNavLevel = 1;
+    state.mobileNavActiveParent = null;
+    renderTopNav();
+  }
+
+  // 메뉴 완전히 닫기(햄버거 다시 누르거나, 배경 탭하거나, 목적지를 골랐을 때).
+  function closeMobileNav() {
+    state.mobileNavLevel = 0;
+    state.mobileNavActiveParent = null;
+    renderTopNav();
   }
 
   // 좌우 배너 자리 — state.adConfig에 이미지/링크가 있으면 그 광고를,
@@ -4329,8 +4525,16 @@ try {
     };
   }
 
-  // 아직 실제 기능이 없는 메뉴 4개 — 전부 #app-wip 자리표시자 하나를 공유한다.
-  var WIP_VIEWS = ['tools', 'majorEdu', 'harmony', 'my'];
+  // 아직 실제 기능이 없는 메뉴 6개 — 전부 #app-wip 자리표시자 하나를 공유한다.
+  var WIP_VIEWS = ['majorEdu', 'harmony', 'my', 'userCommunity', 'guitarShop', 'effecter'];
+
+  // 하위메뉴 카테고리별로 어떤 뷰가 거기 속하는지 — 그 중 하나를 보고 있으면
+  // 카테고리 라벨(PRODUCT/TOOLS/COMMUNITY) 자체에도 active 표시를 해준다.
+  var NAV_PARENT_VIEWS = {
+    product: ['home', 'my'],
+    tools: ['code', 'scale', 'harmony', 'majorEdu'],
+    community: ['userCommunity', 'guitarShop', 'effecter']
+  };
 
   function renderWipView() {
     document.getElementById('wip-text').textContent = t('wipText');
@@ -4346,15 +4550,22 @@ try {
     document.getElementById('app-scale').style.display = state.activeView === 'scale' ? 'block' : 'none';
     document.getElementById('app-admin').style.display = state.activeView === 'admin' ? 'block' : 'none';
     document.getElementById('app-wip').style.display = isWip ? 'block' : 'none';
-    document.getElementById('nav-product').className = 'nav-btn' + (state.activeView === 'home' ? ' active' : '');
-    document.getElementById('nav-code').className = 'nav-btn' + (state.activeView === 'code' ? ' active' : '');
-    document.getElementById('nav-scale').className = 'nav-btn' + (state.activeView === 'scale' ? ' active' : '');
-    document.getElementById('nav-tools').className = 'nav-btn' + (state.activeView === 'tools' ? ' active' : '');
-    document.getElementById('nav-major-edu').className = 'nav-btn' + (state.activeView === 'majorEdu' ? ' active' : '');
-    document.getElementById('nav-harmony').className = 'nav-btn' + (state.activeView === 'harmony' ? ' active' : '');
-    document.getElementById('nav-my').className = 'nav-btn' + (state.activeView === 'my' ? ' active' : '');
-    document.getElementById('nav-about').className = 'nav-btn' + (state.activeView === 'progression' ? ' active' : '');
-    document.getElementById('nav-admin').className = 'nav-btn' + (state.activeView === 'admin' ? ' active' : '');
+
+    document.getElementById('nav-home').className = 'nav-btn nav-child' + (state.activeView === 'home' ? ' active' : '');
+    document.getElementById('nav-my').className = 'nav-btn nav-child' + (state.activeView === 'my' ? ' active' : '');
+    document.getElementById('nav-code').className = 'nav-btn nav-child' + (state.activeView === 'code' ? ' active' : '');
+    document.getElementById('nav-scale').className = 'nav-btn nav-child' + (state.activeView === 'scale' ? ' active' : '');
+    document.getElementById('nav-harmony').className = 'nav-btn nav-child' + (state.activeView === 'harmony' ? ' active' : '');
+    document.getElementById('nav-major-edu').className = 'nav-btn nav-child' + (state.activeView === 'majorEdu' ? ' active' : '');
+    document.getElementById('nav-user-community').className = 'nav-btn nav-child' + (state.activeView === 'userCommunity' ? ' active' : '');
+    document.getElementById('nav-guitar-shop').className = 'nav-btn nav-child' + (state.activeView === 'guitarShop' ? ' active' : '');
+    document.getElementById('nav-effecter').className = 'nav-btn nav-child' + (state.activeView === 'effecter' ? ' active' : '');
+    document.getElementById('nav-about').className = 'nav-btn nav-leaf' + (state.activeView === 'progression' ? ' active' : '');
+    document.getElementById('nav-admin').className = 'nav-btn nav-leaf' + (state.activeView === 'admin' ? ' active' : '');
+    NAV_PARENT_KEYS.forEach(function (key) {
+      var parentActive = NAV_PARENT_VIEWS[key].indexOf(state.activeView) !== -1;
+      document.getElementById('nav-parent-' + key).className = 'nav-btn nav-parent-btn' + (parentActive ? ' active' : '');
+    });
     // 로그인 전엔 메뉴 자체를 숨긴다 — 일반 방문자는 "광고관리자모드"가
     // 있는지조차 모르게. 로그인하면(이번 세션 한정) 다시 보여서 오갈 수 있게.
     document.getElementById('nav-admin').hidden = !state.adAuthed;
@@ -4376,35 +4587,51 @@ try {
     }
   }
 
-  // 목적지로 이동 + (태블릿/모바일이면) 열려 있던 햄버거 메뉴를 자동으로
-  // 닫는다 — 메뉴에서 뭔가 고르고 나면 메뉴가 내용을 계속 가리고 있을
-  // 이유가 없으므로.
+  // 목적지로 이동 + 열려 있던 모바일 드릴다운 메뉴를 완전히 닫는다 — 메뉴에서
+  // 뭔가 고르고 나면 메뉴가 내용을 계속 가리고 있을 이유가 없으므로.
   function goToView(view) {
     state.activeView = view;
-    state.mobileNavOpen = false;
+    state.mobileNavLevel = 0;
+    state.mobileNavActiveParent = null;
     renderApp();
   }
 
-  // board-labs 브랜드 내비 매핑: 워드마크/PRODUCT는 홈, ABOUT은 (당분간)
-  // 코드진행 기능으로 연결 — 전용 About 페이지가 생기기 전까지의 임시 매핑.
-  // TOOLS/MAJOR EDU/HARMONY/MY는 메뉴만 만들어두고 전부 자리표시자로 연결
-  // (실제 기능은 아직 없음, 사용자 요청으로 메뉴 틀만 먼저 세팅).
+  // board-labs 브랜드 내비 매핑: PRODUCT/TOOLS/COMMUNITY는 하위메뉴가 있는
+  // 그룹 라벨이라 그 자체는 목적지가 아니고(모바일: 탭하면 화면2로 드릴다운
+  // / 데스크톱: 호버하면 메가메뉴), 그 하위 항목들만 실제 이동한다. ABOUT은
+  // 하위메뉴 없는 단독 항목 — 당분간 기존 코드진행 화면으로 그대로 연결.
+  // MY/REHAMONY/MAJOR EDU/USER COMMUNITY/GUITAR SHOP/EFFECTER는 전부 아직
+  // 실제 기능이 없는 자리표시자(WIP_VIEWS 참고).
   document.getElementById('topnav-brand').onclick = function () { goToView('home'); };
-  document.getElementById('nav-product').onclick = function () { goToView('home'); };
+  document.getElementById('nav-home').onclick = function () { goToView('home'); };
+  document.getElementById('nav-my').onclick = function () { goToView('my'); };
   document.getElementById('nav-code').onclick = function () { goToView('code'); };
   document.getElementById('nav-scale').onclick = function () { goToView('scale'); };
-  document.getElementById('nav-tools').onclick = function () { goToView('tools'); };
-  document.getElementById('nav-major-edu').onclick = function () { goToView('majorEdu'); };
   document.getElementById('nav-harmony').onclick = function () { goToView('harmony'); };
-  document.getElementById('nav-my').onclick = function () { goToView('my'); };
+  document.getElementById('nav-major-edu').onclick = function () { goToView('majorEdu'); };
+  document.getElementById('nav-user-community').onclick = function () { goToView('userCommunity'); };
+  document.getElementById('nav-guitar-shop').onclick = function () { goToView('guitarShop'); };
+  document.getElementById('nav-effecter').onclick = function () { goToView('effecter'); };
   document.getElementById('nav-about').onclick = function () { goToView('progression'); };
-  document.getElementById('nav-admin').onclick = function () { state.mobileNavOpen = false; tryOpenAdminEntry(); };
-  // 햄버거 버튼: 태블릿/모바일에서만 보이고(CSS), 누르면 세로 독 메뉴를 열고
-  // 닫는다. 기본은 닫힘(state.mobileNavOpen 기본값 false).
+  document.getElementById('nav-admin').onclick = function () { closeMobileNav(); tryOpenAdminEntry(); };
+
+  // PRODUCT/TOOLS/COMMUNITY 버튼: 모바일에선 화면2(하위메뉴)로 드릴다운.
+  // 데스크톱에선 CSS 호버/포커스만으로 메가메뉴가 열려서 클릭이 딱히 할 일은
+  // 없지만, 클릭해도 같은 상태를 세팅해두면 터치스크린 노트북 등에서도
+  // 자연스럽게 동작한다(시각적 효과는 모바일 폭에서만 CSS로 나타남).
+  document.getElementById('nav-parent-product').onclick = function () { openMobileSubmenu('product'); };
+  document.getElementById('nav-parent-tools').onclick = function () { openMobileSubmenu('tools'); };
+  document.getElementById('nav-parent-community').onclick = function () { openMobileSubmenu('community'); };
+  document.getElementById('nav-mobile-back').onclick = backToMobileMain;
+
+  // 햄버거 버튼: 닫혀 있으면 화면1을 열고, 열려 있으면(화면1이든 화면2든)
+  // 완전히 닫는다. 기본은 닫힘(state.mobileNavLevel 기본값 0).
   document.getElementById('nav-menu-toggle').onclick = function () {
-    state.mobileNavOpen = !state.mobileNavOpen;
-    renderTopNav();
+    if (state.mobileNavLevel === 0) { state.mobileNavLevel = 1; renderTopNav(); } else { closeMobileNav(); }
   };
+  // 메뉴 열린 상태에서 뒤 배경(딤드)을 탭하면 완전히 닫힘.
+  document.getElementById('mobile-nav-backdrop').onclick = closeMobileNav;
+
   document.getElementById('lang-toggle').onclick = function () { state.lang = state.lang === 'ko' ? 'en' : 'ko'; renderApp(); };
   document.getElementById('ad-sticky-close').onclick = closeMobileAdBar;
 
