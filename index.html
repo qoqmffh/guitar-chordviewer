@@ -84,7 +84,9 @@
     gap: 16px;
   }
   #topnav-left { display: flex; align-items: center; gap: 14px; }
-  /* 실시간 접속자 배지 — Firebase가 설정돼야만 나타남(설정 전엔 hidden 유지) */
+  /* 실시간 접속자 배지 — Firebase가 설정돼야만 나타남(설정 전엔 hidden 유지).
+     다른 내비 항목(굵은 Chakra Petch)만큼 눈에 띌 필요가 없는 부가 정보라,
+     같은 폰트를 쓰되 라이트 웨이트+흐린 색으로 존재감을 확 낮춘다. */
   .live-visitor-badge {
     display: flex;
     align-items: center;
@@ -92,9 +94,10 @@
     padding: 4px 10px;
     border-radius: var(--radius-pill);
     background: var(--surface-1);
-    color: var(--text-secondary);
+    color: rgba(0, 0, 0, 0.4);
+    font-family: var(--font-chakra);
+    font-weight: 300;
     font-size: 0.75rem;
-    font-weight: 600;
     white-space: nowrap;
   }
   .live-visitor-dot {
