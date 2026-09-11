@@ -5042,6 +5042,37 @@ try {
     renderMajorEduSheet();
   };
 
+  document.getElementById('major-edu-save-btn').onclick = function () {
+    var svgEl = document.querySelector('#major-edu-sheet svg');
+    if (!svgEl) { return; }
+    var viewBoxParts = svgEl.getAttribute('viewBox').split(' ').map(Number);
+    var vbW = viewBoxParts[2], vbH = viewBoxParts[3];
+    var svgData = new XMLSerializer().serializeToString(svgEl);
+    var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(svgBlob);
+    var img = new Image();
+    img.onload = function () {
+      var scale = 2; // 고해상도로 저장
+      var canvas = document.createElement('canvas');
+      canvas.width = vbW * scale;
+      canvas.height = vbH * scale;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#f6f4ee';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function (blob) {
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'board-labs-major-edu-sheet.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    };
+    img.src = url;
+  };
+
   document.getElementById('admin-modal-cancel').onclick = closeAdminModal;
   document.getElementById('admin-modal-submit').onclick = submitAdminPassword;
   document.getElementById('admin-pw-input').addEventListener('keydown', function (e) {
