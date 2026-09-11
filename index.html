@@ -1201,7 +1201,7 @@
 <div id="app-major-edu" style="display:none;">
   <h1 id="major-edu-h1">Major Edu — 코드초견</h1>
 
-  <div style="margin-bottom:16px;">
+  <div id="major-edu-root-group" style="margin-bottom:16px;">
     <div class="gt-label" id="label-major-edu-root">루트음</div>
     <div id="major-edu-roots" class="gt-flex gt-grid-fixed"></div>
   </div>
@@ -1211,10 +1211,12 @@
     <div id="major-edu-chord-tiers" class="gt-flex gt-tiles"></div>
   </div>
 
-  <div style="margin-bottom:20px;">
+  <div id="major-edu-rhythm-group" style="margin-bottom:20px;">
     <div class="gt-label" id="label-major-edu-rhythm-tier">리듬 난이도</div>
     <div id="major-edu-rhythm-tiers" class="gt-flex gt-tiles"></div>
   </div>
+
+  <div id="major-edu-song-info" style="display:none; margin-bottom:20px; font-size:0.8125rem; color:var(--text-secondary);"></div>
 
   <button id="major-edu-generate-btn" class="home-cta home-cta-primary" style="margin-bottom:20px;">출제지 생성</button>
 
@@ -1448,10 +1450,11 @@ try {
       labelMajorEduRoot: '루트음',
       labelMajorEduChordTier: '코드 난이도',
       labelMajorEduRhythmTier: '리듬 난이도',
-      majorEduTierLow: '하', majorEduTierMid: '중', majorEduTierHigh: '상',
+      majorEduTierLow: '하', majorEduTierMid: '중', majorEduTierHigh: '상', majorEduTierRealbook: '리얼북',
       majorEduRandomRoot: '🎲 랜덤',
       majorEduGenerateBtn: '출제지 생성',
       majorEduSaveBtn: 'PNG로 저장',
+      majorEduSongInfoPrefix: '수록곡',
       svgOpenVoicingTitle: '오픈 보이싱 다이어그램',
       svgOpenVoicingDesc: '선택한 오픈 보이싱 그립 하나를 표시 (개방현/뮤트 포함)',
       homeHeroTitle: '코드를 외우지 말고, 지판에서 보세요.',
@@ -1606,10 +1609,11 @@ try {
       labelMajorEduRoot: 'Root',
       labelMajorEduChordTier: 'Chord Difficulty',
       labelMajorEduRhythmTier: 'Rhythm Difficulty',
-      majorEduTierLow: 'Easy', majorEduTierMid: 'Medium', majorEduTierHigh: 'Hard',
+      majorEduTierLow: 'Easy', majorEduTierMid: 'Medium', majorEduTierHigh: 'Hard', majorEduTierRealbook: 'Real Book',
       majorEduRandomRoot: '🎲 Random',
       majorEduGenerateBtn: 'Generate Sheet',
       majorEduSaveBtn: 'Save as PNG',
+      majorEduSongInfoPrefix: 'From',
       svgOpenVoicingTitle: 'Open voicing diagram',
       svgOpenVoicingDesc: 'Shows one selected open-voicing grip (including open/muted strings)',
       homeHeroTitle: 'Stop memorizing chords. See them on the fretboard.',
@@ -2044,7 +2048,101 @@ try {
       measures.push({ rhythmPatternId: pattern.id, hits: hits });
     }
 
-    return { root: rootPC, chordTier: chordTier, rhythmTier: rhythmTier, measures: measures };
+    return { root: rootPC, chordTier: chordTier, rhythmTier: rhythmTier, beatsPerMeasure: 4, measures: measures };
+  }
+
+  // 리얼북 코드 난이도 전용 — 실제 스탠다드 곡의 코드 진행을 직접 옮겨 적은
+  // 데이터. 마디당 코드 1~2개(원곡 그대로), 매번 생성이 아니라 이 중
+  // 하나를 무작위로 골라서 보여준다. 원곡 키 고정(루트음 선택 버튼 무시),
+  // 리듬도 원곡 마디 구조 그대로라 리듬 난이도 선택도 무시한다.
+  var REALBOOK_SONGS = [
+    { title: 'All The Things You Are', composer: 'Kern / Hammerstein', key: 'Ab', beatsPerMeasure: 4,
+      measures: [['Fm7'], ['Bbm7'], ['Eb7'], ['Abmaj7'], ['Dbmaj7'], ['G7'], ['Cmaj7'], ['Cmaj7'],
+        ['Cm7'], ['Fm7'], ['Bb7'], ['Ebmaj7'], ['Abmaj7'], ['D7'], ['Gmaj7'], ['Gmaj7'],
+        ['Am7'], ['D7'], ['Gmaj7'], ['Gmaj7'], ['F#m7'], ['B7'], ['Emaj7'], ['C+7'],
+        ['Fm7'], ['Bbm7'], ['Eb7'], ['Abmaj7'], ['Dbmaj7'], ['Dbm7'], ['Cm7'], ['B7'],
+        ['Bbm7'], ['Eb7'], ['Abmaj7'], ['Abmaj7']] },
+    { title: 'Take The "A" Train', composer: 'Ellington / Strayhorn', key: 'C', beatsPerMeasure: 4,
+      measures: [['C'], ['C'], ['D7♭5'], ['D7♭5'], ['Dm7'], ['G7'], ['C'], ['C'],
+        ['F'], ['F'], ['F'], ['F'], ['D7'], ['D7'], ['Dm7'], ['G7'],
+        ['C'], ['C'], ['D7♭5'], ['D7♭5'], ['Dm7'], ['G7'], ['C'], ['C']] },
+    { title: 'There Will Never Be Another You', composer: 'Warren / Gordon', key: 'Eb', beatsPerMeasure: 4,
+      measures: [['Ebmaj7'], ['Ebmaj7'], ['Dm7♭5'], ['G7♭9'], ['Cm7'], ['Cm7'], ['Bbm7'], ['Eb7'],
+        ['Abmaj7'], ['Fm7♭5'], ['Bb7'], ['Ebmaj7'], ['Cm7'], ['F7'], ['Fm7'], ['Bb7'],
+        ['Ebmaj7'], ['Ebmaj7'], ['Dm7♭5'], ['G7♭9'], ['Cm7'], ['Cm7'], ['Bbm7'], ['Eb7'],
+        ['Abmaj7'], ['Fm7♭5'], ['Bb7'], ['Ebmaj7'], ['Gm7'], ['C7'], ['Fm7'], ['Bb7']] },
+    { title: 'Falling In Love With Love', composer: 'Rodgers / Hart', key: 'Bb', beatsPerMeasure: 4,
+      measures: [['Bbmaj7'], ['Bb6'], ['Bbmaj7'], ['Bb6'], ['Cm7'], ['F7'], ['Cm7'], ['F7'],
+        ['Cm7'], ['F7'], ['Cm7'], ['F7'], ['Bbmaj7'], ['Bb6'], ['Bbmaj7'], ['Bb6'],
+        ['Bbmaj7'], ['Bb6'], ['Bbmaj7'], ['Bb6'], ['Am7'], ['D7'], ['Am7'], ['D7'],
+        ['Gm7'], ['Gm(maj7)'], ['Gm7'], ['C7'], ['Cm7'], ['F7'], ['Bbmaj7'], ['Bb6']] },
+    { title: 'The Girl From Ipanema', composer: 'Jobim', key: 'F', beatsPerMeasure: 4,
+      measures: [['Fmaj7'], ['Fmaj7'], ['G7'], ['G7'], ['Gm7'], ['Gb7'], ['Fmaj7'], ['Fmaj7'],
+        ['Gbmaj7'], ['Gbmaj7'], ['B7'], ['B7'], ['F#m7'], ['F#m7'], ['D7'], ['D7'],
+        ['Gm7'], ['Gm7'], ['Eb7'], ['Eb7'], ['Am7'], ['Am7'], ['D7♭9'], ['D7♭9'],
+        ['Gm7'], ['C7♭9'], ['Fmaj7'], ['Fmaj7'], ['Gm7'], ['Gb7'], ['Fmaj7'], ['Fmaj7']] },
+    { title: 'Satin Doll', composer: 'Ellington', key: 'C', beatsPerMeasure: 4,
+      measures: [['Dm7', 'G7'], ['Dm7', 'G7'], ['Em7', 'A7'], ['Em7', 'A7'], ['Am7', 'D7'], ['Abm7', 'Db7'], ['C6'], ['C6'],
+        ['Dm7', 'G7'], ['Dm7', 'G7'], ['Em7', 'A7'], ['Em7', 'A7'], ['Am7', 'D7'], ['Abm7', 'Db7'], ['C6'], ['C6'],
+        ['Gm7', 'C7'], ['Fmaj7'], ['Gm7', 'C7'], ['Fmaj7'], ['Am7', 'D7'], ['Dm7', 'G7'], ['Em7', 'A7'], ['Abm7', 'Db7'],
+        ['Dm7', 'G7'], ['Dm7', 'G7'], ['Em7', 'A7'], ['Em7', 'A7'], ['Am7', 'D7'], ['Abm7', 'Db7'], ['C6'], ['C6']] },
+    { title: 'Stella By Starlight', composer: 'Victor Young', key: 'Eb', beatsPerMeasure: 4,
+      measures: [['Em7♭5'], ['A7♭9'], ['Cm7'], ['F7'], ['Fm7'], ['Bb7'], ['Ebmaj7'], ['Ab7'],
+        ['Bbmaj7'], ['Em7♭5'], ['A7♭9'], ['Dm7'], ['Bbm7'], ['Eb7'], ['Fmaj7'], ['Em7♭5'],
+        ['A7'], ['Am7♭5'], ['D7♭9'], ['G+7'], ['Cm7'], ['Cm7'], ['Ab7'], ['Ab7'],
+        ['Bbmaj7'], ['Bbmaj7'], ['Em7♭5'], ['A7♭9'], ['Dm7♭5'], ['G7♭9'], ['Cm7♭5', 'F7♭9'], ['Bbmaj7']] },
+    { title: 'Solar', composer: 'Miles Davis', key: 'Cm', beatsPerMeasure: 4,
+      measures: [['Cm'], ['Cm'], ['Gm7'], ['C7'], ['Fmaj7'], ['Fm7'], ['Bb7'], ['Ebmaj7'],
+        ['Ebm7'], ['Ab7'], ['Dbmaj7'], ['Dm7♭5', 'G7♭9']] },
+    { title: 'Blue Trane', composer: 'John Coltrane', key: 'Fm', beatsPerMeasure: 4,
+      measures: [['Fm7'], ['Bb7'], ['Cm'], ['Bb7'], ['Eb7'], ['Fm'], ['Am7'], ['D7'],
+        ['Gm'], ['Fm7'], ['Bb7'], ['Cm'], ['Fm7'], ['Bb7'], ['Cm♭5'], ['Cm']] },
+    { title: 'Green Dolphin Street', composer: 'Kaper / Washington', key: 'C', beatsPerMeasure: 4,
+      measures: [['Cmaj7'], ['Cmaj7'], ['Cm7'], ['Cm7'], ['D7/C'], ['Db/C'], ['Cmaj7'], ['Cmaj7'],
+        ['Dm7'], ['G7'], ['Cmaj7'], ['Cmaj7'], ['Fm7'], ['Bb7'], ['Ebmaj7'], ['G7'],
+        ['Dm7'], ['D/C'], ['Bm7♭5'], ['E7♭9'], ['Am7'], ['A/G'], ['F#m7♭5'], ['B7'],
+        ['Em7'], ['A7'], ['Dm7'], ['G7'], ['Cmaj7'], ['Dm7'], ['G7'], ['Cmaj7']] },
+    { title: 'All Of Me', composer: 'Simons / Marks', key: 'C', beatsPerMeasure: 4,
+      measures: [['Cmaj7'], ['Cmaj7'], ['E7'], ['E7'], ['A7'], ['A7'], ['Dm7'], ['Dm7'],
+        ['E7'], ['E7'], ['Am7'], ['Am7'], ['D7'], ['D7'], ['Dm7'], ['G7'],
+        ['Cmaj7'], ['Cmaj7'], ['E7'], ['E7'], ['A7'], ['A7'], ['Dm7'], ['Dm7'],
+        ['F'], ['Fm7'], ['Cmaj7'], ['Em7'], ['A7'], ['Dm7'], ['G7'], ['C6']] },
+    { title: 'Blue Bossa', composer: 'Kenny Dorham', key: 'Cm', beatsPerMeasure: 4,
+      measures: [['Cm7'], ['Cm7'], ['Fm7'], ['Fm7'], ['Dm7♭5'], ['G7'], ['Cm7'], ['Cm7'],
+        ['Ebm7'], ['Ab7'], ['Dbmaj7'], ['Dbmaj7'], ['Dm7♭5'], ['G7'], ['Cm7'], ['Cm7']] },
+    { title: 'Fly Me To The Moon', composer: 'Bart Howard', key: 'C', beatsPerMeasure: 4,
+      measures: [['Am7'], ['Dm7'], ['G7'], ['Cmaj7'], ['Fmaj7'], ['Bm7♭5'], ['E7'], ['Am7'],
+        ['Dm7'], ['G7'], ['Cmaj7'], ['Am7'], ['Dm7'], ['G7'], ['Cmaj7'], ['Cmaj7'],
+        ['Am7'], ['Dm7'], ['G7'], ['Cmaj7'], ['Fmaj7'], ['Bm7♭5'], ['E7'], ['Am7'],
+        ['Dm7'], ['G7'], ['Cmaj7'], ['Am7'], ['Dm7'], ['G7'], ['Cmaj7'], ['Cmaj7']] },
+    { title: 'Someday My Prince Will Come', composer: 'Churchill', key: 'Bb', beatsPerMeasure: 3,
+      measures: [['Bbmaj7'], ['D7+5'], ['Ebmaj7'], ['G+7'], ['Cm7'], ['G+7'], ['C7'], ['F7'],
+        ['Dm7'], ['C#dim7'], ['Cm7'], ['F7'], ['Fm7'], ['Bb7'], ['Eb'], ['Edim7'],
+        ['Bb/F'], ['Cm7/F'], ['Bb'], ['Bb']] }
+  ];
+
+  function pickRealbookSong() {
+    return REALBOOK_SONGS[Math.floor(Math.random() * REALBOOK_SONGS.length)];
+  }
+
+  // REALBOOK_SONGS 항목 하나를 buildMajorEduSVG가 그릴 수 있는 출제지
+  // 모양으로 바꾼다. 알고리즘 생성본과 달리 정확한 리듬(몇 박에 어택이
+  // 오는지)까지는 옮겨 적지 않았으므로, 마디 안 코드 개수만큼 균등하게
+  // 나눠 슬래시만 찍는다(plainSlashes: true — 스템/깃발/점 없이 슬래시
+  // 노트헤드만, 8분음표 격자 대신 "슬롯" 기준 배치).
+  function buildRealbookSheet(song) {
+    var measures = song.measures.map(function (chords) {
+      var hits = chords.map(function (chordLabel, idx) {
+        return { chordLabel: chordLabel, slot: idx, totalSlots: chords.length };
+      });
+      return { rhythmPatternId: null, hits: hits };
+    });
+    return {
+      root: null, chordTier: 'realbook', rhythmTier: null,
+      beatsPerMeasure: song.beatsPerMeasure, plainSlashes: true,
+      songTitle: song.title, songComposer: song.composer, songKey: song.key,
+      measures: measures
+    };
   }
 
   // measure.hits[hitIndex]가 몇 개의 8분음표 단위만큼 유지되는지(다음
@@ -2073,8 +2171,11 @@ try {
     var padX = 14;                  // 마디 안에서 히트 위치를 바라인에서 살짝 띄우는 여백
     var rowX0 = startX + timeSigW;
     var rowContentW = measuresPerRow * measureW;
+    var totalRows = Math.max(1, Math.ceil(sheet.measures.length / measuresPerRow));
     var totalW = rowX0 + rowContentW + 16;
-    var totalH = startY + 2 * rowH + 20;
+    var totalH = startY + totalRows * rowH + 20;
+    var beatsTop = sheet.beatsPerMeasure || 4; // 리얼북 곡은 3/4일 수 있음(원곡 그대로)
+    var plain = !!sheet.plainSlashes; // 리얼북 곡은 정확한 박자 타이밍이 없어 스템/깃발 없이 슬래시만
     var INK = '#1a1a1a';
     var STAFF = 'rgba(26,26,26,0.45)';
     var FONT = "Arial, 'Helvetica Neue', Helvetica, sans-serif"; // 페이지 CSS 변수(var(--font-sans))는
@@ -2085,7 +2186,7 @@ try {
       '<title>' + t('svgMajorEduTitle') + '</title>' +
       '<desc>' + t('svgMajorEduDesc') + '</desc>';
 
-    for (var row = 0; row < 2; row++) {
+    for (var row = 0; row < totalRows; row++) {
       var y0 = startY + row * rowH;
       var staffTopY = y0 + 40;
       var staffMidY = staffTopY + staffLineGap * 2;
@@ -2097,9 +2198,9 @@ try {
         svg += '<line x1="' + rowX0 + '" y1="' + ly + '" x2="' + rowXEnd + '" y2="' + ly + '" stroke="' + STAFF + '" stroke-width="1.2"/>';
       }
 
-      // 박자표 4/4 — 연습용 출제지라 줄마다 반복해서 가독성을 우선한다.
+      // 박자표 — 연습용 출제지라 줄마다 반복해서 가독성을 우선한다.
       var tsX = startX + timeSigW / 2;
-      svg += '<text x="' + tsX + '" y="' + (staffTopY + staffLineGap * 1.75) + '" text-anchor="middle" font-size="19" font-weight="700" fill="' + INK + '">4</text>';
+      svg += '<text x="' + tsX + '" y="' + (staffTopY + staffLineGap * 1.75) + '" text-anchor="middle" font-size="19" font-weight="700" fill="' + INK + '">' + beatsTop + '</text>';
       svg += '<text x="' + tsX + '" y="' + (staffTopY + staffLineGap * 3.75) + '" text-anchor="middle" font-size="19" font-weight="700" fill="' + INK + '">4</text>';
 
       // 줄 맨 앞 시작 바라인
@@ -2107,6 +2208,7 @@ try {
 
       for (var col = 0; col < measuresPerRow; col++) {
         var i = row * measuresPerRow + col;
+        if (i >= sheet.measures.length) { break; } // 마지막 줄이 4마디보다 적게 찰 수 있음(리얼북 곡 길이가 4의 배수가 아닐 때)
         var measure = sheet.measures[i];
         var x0 = rowX0 + col * measureW;
         var xEnd = x0 + measureW;
@@ -2126,39 +2228,48 @@ try {
         var hits = measure.hits;
         for (var h = 0; h < hits.length; h++) {
           var hit = hits[h];
-          var cx = innerX0 + ((hit.unit - 0.5) / 8) * innerW;
-          var dur = hitDurationUnits(measure, h);
+          var cx = plain
+            ? innerX0 + ((hit.slot + 0.5) / hit.totalSlots) * innerW
+            : innerX0 + ((hit.unit - 0.5) / 8) * innerW;
           var stemTopY = staffMidY - 30;
-
-          // 한 마디 안에 히트가 촘촘하면(리듬 "상" 난이도) 코드기호끼리 겹치기
-          // 쉽다. 히트 개수가 많을수록 글자를 작게 하고, 가장 가까운 이웃
-          // 히트에서 멀어지는 방향으로 정렬을 틀어서("end"=왼쪽으로 붙임,
-          // "start"=오른쪽으로 붙임) 겹침을 줄인다 — 실제로 그쪽으로 기울일
-          // 여유 공간(바라인까지 남은 거리)이 충분할 때만 적용해서 반대편
-          // 바라인을 넘어가는 걸 막는다.
-          var gapNext = h + 1 < hits.length ? hits[h + 1].unit - hit.unit : 99;
-          var gapPrev = h > 0 ? hit.unit - hits[h - 1].unit : 99;
-          var marginLeft = cx - x0;
-          var marginRight = xEnd - cx;
-          var crowdRight = gapNext <= 2;
-          var crowdLeft = gapPrev <= 2;
           var anchor = 'middle';
-          if (crowdRight && crowdLeft) {
-            // 양쪽 다 붙어있으면 더 급한(간격이 더 좁은) 쪽에서 멀어지는 방향으로.
-            if (gapNext <= gapPrev) { if (marginLeft > 24) { anchor = 'end'; } }
-            else { if (marginRight > 24) { anchor = 'start'; } }
-          } else if (crowdRight) {
-            if (marginLeft > 24) { anchor = 'end'; }
-          } else if (crowdLeft) {
-            if (marginRight > 24) { anchor = 'start'; }
+          var labelFontSize = 18;
+
+          if (!plain) {
+            var dur = hitDurationUnits(measure, h);
+            // 한 마디 안에 히트가 촘촘하면(리듬 "상" 난이도) 코드기호끼리 겹치기
+            // 쉽다. 히트 개수가 많을수록 글자를 작게 하고, 가장 가까운 이웃
+            // 히트에서 멀어지는 방향으로 정렬을 틀어서("end"=왼쪽으로 붙임,
+            // "start"=오른쪽으로 붙임) 겹침을 줄인다 — 실제로 그쪽으로 기울일
+            // 여유 공간(바라인까지 남은 거리)이 충분할 때만 적용해서 반대편
+            // 바라인을 넘어가는 걸 막는다.
+            var gapNext = h + 1 < hits.length ? hits[h + 1].unit - hit.unit : 99;
+            var gapPrev = h > 0 ? hit.unit - hits[h - 1].unit : 99;
+            var marginLeft = cx - x0;
+            var marginRight = xEnd - cx;
+            var crowdRight = gapNext <= 2;
+            var crowdLeft = gapPrev <= 2;
+            if (crowdRight && crowdLeft) {
+              if (gapNext <= gapPrev) { if (marginLeft > 24) { anchor = 'end'; } }
+              else { if (marginRight > 24) { anchor = 'start'; } }
+            } else if (crowdRight) {
+              if (marginLeft > 24) { anchor = 'end'; }
+            } else if (crowdLeft) {
+              if (marginRight > 24) { anchor = 'start'; }
+            }
+            labelFontSize = hits.length >= 4 ? 12 : (hits.length === 3 ? 16 : 18);
+          } else {
+            // 리얼북 곡은 마디당 최대 2코드라, 2개일 때만 서로 반대쪽으로
+            // 붙여서 가운데 정렬보다 더 넓게 벌린다.
+            if (hit.totalSlots === 2) { anchor = hit.slot === 0 ? 'end' : 'start'; }
+            labelFontSize = 16;
           }
-          var labelFontSize = hits.length >= 4 ? 12 : (hits.length === 3 ? 16 : 18);
 
           svg += '<text x="' + cx + '" y="' + (y0 + 16) + '" text-anchor="' + anchor + '" font-size="' + labelFontSize + '" font-weight="800" fill="' + INK + '">' + hit.chordLabel + '</text>';
           // 슬래시 노트헤드 — 항상 가운데 줄 위, 음높이 없는 리듬 전용 표기.
           svg += '<line x1="' + (cx - 6) + '" y1="' + (staffMidY + 6) + '" x2="' + (cx + 6) + '" y2="' + (staffMidY - 6) + '" stroke="' + INK + '" stroke-width="3.5" stroke-linecap="round"/>';
 
-          if (dur !== 8) {
+          if (!plain && dur !== 8) {
             svg += '<line x1="' + (cx + 5) + '" y1="' + (staffMidY - 5) + '" x2="' + (cx + 5) + '" y2="' + stemTopY + '" stroke="' + INK + '" stroke-width="2"/>';
             if (dur === 1) {
               svg += '<path d="M' + (cx + 5) + ' ' + stemTopY + ' Q' + (cx + 15) + ' ' + (stemTopY + 5) + ' ' + (cx + 13) + ' ' + (stemTopY + 14) + '" stroke="' + INK + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
@@ -2211,6 +2322,9 @@ try {
     var el = document.getElementById(containerId);
     el.innerHTML = '';
     var tiers = [['low', t('majorEduTierLow')], ['mid', t('majorEduTierMid')], ['high', t('majorEduTierHigh')]];
+    // '리얼북'은 코드 난이도 쪽에만 있는 4번째 선택지 — 알고리즘 생성이 아니라
+    // 실제 스탠다드 곡(REALBOOK_SONGS)에서 하나를 골라 보여주는 별도 모드.
+    if (kind === 'chord') { tiers.push(['realbook', t('majorEduTierRealbook')]); }
     for (var i = 0; i < tiers.length; i++) {
       (function (tier) {
         var b = document.createElement('button');
@@ -2225,17 +2339,31 @@ try {
   function renderMajorEduSheet() {
     var sheetEl = document.getElementById('major-edu-sheet');
     var saveBtn = document.getElementById('major-edu-save-btn');
+    var infoEl = document.getElementById('major-edu-song-info');
     if (!state.majorEduSheet) {
       sheetEl.innerHTML = '';
       saveBtn.style.display = 'none';
+      infoEl.style.display = 'none';
       return;
     }
     sheetEl.innerHTML = buildMajorEduSVG(state.majorEduSheet);
     saveBtn.style.display = 'inline-block';
+    if (state.majorEduSheet.chordTier === 'realbook') {
+      var sheet = state.majorEduSheet;
+      infoEl.textContent = t('majorEduSongInfoPrefix') + ': ' + sheet.songTitle + ' — ' + sheet.songComposer + ' (' + sheet.songKey + ')';
+      infoEl.style.display = 'block';
+    } else {
+      infoEl.style.display = 'none';
+    }
   }
 
   function renderMajorEdu() {
     renderMajorEduStatic();
+    var isRealbook = state.majorEduChordTier === 'realbook';
+    // 리얼북은 원곡 키/원곡 리듬 그대로라 루트음 선택과 리듬 난이도 선택이
+    // 의미가 없어져서 숨긴다(코드 난이도 탭만 계속 보임).
+    document.getElementById('major-edu-root-group').style.display = isRealbook ? 'none' : 'block';
+    document.getElementById('major-edu-rhythm-group').style.display = isRealbook ? 'none' : 'block';
     renderMajorEduRoots();
     renderMajorEduTier('chord');
     renderMajorEduTier('rhythm');
@@ -5115,7 +5243,9 @@ try {
   document.getElementById('ad-sticky-close').onclick = closeMobileAdBar;
 
   document.getElementById('major-edu-generate-btn').onclick = function () {
-    state.majorEduSheet = generateMajorEduProgression(state.majorEduRoot, state.majorEduChordTier, state.majorEduRhythmTier);
+    state.majorEduSheet = state.majorEduChordTier === 'realbook'
+      ? buildRealbookSheet(pickRealbookSong())
+      : generateMajorEduProgression(state.majorEduRoot, state.majorEduChordTier, state.majorEduRhythmTier);
     renderMajorEduSheet();
   };
 
