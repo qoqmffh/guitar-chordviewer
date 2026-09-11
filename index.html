@@ -1865,6 +1865,126 @@ try {
     ]
   };
 
+  // Fisher-Yates — 배열을 제자리에서 섞어서 그대로 반환.
+  function shuffleArray(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // DIATONIC_DEGREES/DIATONIC_TRIADS의 도수 라벨 순서(둘 다 이 순서로 정의돼 있음).
+  var DIATONIC_ROMANS = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+
+  // slotCount개의 다이아토닉 도수를 무작위로 뽑는다. 규칙: 1) 바로 연속으로
+  // 같은 도수가 두 번 나오지 않음 2) 마지막 슬롯은 항상 I(토닉으로 종지)
+  // 3) 최소 한 번은 V->I 진행이 들어가게(없으면 뒤에서 두 번째 슬롯을 V로
+  // 강제 교체 — 단, 그렇게 했을 때 뒤에서 세 번째와 연속으로 겹치면 포기하고
+  // 그대로 둔다. 8마디짜리 연습용 진행이라 이 정도 소프트 규칙이면 충분).
+  function pickDiatonicSequence(slotCount) {
+    var seq = [];
+    for (var i = 0; i < slotCount; i++) {
+      if (i === slotCount - 1) {
+        seq.push('I');
+        continue;
+      }
+      // 뒤에서 두 번째 슬롯은 마지막(항상 'I')과 이어지므로 'I'도 같이
+      // 제외해야 연속반복 규칙이 끝에서 깨지지 않는다.
+      var forbidden = [seq[seq.length - 1]];
+      if (i === slotCount - 2) { forbidden.push('I'); }
+      var choices = DIATONIC_ROMANS.filter(function (r) { return forbidden.indexOf(r) === -1; });
+      seq.push(choices[Math.floor(Math.random() * choices.length)]);
+    }
+    var hasVtoI = false;
+    for (var j = 0; j < seq.length - 1; j++) {
+      if (seq[j] === 'V' && seq[j + 1] === 'I') { hasVtoI = true; break; }
+    }
+    if (!hasVtoI && seq.length >= 2) {
+      var pos = seq.length - 2;
+      if (seq[pos - 1] !== 'V') { seq[pos] = 'V'; }
+    }
+    return seq;
+  }
+
+  // targetRoman(예: 'ii')의 5도 위 음정(반음 offset, 0~11)을 계산 — 그 위에
+  // dom7을 쌓으면 targetRoman으로 가는 이차도미넌트(V7/ii 등)가 된다.
+  function secondaryDominantOffset(targetRoman) {
+    for (var i = 0; i < DIATONIC_DEGREES.length; i++) {
+      if (DIATONIC_DEGREES[i].label === targetRoman) {
+        return (DIATONIC_DEGREES[i].offset + 7) % 12;
+      }
+    }
+    return null;
+  }
+
+  // seq 안에서 다음 슬롯이 'ii'/'V'/'vi'인 자리를 찾아 최대 maxSubs개를
+  // 'V7/<다음도수>'로 치환한다(마지막 슬롯 앞까지만 대상 — 마지막은 항상 I).
+  // 적절한 자리가 없으면 그냥 원래 seq를 그대로 돌려준다(강제하지 않음).
+  function applySecondaryDominants(seq, maxSubs) {
+    var eligible = ['ii', 'V', 'vi'];
+    var candidates = [];
+    for (var i = 0; i < seq.length - 1; i++) {
+      if (eligible.indexOf(seq[i + 1]) !== -1 && seq[i] !== 'V') { candidates.push(i); }
+    }
+    shuffleArray(candidates);
+    var subs = candidates.slice(0, maxSubs);
+    return seq.map(function (roman, i) {
+      return subs.indexOf(i) !== -1 ? ('V7/' + seq[i + 1]) : roman;
+    });
+  }
+
+  // roman(예: 'ii°'는 없음, 'vii°'만 있음)에 해당하는 코드 기호를 계산.
+  // chordTier==='low'면 DIATONIC_TRIADS(트라이어드), 아니면 DIATONIC_DEGREES
+  // (7th 코드)에서 찾는다. 'V7/...' 형태(이차도미넌트)는 이 함수가 아니라
+  // generateMajorEduProgression 안에서 별도로 처리한다.
+  function romanToChordLabel(rootPC, roman, chordTier) {
+    var table = chordTier === 'low' ? DIATONIC_TRIADS : DIATONIC_DEGREES;
+    for (var i = 0; i < table.length; i++) {
+      if (table[i].label === roman) { return scaleChordName(rootPC, table[i].offset, table[i].qual); }
+    }
+    return null;
+  }
+
+  // Major Edu 코드초견 출제지 하나(8마디)를 생성. rootPC: 0~11.
+  // chordTier/rhythmTier: 'low'|'mid'|'high'.
+  function generateMajorEduProgression(rootPC, chordTier, rhythmTier) {
+    var measureCount = 8;
+    var bank = RHYTHM_PATTERNS[rhythmTier];
+    var measureRhythms = [];
+    for (var m = 0; m < measureCount; m++) {
+      measureRhythms.push(bank[Math.floor(Math.random() * bank.length)]);
+    }
+
+    var slotCount = 0;
+    for (var mi = 0; mi < measureRhythms.length; mi++) { slotCount += measureRhythms[mi].units.length; }
+
+    var romanSeq = pickDiatonicSequence(slotCount);
+    if (chordTier === 'high') { romanSeq = applySecondaryDominants(romanSeq, 2); }
+
+    var measures = [];
+    var slotIdx = 0;
+    for (var i = 0; i < measureCount; i++) {
+      var pattern = measureRhythms[i];
+      var hits = [];
+      for (var u = 0; u < pattern.units.length; u++) {
+        var roman = romanSeq[slotIdx];
+        var chordLabel;
+        if (roman.indexOf('V7/') === 0) {
+          var targetRoman = roman.slice(3);
+          chordLabel = scaleChordName(rootPC, secondaryDominantOffset(targetRoman), 'dom7');
+        } else {
+          chordLabel = romanToChordLabel(rootPC, roman, chordTier);
+        }
+        hits.push({ unit: pattern.units[u], roman: roman, chordLabel: chordLabel });
+        slotIdx++;
+      }
+      measures.push({ rhythmPatternId: pattern.id, hits: hits });
+    }
+
+    return { root: rootPC, chordTier: chordTier, rhythmTier: rhythmTier, measures: measures };
+  }
+
   // 다이아토닉 코드의 화성 기능 (토닉/서브도미넌트/도미넌트) — 장조 기준
   // 보편 이론이라 스케일별 데이터가 아니라 한 번만 정의해서 공용으로 씀.
   var DIATONIC_FUNCTION = { 'I': 'tonic', 'iii': 'tonic', 'vi': 'tonic', 'ii': 'subdominant', 'IV': 'subdominant', 'V': 'dominant', 'vii°': 'dominant' };
