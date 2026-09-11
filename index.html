@@ -566,12 +566,13 @@
   /* 고정 72px + object-fit:cover였을 때 배너 위아래(특히 문구가 있는 위쪽)가
      잘려 보이던 문제 — 높이를 고정해서 억지로 채우지 않고, 이미지 자체
      비율대로(width:100% + height:auto) 다 보이게 하되, 유난히 세로로
-     긴 이미지가 화면을 너무 많이 덮지 않도록 컨테이너에만 높이 상한을 둔다. */
+     긴 이미지가 화면을 너무 많이 덮지 않도록 컨테이너에만 높이 상한을 둔다.
+     예전 160px은 본문을 너무 많이 가려서 110px로 줄임. */
   .ad-inline.has-ad {
     display: block;
     background: var(--surface-2);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.12);
-    max-height: 160px;
+    max-height: 110px;
     overflow: hidden;
   }
   .ad-inline.has-ad a { display: block; line-height: 0; }
@@ -579,7 +580,41 @@
   /* 광고 바가 화면 아래에 고정되면 그만큼 본문 맨 아래가 가려지니
      띄운 만큼 페이지 하단에 여백을 더해 실제로는 안 가려지게 한다. */
   @media (max-width: 1899px) {
-    body.has-sticky-ad { padding-bottom: 168px; }
+    body.has-sticky-ad { padding-bottom: 118px; }
+  }
+  /* 광고 띠 닫기 버튼 — 왼쪽 위 모서리에 얹는 원형 버튼, 아래쪽 그림자로
+     눌러지는 입체감을 준 뒤(햄버거 버튼과 같은 톤) 안쪽에 아래쪽 화살표
+     (셰브런)를 그려서 "이 띠를 아래로 치운다"는 방향성을 그대로 보여준다. */
+  .ad-sticky-close {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    z-index: 1;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.16), 0 4px 9px -3px rgba(0, 0, 0, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: box-shadow 120ms ease, transform 120ms ease;
+  }
+  .ad-sticky-close:active {
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0.16), 0 1px 3px -1px rgba(0, 0, 0, 0.2);
+    transform: translateY(1px);
+  }
+  .ad-sticky-close::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    margin-top: -3px;
+    border-right: 2px solid #1a1a1a;
+    border-bottom: 2px solid #1a1a1a;
+    transform: rotate(45deg);
   }
 
   /* 광고관리자모드 진입용 비밀번호 모달 */
@@ -735,6 +770,7 @@
 <div id="ad-rail-left" class="ad-rail">광고 영역</div>
 <div id="ad-rail-right" class="ad-rail">광고 영역</div>
 <div id="ad-sticky-bar" class="ad-sticky-bar">
+  <button id="ad-sticky-close" class="ad-sticky-close" aria-label="광고 닫기"></button>
   <div id="ad-inline-left" class="ad-inline"></div>
   <div id="ad-inline-right" class="ad-inline"></div>
 </div>
@@ -1267,6 +1303,7 @@ try {
       fbUnavailable: '지금은 자유게시판을 이용할 수 없어요.',
       fbEmpty: '아직 등록된 글이 없어요. 첫 글을 남겨보세요!',
       adRailPlaceholder: '광고 영역',
+      adCloseLabel: '광고 닫기',
       adminModalTitle: '광고관리자모드',
       adminModalDesc: '비밀번호를 입력하세요.',
       adminModalCancel: '취소',
@@ -1414,6 +1451,7 @@ try {
       fbUnavailable: 'Free Board is unavailable right now.',
       fbEmpty: 'No posts yet — be the first to write one!',
       adRailPlaceholder: 'Ad Space',
+      adCloseLabel: 'Close ad',
       adminModalTitle: 'Ad Admin Mode',
       adminModalDesc: 'Enter the password.',
       adminModalCancel: 'Cancel',
@@ -2213,7 +2251,8 @@ try {
     adConfig: { left: { img: '', imgWide: '', link: '' }, right: { img: '', imgWide: '', link: '' } },
     adClicks: { left: 0, right: 0 }, // 배너별 클릭수 (Firebase 연결 시에만 실제 값)
     liveVisitors: 0,       // 실시간 접속자 수 (Firebase 연결 시에만 의미 있는 값)
-    freeboardPosts: []      // 자유게시판 글 목록, 최신순 (Firebase 연결 시에만 실제 값)
+    freeboardPosts: [],     // 자유게시판 글 목록, 최신순 (Firebase 연결 시에만 실제 값)
+    mobileAdClosed: false   // 좁은 화면 하단 광고 띠를 사용자가 직접 닫았는지 (세션 한정)
   };
 
   // ---------------------------------------------------------------
@@ -2264,6 +2303,7 @@ try {
   // ---------------------------------------------------------------
   var AD_STORAGE_KEY = 'gt-ad-config';
   var AD_AUTH_KEY = 'gt-ad-authed';
+  var AD_STICKY_CLOSED_KEY = 'gt-ad-sticky-closed';
   // SHA-256("2729") 의 16진 해시. 평문 비밀번호를 소스에 그대로 남기지
   // 않기 위한 최소한의 조치일 뿐 — 정적 사이트라 진짜 보안은 아님.
   var ADMIN_PW_HASH = 'd1a08ae1268b2fc1248ace198c3518a73d86ea765ff93d964a6182b4c32d80c3';
@@ -2295,6 +2335,7 @@ try {
         if (parsed && parsed.left && parsed.right) { state.adConfig = parsed; }
       }
       state.adAuthed = sessionStorage.getItem(AD_AUTH_KEY) === '1';
+      state.mobileAdClosed = sessionStorage.getItem(AD_STICKY_CLOSED_KEY) === '1';
     } catch (e) { /* 프라이빗 모드 등 스토리지 접근 불가 시 기본값 유지 */ }
   })();
 
@@ -4131,9 +4172,19 @@ try {
         inlineEl.innerHTML = '';
       }
     });
+    var showSticky = anyInlineAd && !state.mobileAdClosed;
     var stickyBar = document.getElementById('ad-sticky-bar');
-    stickyBar.classList.toggle('has-any-ad', anyInlineAd);
-    document.body.classList.toggle('has-sticky-ad', anyInlineAd);
+    stickyBar.classList.toggle('has-any-ad', showSticky);
+    document.body.classList.toggle('has-sticky-ad', showSticky);
+    document.getElementById('ad-sticky-close').setAttribute('aria-label', t('adCloseLabel'));
+  }
+
+  // 하단 광고 띠 닫기 — 방문자가 직접 닫으면 이번 세션 동안은 다시 안 뜨게
+  // sessionStorage에 남긴다(광고 있음/없음이 바뀌어도 계속 닫힌 채로 유지).
+  function closeMobileAdBar() {
+    state.mobileAdClosed = true;
+    try { sessionStorage.setItem(AD_STICKY_CLOSED_KEY, '1'); } catch (e) { /* 무시 */ }
+    renderAdRails();
   }
 
   // --- 광고관리자모드 비밀번호 모달 ---
@@ -4355,6 +4406,7 @@ try {
     renderTopNav();
   };
   document.getElementById('lang-toggle').onclick = function () { state.lang = state.lang === 'ko' ? 'en' : 'ko'; renderApp(); };
+  document.getElementById('ad-sticky-close').onclick = closeMobileAdBar;
 
   document.getElementById('admin-modal-cancel').onclick = closeAdminModal;
   document.getElementById('admin-modal-submit').onclick = submitAdminPassword;
