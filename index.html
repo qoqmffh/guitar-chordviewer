@@ -235,7 +235,7 @@
      padding 값은 그대로 두고, 홈에서만 음수 마진으로 상쇄한다. */
   #app-home { margin-top: -24px; }
   /* 흰 카드 박스 없이 스케일 페이지처럼 크림 배경 위에 내용이 바로 놓이게 */
-  #app, #app-progression, #app-admin, #app-wip {
+  #app, #app-progression, #app-admin, #app-wip, #app-major-edu {
     max-width: 1200px;
     margin: 0 auto;
   }
@@ -995,7 +995,7 @@
             <button id="nav-code" class="nav-btn nav-child">CHORD</button>
             <button id="nav-scale" class="nav-btn nav-child">SCALES</button>
             <button id="nav-harmony" class="nav-btn nav-child">REHAMONY <span class="nav-badge">🚧</span></button>
-            <button id="nav-major-edu" class="nav-btn nav-child">MAJOR EDU <span class="nav-badge">🚧</span></button>
+            <button id="nav-major-edu" class="nav-btn nav-child">MAJOR EDU</button>
           </div>
           <div id="nav-children-community" class="nav-children nav-mega-col">
             <div class="nav-mega-col-title">COMMUNITY</div>
@@ -1184,7 +1184,32 @@
   <div id="scale-chordtone-grips"></div>
 </div>
 
-<!-- 아직 안 만든 메뉴(TOOLS/MAJOR EDU/HARMONY/MY) 전부가 공유하는 자리표시자
+<div id="app-major-edu" style="display:none;">
+  <h1 id="major-edu-h1">Major Edu — 코드초견</h1>
+
+  <div style="margin-bottom:16px;">
+    <div class="gt-label" id="label-major-edu-root">루트음</div>
+    <div id="major-edu-roots" class="gt-flex gt-grid-fixed"></div>
+  </div>
+
+  <div style="margin-bottom:16px;">
+    <div class="gt-label" id="label-major-edu-chord-tier">코드 난이도</div>
+    <div id="major-edu-chord-tiers" class="gt-flex gt-segmented"></div>
+  </div>
+
+  <div style="margin-bottom:20px;">
+    <div class="gt-label" id="label-major-edu-rhythm-tier">리듬 난이도</div>
+    <div id="major-edu-rhythm-tiers" class="gt-flex gt-segmented"></div>
+  </div>
+
+  <button id="major-edu-generate-btn" class="home-cta home-cta-primary" style="margin-bottom:20px;">출제지 생성</button>
+
+  <div id="major-edu-sheet"></div>
+
+  <button id="major-edu-save-btn" class="gt-btn" style="margin-top:16px; display:none;">PNG로 저장</button>
+</div>
+
+<!-- 아직 안 만든 메뉴(HARMONY/MY 등) 전부가 공유하는 자리표시자
      페이지 — 어느 메뉴를 눌렀든 똑같이 "개발중입니다" 안내만 보여준다. -->
 <div id="app-wip" style="display:none;">
   <div class="wip-emoji">🚧</div>
@@ -1405,6 +1430,14 @@ try {
       svgScaleDesc: '선택한 루트음과 스케일에 맞는 음정 위치를 전체 지판에 표시',
       svgMajorEduTitle: '코드초견 출제지',
       svgMajorEduDesc: '선택한 조성·난이도로 생성한 8마디 코드초견 연습용 리듬 차트',
+      majorEduTitle: 'Major Edu — 코드초견',
+      labelMajorEduRoot: '루트음',
+      labelMajorEduChordTier: '코드 난이도',
+      labelMajorEduRhythmTier: '리듬 난이도',
+      majorEduTierLow: '하', majorEduTierMid: '중', majorEduTierHigh: '상',
+      majorEduRandomRoot: '🎲 랜덤',
+      majorEduGenerateBtn: '출제지 생성',
+      majorEduSaveBtn: 'PNG로 저장',
       svgOpenVoicingTitle: '오픈 보이싱 다이어그램',
       svgOpenVoicingDesc: '선택한 오픈 보이싱 그립 하나를 표시 (개방현/뮤트 포함)',
       homeHeroTitle: '코드를 외우지 말고, 지판에서 보세요.',
@@ -1555,6 +1588,14 @@ try {
       svgScaleDesc: 'Shows interval positions across the full fretboard for the selected root and scale',
       svgMajorEduTitle: 'Chord sight-reading sheet',
       svgMajorEduDesc: 'An 8-bar chord sight-reading rhythm chart generated for the selected key and difficulty',
+      majorEduTitle: 'Major Edu — Chord Sight-Reading',
+      labelMajorEduRoot: 'Root',
+      labelMajorEduChordTier: 'Chord Difficulty',
+      labelMajorEduRhythmTier: 'Rhythm Difficulty',
+      majorEduTierLow: 'Easy', majorEduTierMid: 'Medium', majorEduTierHigh: 'Hard',
+      majorEduRandomRoot: '🎲 Random',
+      majorEduGenerateBtn: 'Generate Sheet',
+      majorEduSaveBtn: 'Save as PNG',
       svgOpenVoicingTitle: 'Open voicing diagram',
       svgOpenVoicingDesc: 'Shows one selected open-voicing grip (including open/muted strings)',
       homeHeroTitle: 'Stop memorizing chords. See them on the fretboard.',
@@ -2055,6 +2096,73 @@ try {
 
     svg += '</svg>';
     return svg;
+  }
+
+  function renderMajorEduStatic() {
+    document.getElementById('major-edu-h1').textContent = t('majorEduTitle');
+    document.getElementById('label-major-edu-root').textContent = t('labelMajorEduRoot');
+    document.getElementById('label-major-edu-chord-tier').textContent = t('labelMajorEduChordTier');
+    document.getElementById('label-major-edu-rhythm-tier').textContent = t('labelMajorEduRhythmTier');
+    document.getElementById('major-edu-generate-btn').textContent = t('majorEduGenerateBtn');
+    document.getElementById('major-edu-save-btn').textContent = t('majorEduSaveBtn');
+  }
+
+  function renderMajorEduRoots() {
+    var el = document.getElementById('major-edu-roots');
+    el.innerHTML = '';
+    for (var i = 0; i < NOTES.length; i++) {
+      (function (idx) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state.majorEduRoot === idx ? ' active' : '');
+        b.textContent = NOTES[idx];
+        b.onclick = function () { state.majorEduRoot = idx; renderMajorEdu(); };
+        el.appendChild(b);
+      })(i);
+    }
+    var randomBtn = document.createElement('button');
+    randomBtn.className = 'gt-btn';
+    randomBtn.textContent = t('majorEduRandomRoot');
+    randomBtn.onclick = function () { state.majorEduRoot = Math.floor(Math.random() * 12); renderMajorEdu(); };
+    el.appendChild(randomBtn);
+  }
+
+  // kind: 'chord' | 'rhythm' — 두 세그먼티드 컨트롤(코드 난이도/리듬 난이도)이
+  // 구조가 완전히 같아서 하나의 함수로 처리.
+  function renderMajorEduTier(kind) {
+    var containerId = kind === 'chord' ? 'major-edu-chord-tiers' : 'major-edu-rhythm-tiers';
+    var stateKey = kind === 'chord' ? 'majorEduChordTier' : 'majorEduRhythmTier';
+    var el = document.getElementById(containerId);
+    el.innerHTML = '';
+    var tiers = [['low', t('majorEduTierLow')], ['mid', t('majorEduTierMid')], ['high', t('majorEduTierHigh')]];
+    for (var i = 0; i < tiers.length; i++) {
+      (function (tier) {
+        var b = document.createElement('button');
+        b.className = 'gt-btn' + (state[stateKey] === tier[0] ? ' active' : '');
+        b.textContent = tier[1];
+        b.onclick = function () { state[stateKey] = tier[0]; renderMajorEdu(); };
+        el.appendChild(b);
+      })(tiers[i]);
+    }
+  }
+
+  function renderMajorEduSheet() {
+    var sheetEl = document.getElementById('major-edu-sheet');
+    var saveBtn = document.getElementById('major-edu-save-btn');
+    if (!state.majorEduSheet) {
+      sheetEl.innerHTML = '';
+      saveBtn.style.display = 'none';
+      return;
+    }
+    sheetEl.innerHTML = buildMajorEduSVG(state.majorEduSheet);
+    saveBtn.style.display = 'inline-block';
+  }
+
+  function renderMajorEdu() {
+    renderMajorEduStatic();
+    renderMajorEduRoots();
+    renderMajorEduTier('chord');
+    renderMajorEduTier('rhythm');
+    renderMajorEduSheet();
   }
 
   // 다이아토닉 코드의 화성 기능 (토닉/서브도미넌트/도미넌트) — 장조 기준
@@ -4816,8 +4924,8 @@ try {
     };
   }
 
-  // 아직 실제 기능이 없는 메뉴 6개 — 전부 #app-wip 자리표시자 하나를 공유한다.
-  var WIP_VIEWS = ['majorEdu', 'harmony', 'my', 'userCommunity', 'guitarShop', 'effecter'];
+  // 아직 실제 기능이 없는 메뉴 5개 — 전부 #app-wip 자리표시자 하나를 공유한다.
+  var WIP_VIEWS = ['harmony', 'my', 'userCommunity', 'guitarShop', 'effecter'];
 
   // 하위메뉴 카테고리별로 어떤 뷰가 거기 속하는지 — 그 중 하나를 보고 있으면
   // 카테고리 라벨(PRODUCT/TOOLS/COMMUNITY) 자체에도 active 표시를 해준다.
@@ -4841,6 +4949,7 @@ try {
     document.getElementById('app-scale').style.display = state.activeView === 'scale' ? 'block' : 'none';
     document.getElementById('app-admin').style.display = state.activeView === 'admin' ? 'block' : 'none';
     document.getElementById('app-wip').style.display = isWip ? 'block' : 'none';
+    document.getElementById('app-major-edu').style.display = state.activeView === 'majorEdu' ? 'block' : 'none';
 
     document.getElementById('nav-home').className = 'nav-btn nav-child' + (state.activeView === 'home' ? ' active' : '');
     document.getElementById('nav-my').className = 'nav-btn nav-child' + (state.activeView === 'my' ? ' active' : '');
@@ -4873,6 +4982,8 @@ try {
       renderScale();
     } else if (state.activeView === 'admin') {
       renderAdminView();
+    } else if (state.activeView === 'majorEdu') {
+      renderMajorEdu();
     } else if (isWip) {
       renderWipView();
     }
@@ -4925,6 +5036,11 @@ try {
 
   document.getElementById('lang-toggle').onclick = function () { state.lang = state.lang === 'ko' ? 'en' : 'ko'; renderApp(); };
   document.getElementById('ad-sticky-close').onclick = closeMobileAdBar;
+
+  document.getElementById('major-edu-generate-btn').onclick = function () {
+    state.majorEduSheet = generateMajorEduProgression(state.majorEduRoot, state.majorEduChordTier, state.majorEduRhythmTier);
+    renderMajorEduSheet();
+  };
 
   document.getElementById('admin-modal-cancel').onclick = closeAdminModal;
   document.getElementById('admin-modal-submit').onclick = submitAdminPassword;
