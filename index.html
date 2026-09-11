@@ -877,6 +877,14 @@
       left: 50%;
       transform: translateX(-50%);
       padding-top: 14px; /* 안 보이지만 항상 호버 가능한 안전지대 — 여백은 여기로 만든다 */
+      /* height:0 + overflow:visible — 안 보이는 이 래퍼의 실제 히트박스를 딱
+         padding-top(14px, 마우스가 버튼→카드로 넘어가는 틈)만큼만으로 못박는다.
+         이게 없으면 자식 카드(.nav-megamenu-card)가 opacity:0이어도 레이아웃
+         높이는 그대로 차지해서, 메뉴를 안 열었을 때도 카드 크기만한 투명
+         영역이 내비 바로 아래에 계속 남아 그 자리의 페이지 클릭을 막아버린다
+         (카드 자체는 overflow:visible이라 열렸을 때는 그대로 잘 보이고 클릭됨). */
+      height: 0;
+      overflow: visible;
       z-index: 12;
     }
     .nav-megamenu-card {
@@ -1898,9 +1906,12 @@ try {
   // 8="&4". units는 코드가 바뀌는(=리듬이 attack하는) 위치들의 오름차순
   // 배열이다. 각 히트의 실제 길이(몇 8분음표만큼 유지되는지)는 렌더링
   // 시점에 "다음 히트까지의 간격"으로 계산한다(마지막 히트는 9-unit).
-  // high 티어의 4개 패턴은 전부 한 마디 안에서 완결되고(마디를 넘어가는
-  // 타이 없음), 연속된 8분음표 두 개가 붙어 나오는 경우가 없도록 골라서
-  // (비트/플래그만으로 그릴 수 있고 빔(beam) 연결선을 그릴 필요가 없다.
+  // high 티어의 4개 패턴은 전부 한 마디 안에서 완결된다(마디를 넘어가는
+  // 타이 없음). 히트끼리 최소 2유닛(4분음표 절반) 이상 떨어지게 골랐다 —
+  // 1유닛(8분음표 한 칸) 간격으로 서로 다른 코드기호 두 개를 붙이면 어떤
+  // 폰트 크기로도 겹치지 않게 그릴 수가 없고, 실제 악보에서도 그렇게
+  // 촘촘한 "당김음"은 보통 마디를 넘어가는 타이와 함께 쓰이는데 그건
+  // 이번 버전 범위 밖이라 애초에 배치를 안 한다.
   var RHYTHM_PATTERNS = {
     low: [
       { id: 'low-1', units: [1] } // 온음표 한 방
@@ -1909,10 +1920,10 @@ try {
       { id: 'mid-1', units: [1, 5] } // 1박, 3박에 2분음표씩
     ],
     high: [
-      { id: 'high-1', units: [1, 4, 5] },    // 1박(점4분) + "&2"(8분) + 3박(2분)
-      { id: 'high-2', units: [1, 2, 5] },    // 1박(8분) + "&1"(점4분) + 3박(2분) — "찰스턴" 리듬
-      { id: 'high-3', units: [1, 4, 7] },    // 1박(점4분) + "&2"(점4분) + 4박(4분) — 3+3+2 분할
-      { id: 'high-4', units: [1, 3, 4, 7] }  // 1박(4분)+2박(8분)+"&2"(점4분)+4박(4분)
+      { id: 'high-1', units: [1, 4, 6] },    // 1박(점4분)+"&2"(4분)+3박(점4분) — 3+2+3 분할
+      { id: 'high-2', units: [1, 3, 6] },    // 1박(4분)+2박(점4분)+3박(점4분) — "&2"에서 당겨 들어옴
+      { id: 'high-3', units: [1, 4, 7] },    // 1박(점4분)+"&2"(점4분)+4박(4분) — 3+3+2 분할
+      { id: 'high-4', units: [1, 3, 6, 8] }  // 1박(4분)+2박(점4분)+3박(4분)+"&4"(8분) — 4히트 중 가장 빽빽한 패턴
     ]
   };
 
@@ -2050,17 +2061,22 @@ try {
   // 형식). 색은 사이트 테마 변수(var(--...))를 쓰지 않고 고정 색만 쓴다 —
   // 이 SVG는 PNG로 내보낼 때 페이지 스타일시트에서 분리된 독립 문서가
   // 되기 때문에 CSS 커스텀 프로퍼티가 해석되지 않는다.
+  // 실제 5선 오선지 위에 코드기호+리듬 슬래시를 얹는 정통 "리듬 차트" 방식.
+  // 슬래시 음표는 음높이를 따로 표기하지 않는 관례라, 항상 가운데 줄(3번째
+  // 줄) 위에 그린다 — 이 앱은 음높이가 아니라 리듬/화성 진행만 연습하는
+  // 용도라 실제 실기시험 출제지와 같은 표기법.
   function buildMajorEduSVG(sheet) {
     var measuresPerRow = 4;
-    var measureW = 210, measureGap = 14, rowH = 130, startX = 16, startY = 20;
-    var cardH = 104;      // 마디 카드 실제 높이(rowH보다 작게 둬서 줄 사이 숨통 확보)
-    var padX = 16;        // 카드 안쪽 좌우 여백 — 코드기호/음표가 테두리에 닿지 않게
-    var totalW = startX * 2 + measuresPerRow * measureW + (measuresPerRow - 1) * measureGap;
-    var totalH = startY + 2 * rowH + 14;
+    var measureW = 224, timeSigW = 34, startX = 16, startY = 20, rowH = 110;
+    var staffLineGap = 9;           // 오선 줄 사이 간격
+    var staffH = staffLineGap * 4;  // 맨 위 줄~맨 아래 줄 총 높이
+    var padX = 14;                  // 마디 안에서 히트 위치를 바라인에서 살짝 띄우는 여백
+    var rowX0 = startX + timeSigW;
+    var rowContentW = measuresPerRow * measureW;
+    var totalW = rowX0 + rowContentW + 16;
+    var totalH = startY + 2 * rowH + 20;
     var INK = '#1a1a1a';
-    var CARD_FILL = '#ffffff';
-    var CARD_BORDER = 'rgba(26,26,26,0.28)';
-    var GUIDE = 'rgba(26,26,26,0.32)';
+    var STAFF = 'rgba(26,26,26,0.45)';
     var FONT = "Arial, 'Helvetica Neue', Helvetica, sans-serif"; // 페이지 CSS 변수(var(--font-sans))는
     // PNG로 내보낼 때 분리된 문서라 해석이 안 되므로, 온스크린/내보내기 결과가
     // 항상 똑같도록 시스템 기본 산세리프를 고정으로 쓴다.
@@ -2069,39 +2085,87 @@ try {
       '<title>' + t('svgMajorEduTitle') + '</title>' +
       '<desc>' + t('svgMajorEduDesc') + '</desc>';
 
-    for (var i = 0; i < sheet.measures.length; i++) {
-      var row = Math.floor(i / measuresPerRow);
-      var col = i % measuresPerRow;
-      var x0 = startX + col * (measureW + measureGap);
+    for (var row = 0; row < 2; row++) {
       var y0 = startY + row * rowH;
-      var xEnd = x0 + measureW;
-      var lineY = y0 + 74;   // 리듬(슬래시) 기준선
-      var stemTopY = lineY - 32;
-      var innerX0 = x0 + padX;
-      var innerXEnd = xEnd - padX;
-      var innerW = innerXEnd - innerX0;
+      var staffTopY = y0 + 40;
+      var staffMidY = staffTopY + staffLineGap * 2;
+      var staffBotY = staffTopY + staffH;
+      var rowXEnd = rowX0 + rowContentW;
 
-      // 마디 하나 = 카드 한 장. 진한 얇은 선 대신 뚜렷한 테두리+흰 배경으로
-      // 마디 경계를 훨씬 잘 보이게 한다.
-      svg += '<rect x="' + x0 + '" y="' + y0 + '" width="' + measureW + '" height="' + cardH + '" rx="10" fill="' + CARD_FILL + '" stroke="' + CARD_BORDER + '" stroke-width="1.5"/>';
-      svg += '<line x1="' + (x0 + padX * 0.5) + '" y1="' + lineY + '" x2="' + (xEnd - padX * 0.5) + '" y2="' + lineY + '" stroke="' + GUIDE + '" stroke-width="1.5"/>';
+      for (var line = 0; line < 5; line++) {
+        var ly = staffTopY + line * staffLineGap;
+        svg += '<line x1="' + rowX0 + '" y1="' + ly + '" x2="' + rowXEnd + '" y2="' + ly + '" stroke="' + STAFF + '" stroke-width="1.2"/>';
+      }
 
-      var hits = sheet.measures[i].hits;
-      for (var h = 0; h < hits.length; h++) {
-        var hit = hits[h];
-        var cx = innerX0 + ((hit.unit - 0.5) / 8) * innerW;
-        var dur = hitDurationUnits(sheet.measures[i], h);
+      // 박자표 4/4 — 연습용 출제지라 줄마다 반복해서 가독성을 우선한다.
+      var tsX = startX + timeSigW / 2;
+      svg += '<text x="' + tsX + '" y="' + (staffTopY + staffLineGap * 1.75) + '" text-anchor="middle" font-size="19" font-weight="700" fill="' + INK + '">4</text>';
+      svg += '<text x="' + tsX + '" y="' + (staffTopY + staffLineGap * 3.75) + '" text-anchor="middle" font-size="19" font-weight="700" fill="' + INK + '">4</text>';
 
-        svg += '<text x="' + cx + '" y="' + (y0 + 26) + '" text-anchor="middle" font-size="19" font-weight="800" fill="' + INK + '">' + hit.chordLabel + '</text>';
-        svg += '<line x1="' + (cx - 7) + '" y1="' + (lineY + 7) + '" x2="' + (cx + 7) + '" y2="' + (lineY - 7) + '" stroke="' + INK + '" stroke-width="4" stroke-linecap="round"/>';
+      // 줄 맨 앞 시작 바라인
+      svg += '<line x1="' + rowX0 + '" y1="' + staffTopY + '" x2="' + rowX0 + '" y2="' + staffBotY + '" stroke="' + INK + '" stroke-width="1.75"/>';
 
-        if (dur !== 8) {
-          svg += '<line x1="' + (cx + 6) + '" y1="' + (lineY - 6) + '" x2="' + (cx + 6) + '" y2="' + stemTopY + '" stroke="' + INK + '" stroke-width="2.5"/>';
-          if (dur === 1) {
-            svg += '<path d="M' + (cx + 6) + ' ' + stemTopY + ' Q' + (cx + 18) + ' ' + (stemTopY + 6) + ' ' + (cx + 16) + ' ' + (stemTopY + 17) + '" stroke="' + INK + '" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+      for (var col = 0; col < measuresPerRow; col++) {
+        var i = row * measuresPerRow + col;
+        var measure = sheet.measures[i];
+        var x0 = rowX0 + col * measureW;
+        var xEnd = x0 + measureW;
+        var isLastMeasure = (i === sheet.measures.length - 1);
+
+        if (isLastMeasure) {
+          // 곡 전체의 마지막 마디 끝 — 얇은 선+굵은 선의 종지 겹바라인.
+          svg += '<line x1="' + (xEnd - 6) + '" y1="' + staffTopY + '" x2="' + (xEnd - 6) + '" y2="' + staffBotY + '" stroke="' + INK + '" stroke-width="1.25"/>';
+          svg += '<line x1="' + xEnd + '" y1="' + staffTopY + '" x2="' + xEnd + '" y2="' + staffBotY + '" stroke="' + INK + '" stroke-width="3"/>';
+        } else {
+          svg += '<line x1="' + xEnd + '" y1="' + staffTopY + '" x2="' + xEnd + '" y2="' + staffBotY + '" stroke="' + INK + '" stroke-width="1.75"/>';
+        }
+
+        var innerX0 = x0 + padX;
+        var innerW = measureW - padX * 2;
+
+        var hits = measure.hits;
+        for (var h = 0; h < hits.length; h++) {
+          var hit = hits[h];
+          var cx = innerX0 + ((hit.unit - 0.5) / 8) * innerW;
+          var dur = hitDurationUnits(measure, h);
+          var stemTopY = staffMidY - 30;
+
+          // 한 마디 안에 히트가 촘촘하면(리듬 "상" 난이도) 코드기호끼리 겹치기
+          // 쉽다. 히트 개수가 많을수록 글자를 작게 하고, 가장 가까운 이웃
+          // 히트에서 멀어지는 방향으로 정렬을 틀어서("end"=왼쪽으로 붙임,
+          // "start"=오른쪽으로 붙임) 겹침을 줄인다 — 실제로 그쪽으로 기울일
+          // 여유 공간(바라인까지 남은 거리)이 충분할 때만 적용해서 반대편
+          // 바라인을 넘어가는 걸 막는다.
+          var gapNext = h + 1 < hits.length ? hits[h + 1].unit - hit.unit : 99;
+          var gapPrev = h > 0 ? hit.unit - hits[h - 1].unit : 99;
+          var marginLeft = cx - x0;
+          var marginRight = xEnd - cx;
+          var crowdRight = gapNext <= 2;
+          var crowdLeft = gapPrev <= 2;
+          var anchor = 'middle';
+          if (crowdRight && crowdLeft) {
+            // 양쪽 다 붙어있으면 더 급한(간격이 더 좁은) 쪽에서 멀어지는 방향으로.
+            if (gapNext <= gapPrev) { if (marginLeft > 24) { anchor = 'end'; } }
+            else { if (marginRight > 24) { anchor = 'start'; } }
+          } else if (crowdRight) {
+            if (marginLeft > 24) { anchor = 'end'; }
+          } else if (crowdLeft) {
+            if (marginRight > 24) { anchor = 'start'; }
           }
-          if (dur === 3) {
-            svg += '<circle cx="' + (cx + 13) + '" cy="' + lineY + '" r="2.5" fill="' + INK + '"/>';
+          var labelFontSize = hits.length >= 4 ? 12 : (hits.length === 3 ? 16 : 18);
+
+          svg += '<text x="' + cx + '" y="' + (y0 + 16) + '" text-anchor="' + anchor + '" font-size="' + labelFontSize + '" font-weight="800" fill="' + INK + '">' + hit.chordLabel + '</text>';
+          // 슬래시 노트헤드 — 항상 가운데 줄 위, 음높이 없는 리듬 전용 표기.
+          svg += '<line x1="' + (cx - 6) + '" y1="' + (staffMidY + 6) + '" x2="' + (cx + 6) + '" y2="' + (staffMidY - 6) + '" stroke="' + INK + '" stroke-width="3.5" stroke-linecap="round"/>';
+
+          if (dur !== 8) {
+            svg += '<line x1="' + (cx + 5) + '" y1="' + (staffMidY - 5) + '" x2="' + (cx + 5) + '" y2="' + stemTopY + '" stroke="' + INK + '" stroke-width="2"/>';
+            if (dur === 1) {
+              svg += '<path d="M' + (cx + 5) + ' ' + stemTopY + ' Q' + (cx + 15) + ' ' + (stemTopY + 5) + ' ' + (cx + 13) + ' ' + (stemTopY + 14) + '" stroke="' + INK + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
+            }
+            if (dur === 3) {
+              svg += '<circle cx="' + (cx + 11) + '" cy="' + (staffMidY - staffLineGap / 2) + '" r="2.2" fill="' + INK + '"/>';
+            }
           }
         }
       }
