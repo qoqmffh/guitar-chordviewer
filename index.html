@@ -1403,6 +1403,8 @@ try {
       svgFretboardDesc: '선택한 루트음과 탑노트에 맞는 음정 위치, 프렛 묶기 켜짐 시 그립 구간 박스를 표시',
       svgScaleTitle: '스케일 다이어그램',
       svgScaleDesc: '선택한 루트음과 스케일에 맞는 음정 위치를 전체 지판에 표시',
+      svgMajorEduTitle: '코드초견 출제지',
+      svgMajorEduDesc: '선택한 조성·난이도로 생성한 8마디 코드초견 연습용 리듬 차트',
       svgOpenVoicingTitle: '오픈 보이싱 다이어그램',
       svgOpenVoicingDesc: '선택한 오픈 보이싱 그립 하나를 표시 (개방현/뮤트 포함)',
       homeHeroTitle: '코드를 외우지 말고, 지판에서 보세요.',
@@ -1551,6 +1553,8 @@ try {
       svgFretboardDesc: 'Shows interval positions for the selected root and top note, with grip-range boxes when fret grouping is on',
       svgScaleTitle: 'Scale diagram',
       svgScaleDesc: 'Shows interval positions across the full fretboard for the selected root and scale',
+      svgMajorEduTitle: 'Chord sight-reading sheet',
+      svgMajorEduDesc: 'An 8-bar chord sight-reading rhythm chart generated for the selected key and difficulty',
       svgOpenVoicingTitle: 'Open voicing diagram',
       svgOpenVoicingDesc: 'Shows one selected open-voicing grip (including open/muted strings)',
       homeHeroTitle: 'Stop memorizing chords. See them on the fretboard.',
@@ -1983,6 +1987,74 @@ try {
     }
 
     return { root: rootPC, chordTier: chordTier, rhythmTier: rhythmTier, measures: measures };
+  }
+
+  // measure.hits[hitIndex]가 몇 개의 8분음표 단위만큼 유지되는지(다음
+  // 히트 전까지, 마지막 히트면 마디 끝(9)까지) 계산. 1=8분, 2=4분, 3=점4분,
+  // 4=2분, 8=온음표.
+  function hitDurationUnits(measure, hitIndex) {
+    var thisUnit = measure.hits[hitIndex].unit;
+    var nextUnit = hitIndex + 1 < measure.hits.length ? measure.hits[hitIndex + 1].unit : 9;
+    return nextUnit - thisUnit;
+  }
+
+  // 코드초견 출제지 SVG — 8마디를 한 줄에 4마디씩 2줄로 그린다. 정식
+  // 5선보 대신 "마디 박스 + 코드기호 + 리듬 슬래시" 형태(실기시험 출제지
+  // 형식). 색은 사이트 테마 변수(var(--...))를 쓰지 않고 고정 색만 쓴다 —
+  // 이 SVG는 PNG로 내보낼 때 페이지 스타일시트에서 분리된 독립 문서가
+  // 되기 때문에 CSS 커스텀 프로퍼티가 해석되지 않는다.
+  function buildMajorEduSVG(sheet) {
+    var measuresPerRow = 4;
+    var measureW = 210, measureGap = 14, rowH = 170, startX = 16, startY = 50;
+    var totalW = startX * 2 + measuresPerRow * measureW + (measuresPerRow - 1) * measureGap;
+    var totalH = startY + 2 * rowH + 20;
+    var INK = '#1a1a1a';
+    var GUIDE = '#c9c5b8';
+
+    var svg = '<svg width="100%" viewBox="0 0 ' + totalW + ' ' + totalH + '" role="img">' +
+      '<title>' + t('svgMajorEduTitle') + '</title>' +
+      '<desc>' + t('svgMajorEduDesc') + '</desc>';
+
+    for (var i = 0; i < sheet.measures.length; i++) {
+      var row = Math.floor(i / measuresPerRow);
+      var col = i % measuresPerRow;
+      var x0 = startX + col * (measureW + measureGap);
+      var y0 = startY + row * rowH;
+      var lineY = y0 + 46;
+      var stemTopY = lineY - 34;
+      var xEnd = x0 + measureW;
+      var isLastMeasure = (i === sheet.measures.length - 1);
+
+      svg += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x0 + '" y2="' + (lineY + 10) + '" stroke="' + INK + '" stroke-width="' + (col === 0 ? 2.5 : 1.25) + '"/>';
+      svg += '<line x1="' + xEnd + '" y1="' + y0 + '" x2="' + xEnd + '" y2="' + (lineY + 10) + '" stroke="' + INK + '" stroke-width="' + (isLastMeasure ? 2.5 : 1.25) + '"/>';
+      if (isLastMeasure) {
+        svg += '<line x1="' + (xEnd - 5) + '" y1="' + y0 + '" x2="' + (xEnd - 5) + '" y2="' + (lineY + 10) + '" stroke="' + INK + '" stroke-width="1.25"/>';
+      }
+      svg += '<line x1="' + x0 + '" y1="' + lineY + '" x2="' + xEnd + '" y2="' + lineY + '" stroke="' + GUIDE + '" stroke-width="1"/>';
+
+      var hits = sheet.measures[i].hits;
+      for (var h = 0; h < hits.length; h++) {
+        var hit = hits[h];
+        var cx = x0 + ((hit.unit - 0.5) / 8) * measureW;
+        var dur = hitDurationUnits(sheet.measures[i], h);
+
+        svg += '<text x="' + cx + '" y="' + (y0 + 14) + '" text-anchor="middle" font-size="15" font-weight="700" fill="' + INK + '" style="font-family:var(--font-sans)">' + hit.chordLabel + '</text>';
+        svg += '<line x1="' + (cx - 6) + '" y1="' + (lineY + 6) + '" x2="' + (cx + 6) + '" y2="' + (lineY - 6) + '" stroke="' + INK + '" stroke-width="3"/>';
+
+        if (dur !== 8) {
+          svg += '<line x1="' + (cx + 5) + '" y1="' + (lineY - 5) + '" x2="' + (cx + 5) + '" y2="' + stemTopY + '" stroke="' + INK + '" stroke-width="2"/>';
+          if (dur === 1) {
+            svg += '<path d="M' + (cx + 5) + ' ' + stemTopY + ' Q' + (cx + 16) + ' ' + (stemTopY + 6) + ' ' + (cx + 14) + ' ' + (stemTopY + 16) + '" stroke="' + INK + '" stroke-width="2" fill="none"/>';
+          }
+          if (dur === 3) {
+            svg += '<circle cx="' + (cx + 12) + '" cy="' + lineY + '" r="2" fill="' + INK + '"/>';
+          }
+        }
+      }
+    }
+
+    svg += '</svg>';
+    return svg;
   }
 
   // 다이아토닉 코드의 화성 기능 (토닉/서브도미넌트/도미넌트) — 장조 기준
