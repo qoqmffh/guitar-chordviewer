@@ -1830,6 +1830,41 @@ try {
     { label: 'vii°', offset: 11, qual: 'halfdim7' }
   ];
 
+  // Major Edu 코드초견 "하" 난이도 전용 — DIATONIC_DEGREES(7th 코드 하모나이제이션)의
+  // 트라이어드 버전. label/offset은 DIATONIC_DEGREES와 완전히 동일하게 맞춘다.
+  var DIATONIC_TRIADS = [
+    { label: 'I',    offset: 0,  qual: 'major' },
+    { label: 'ii',   offset: 2,  qual: 'minor' },
+    { label: 'iii',  offset: 4,  qual: 'minor' },
+    { label: 'IV',   offset: 5,  qual: 'major' },
+    { label: 'V',    offset: 7,  qual: 'major' },
+    { label: 'vi',   offset: 9,  qual: 'minor' },
+    { label: 'vii°', offset: 11, qual: 'dimTriad' }
+  ];
+
+  // Major Edu 코드초견 리듬 패턴 뱅크. 한 마디(4/4)를 8분음표 단위로 8칸
+  // (1~8)으로 나눈다: 1=1박, 2="&1", 3=2박, 4="&2", 5=3박, 6="&3", 7=4박,
+  // 8="&4". units는 코드가 바뀌는(=리듬이 attack하는) 위치들의 오름차순
+  // 배열이다. 각 히트의 실제 길이(몇 8분음표만큼 유지되는지)는 렌더링
+  // 시점에 "다음 히트까지의 간격"으로 계산한다(마지막 히트는 9-unit).
+  // high 티어의 4개 패턴은 전부 한 마디 안에서 완결되고(마디를 넘어가는
+  // 타이 없음), 연속된 8분음표 두 개가 붙어 나오는 경우가 없도록 골라서
+  // (비트/플래그만으로 그릴 수 있고 빔(beam) 연결선을 그릴 필요가 없다.
+  var RHYTHM_PATTERNS = {
+    low: [
+      { id: 'low-1', units: [1] } // 온음표 한 방
+    ],
+    mid: [
+      { id: 'mid-1', units: [1, 5] } // 1박, 3박에 2분음표씩
+    ],
+    high: [
+      { id: 'high-1', units: [1, 4, 5] },    // 1박(점4분) + "&2"(8분) + 3박(2분)
+      { id: 'high-2', units: [1, 2, 5] },    // 1박(8분) + "&1"(점4분) + 3박(2분) — "찰스턴" 리듬
+      { id: 'high-3', units: [1, 4, 7] },    // 1박(점4분) + "&2"(점4분) + 4박(4분) — 3+3+2 분할
+      { id: 'high-4', units: [1, 3, 4, 7] }  // 1박(4분)+2박(8분)+"&2"(점4분)+4박(4분)
+    ]
+  };
+
   // 다이아토닉 코드의 화성 기능 (토닉/서브도미넌트/도미넌트) — 장조 기준
   // 보편 이론이라 스케일별 데이터가 아니라 한 번만 정의해서 공용으로 씀.
   var DIATONIC_FUNCTION = { 'I': 'tonic', 'iii': 'tonic', 'vi': 'tonic', 'ii': 'subdominant', 'IV': 'subdominant', 'V': 'dominant', 'vii°': 'dominant' };
@@ -1851,7 +1886,10 @@ try {
   // QUALITIES에 없는 화음(마이너메이저7 등)을 스케일 운용법 표시에서만
   // 쓰기 위한 보조 테이블 — "코드 종류" 메뉴 등 다른 곳에는 영향 없음.
   var SCALE_CHORD_EXTRA = {
-    minMaj7: { label: 'm(maj7)', intervals: [[0, 'R'], [3, 'b3'], [7, '5'], [11, '7']] }
+    minMaj7: { label: 'm(maj7)', intervals: [[0, 'R'], [3, 'b3'], [7, '5'], [11, '7']] },
+    // Major Edu 코드초견의 "하" 난이도(다이아토닉 트라이어드)에서 vii°를
+    // 표기하려고 추가 — QUALITIES에는 순수 디미니쉬 트라이어드가 없음(dim7만 있음).
+    dimTriad: { label: 'dim', intervals: [[0, 'R'], [3, 'b3'], [6, 'b5']] }
   };
   function scaleChordName(rootPC, offset, qualKey) {
     var pc = (rootPC + offset) % 12;
@@ -2464,7 +2502,11 @@ try {
     adClicks: { left: 0, right: 0 }, // 배너별 클릭수 (Firebase 연결 시에만 실제 값)
     liveVisitors: 0,       // 실시간 접속자 수 (Firebase 연결 시에만 의미 있는 값)
     freeboardPosts: [],     // 자유게시판 글 목록, 최신순 (Firebase 연결 시에만 실제 값)
-    mobileAdClosed: false   // 좁은 화면 하단 광고 띠를 사용자가 직접 닫았는지 (세션 한정)
+    mobileAdClosed: false,  // 좁은 화면 하단 광고 띠를 사용자가 직접 닫았는지 (세션 한정)
+    majorEduRoot: 0,        // Major Edu 코드초견: 조성 루트음 (0~11, C=0)
+    majorEduChordTier: 'mid',   // 'low' | 'mid' | 'high'
+    majorEduRhythmTier: 'mid',  // 'low' | 'mid' | 'high'
+    majorEduSheet: null     // 마지막으로 생성한 출제지 객체(Task 2 참고), 생성 전엔 null
   };
 
   // ---------------------------------------------------------------
