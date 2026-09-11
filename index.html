@@ -827,7 +827,7 @@
     <div class="home-footer-inner">
       <div class="home-footer-label" id="home-creator-label">제작자 정보</div>
       <div class="home-footer-body">
-        <span id="home-creator-name">박태준</span> · <span id="home-creator-contact">광고문의</span> <a href="mailto:etude_8838@naver.com">etude_8838@naver.com</a>
+        <span id="home-creator-name">박태준</span> · <span id="home-creator-contact">광고문의</span> <span id="home-creator-kakao-label">카카오톡 ID</span>: boardlabs · <a href="mailto:etude_8838@naver.com">etude_8838@naver.com</a>
       </div>
     </div>
   </footer>
@@ -1109,6 +1109,7 @@ try {
       homeCreator: '제작자 정보',
       homeCreatorName: '박태준',
       homeCreatorContact: '광고문의',
+      homeCreatorKakaoLabel: '카카오톡 ID',
       homeFeatureCode: {
         title: '코드',
         desc: '루트음과 코드 종류를 고르면 지판 전체에서 구성음 위치를 바로 보여줘요.',
@@ -1255,6 +1256,7 @@ try {
       homeCreator: 'About the Creator',
       homeCreatorName: 'Taejun Park',
       homeCreatorContact: 'Business inquiries',
+      homeCreatorKakaoLabel: 'KakaoTalk ID',
       homeFeatureCode: {
         title: 'Chords',
         desc: 'Pick a root and chord type and instantly see every instance of its notes across the fretboard.',
@@ -3626,6 +3628,7 @@ try {
     document.getElementById('home-creator-label').textContent = t('homeCreator');
     document.getElementById('home-creator-name').textContent = t('homeCreatorName');
     document.getElementById('home-creator-contact').textContent = t('homeCreatorContact');
+    document.getElementById('home-creator-kakao-label').textContent = t('homeCreatorKakaoLabel');
   }
 
   // ---------------------------------------------------------------
