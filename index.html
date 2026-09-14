@@ -491,6 +491,39 @@
     margin: 0 0 8px;
   }
 
+  .home-features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 28px;
+  }
+  @media (max-width: 720px) {
+    .home-features-grid { grid-template-columns: 1fr; }
+  }
+  .home-feature-card {
+    display: block;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-card);
+    padding: 22px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 150ms ease, transform 150ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .home-feature-card:hover { border-color: rgba(0, 0, 0, 0.3); transform: translateY(-2px); }
+  }
+  .home-feature-card h3 {
+    font-family: var(--font-chakra);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    margin: 0 0 8px;
+    color: #1a1a1a;
+  }
+  .home-feature-card p { margin: 0 0 12px; font-size: 0.875rem; line-height: 1.65; color: var(--text-secondary); }
+  .home-feature-points { margin: 0; padding-left: 1.1em; font-size: 0.8125rem; line-height: 1.7; color: var(--text-secondary); }
+  .home-feature-points li { margin-bottom: 2px; }
+
   .home-news-list { display: flex; flex-direction: column; margin-top: 28px; }
   .home-news-row { display: flex; align-items: baseline; gap: 24px; padding: 16px 4px; border-top: 1px solid rgba(0, 0, 0, 0.12); }
   .home-news-list > :last-child { border-bottom: 1px solid rgba(0, 0, 0, 0.12); }
@@ -1074,6 +1107,13 @@
 
   <section class="home-section">
     <div class="home-section-inner">
+      <h2 class="home-section-title" id="home-features-label">기능</h2>
+      <div class="home-features-grid" id="home-features"></div>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="home-section-inner">
       <h2 class="home-section-title" id="home-news-label">News</h2>
       <div class="home-news-list" id="home-news"></div>
     </div>
@@ -1484,22 +1524,42 @@ try {
       homeCreatorKakaoLabel: '카카오톡 ID',
       homeFeatureCode: {
         title: '코드',
-        desc: '루트음과 코드 종류를 고르면 지판 전체에서 구성음 위치를 바로 보여줘요.',
+        desc: '루트음과 코드 종류를 고르면 지판 전체에서 구성음 위치를 바로 보여줘요 — 기타 코드표를 따로 안 외워도 됩니다.',
+        view: 'code',
         points: [
           '전체 지판 — 구성음이 나오는 모든 자리를 한눈에',
           '멜로디 보이싱 — 탑노트를 고정한 그립, "프렛 묶기"로 손이 닿는 구간만 표시',
-          '오픈 보이싱 — 조성별 다이아토닉/추가 코드를 실제 손가락으로 누를 수 있는 그립으로'
+          '바레코드·오픈코드 기본 코드 — 통기타 운지법 그대로'
         ]
       },
       homeFeatureProgression: {
         title: '코드진행',
-        desc: '코드를 순서대로 넣고 프렛 범위를 지정하면, 그 구간 안에서만 그립을 찾아줘요.',
-        points: []
+        desc: '코드를 순서대로 넣고 프렛 범위를 지정하면, 그 구간 안에서 손 이동 없이 이어칠 수 있는 그립을 찾아줘요.',
+        view: 'progression',
+        points: [
+          '반주 코드 진행을 손 이동 최소화해서 이어치기',
+          '보이싱 방식(멜로디/오픈) 선택 가능'
+        ]
       },
       homeFeatureScale: {
         title: '스케일',
-        desc: '루트음과 스케일 종류를 고르면 지판 전체에 스케일 음을 표시하고, 어떻게 쓰면 좋은지도 정리해뒀어요.',
-        points: []
+        desc: '루트음과 스케일 종류를 고르면 지판 전체에 스케일 음을 표시하고, 애드립에 어떻게 쓰면 좋은지도 정리해뒀어요.',
+        view: 'scale',
+        points: [
+          '메이저·마이너 펜타토닉부터 모드 스케일까지 21개',
+          '스케일 포지션을 지판 전체에서 한눈에 — 핑거링 익히기',
+          '코드톤 모드로 다이아토닉 코드 위치까지 함께 확인'
+        ]
+      },
+      homeFeatureMajorEdu: {
+        title: 'Major Edu — 코드초견',
+        desc: '실용음악과 입시에서 보는 코드초견 연습용 리듬 차트를 매번 새로 생성해요.',
+        view: 'majorEdu',
+        points: [
+          '코드 난이도·리듬 난이도를 따로 조절',
+          '실제 재즈 스탠다드 14곡 코드 진행으로도 연습(리얼북)',
+          '완성된 출제지는 PNG로 저장'
+        ]
       },
 
       modeBasic: '기본코드', modeTop: '멜로디 보이싱',
@@ -1643,22 +1703,42 @@ try {
       homeCreatorKakaoLabel: 'KakaoTalk ID',
       homeFeatureCode: {
         title: 'Chords',
-        desc: 'Pick a root and chord type and instantly see every instance of its notes across the fretboard.',
+        desc: 'Pick a root and chord type and instantly see every instance of its notes across the fretboard — no chord chart memorizing required.',
+        view: 'code',
         points: [
           'Full Fretboard — every spot the chord tones appear, at a glance',
           'Melody Voicing — a grip with a fixed top note; "Fret Grouping" boxes off what your hand can reach',
-          'Open Voicing — diatonic/extra chords per key, shown as real, playable open-chord grips'
+          'Barre and open basic chords — the same fingerings you already know'
         ]
       },
       homeFeatureProgression: {
         title: 'Progression',
-        desc: 'Enter chords in order and set a fret range — it finds grips that fit within it.',
-        points: []
+        desc: 'Enter chords in order and set a fret range — it finds grips you can play in sequence without jumping around the neck.',
+        view: 'progression',
+        points: [
+          'Play through a chord progression with minimal hand movement',
+          'Choose your voicing style (melody or open)'
+        ]
       },
       homeFeatureScale: {
         title: 'Scale',
-        desc: 'Pick a root and a scale type to see it across the whole neck, plus notes on how to actually use it.',
-        points: []
+        desc: 'Pick a root and a scale type to see it across the whole neck, plus notes on how to actually use it for improvisation.',
+        view: 'scale',
+        points: [
+          '21 scales — major/minor pentatonic through the modes',
+          'See scale positions across the whole neck to learn fingerings',
+          'Chord-tone mode shows diatonic chord positions too'
+        ]
+      },
+      homeFeatureMajorEdu: {
+        title: 'Major Edu — Chord Sight-Reading',
+        desc: 'Generate a fresh chord sight-reading rhythm chart for practical-music entrance exam practice, every time.',
+        view: 'majorEdu',
+        points: [
+          'Chord difficulty and rhythm difficulty adjust independently',
+          'Practice with real jazz standard changes too (Real Book mode)',
+          'Save the finished sheet as a PNG'
+        ]
       },
 
       modeBasic: 'Basic Chords', modeTop: 'Melody Voicing',
@@ -4505,6 +4585,46 @@ try {
     document.getElementById('home-creator-name').textContent = t('homeCreatorName');
     document.getElementById('home-creator-contact').textContent = t('homeCreatorContact');
     document.getElementById('home-creator-kakao-label').textContent = t('homeCreatorKakaoLabel');
+    renderHomeFeatures();
+  }
+
+  // 홈 화면의 "기능" 소개 카드 4개(코드/스케일/코드진행/Major Edu) — 실제
+  // 검색되는 문구를 자연스럽게 녹인 설명 텍스트로, 클릭하면 해당 도구로
+  // 바로 이동한다(goToView). href도 같이 채워서(#code 등) 우클릭으로 새 탭
+  // 열기·크롤러가 링크를 읽는 것도 자연스럽게 되게 한다.
+  function renderHomeFeatures() {
+    document.getElementById('home-features-label').textContent = t('homeFeaturesLabel');
+    var el = document.getElementById('home-features');
+    el.innerHTML = '';
+    var keys = ['homeFeatureCode', 'homeFeatureScale', 'homeFeatureProgression', 'homeFeatureMajorEdu'];
+    keys.forEach(function (key) {
+      var feature = t(key);
+      var card = document.createElement('a');
+      card.className = 'home-feature-card';
+      card.href = '#' + feature.view;
+      card.onclick = function (e) { e.preventDefault(); goToView(feature.view); };
+
+      var h3 = document.createElement('h3');
+      h3.textContent = feature.title;
+      card.appendChild(h3);
+
+      var p = document.createElement('p');
+      p.textContent = feature.desc;
+      card.appendChild(p);
+
+      if (feature.points && feature.points.length) {
+        var ul = document.createElement('ul');
+        ul.className = 'home-feature-points';
+        feature.points.forEach(function (point) {
+          var li = document.createElement('li');
+          li.textContent = point;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+      }
+
+      el.appendChild(card);
+    });
   }
 
   // ---------------------------------------------------------------
