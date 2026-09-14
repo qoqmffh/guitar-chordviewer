@@ -502,8 +502,8 @@
   }
   .home-feature-card {
     display: block;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.16);
     border-radius: var(--radius-card);
     padding: 22px 24px;
     text-decoration: none;
@@ -511,7 +511,10 @@
     transition: border-color 150ms ease, transform 150ms ease;
   }
   @media (hover: hover) and (pointer: fine) {
-    .home-feature-card:hover { border-color: rgba(0, 0, 0, 0.3); transform: translateY(-2px); }
+    .home-feature-card:hover { border-color: rgba(0, 0, 0, 0.4); transform: translateY(-2px); }
+  }
+  @media (max-width: 720px) {
+    .home-feature-card { padding: 18px 18px; }
   }
   .home-feature-card h3 {
     font-family: var(--font-chakra);
