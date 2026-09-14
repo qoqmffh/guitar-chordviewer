@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>board-labs</title>
+<title>board-labs — 기타 코드/스케일 무료 웹앱</title>
+<meta name="description" content="기타 코드와 스케일을 지판 위에서 바로 확인하고, 코드 진행을 만들고, 코드초견 연습까지 — 회원가입 없이 무료로 쓰는 기타 학습 도구 board-labs.">
+<link rel="canonical" href="https://qoqmffh.github.io/guitar-chordviewer/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="board-labs">
+<meta property="og:title" content="board-labs — 기타 코드/스케일 무료 웹앱">
+<meta property="og:description" content="기타 코드와 스케일을 지판 위에서 바로 확인하고, 코드 진행을 만들고, 코드초견 연습까지 — 회원가입 없이 무료로 쓰는 기타 학습 도구.">
+<meta property="og:url" content="https://qoqmffh.github.io/guitar-chordviewer/">
+<meta property="og:image" content="https://qoqmffh.github.io/guitar-chordviewer/imagedata/strat-sheet.png">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="board-labs — 기타 코드/스케일 무료 웹앱">
+<meta name="twitter:description" content="기타 코드와 스케일을 지판 위에서 바로 확인하고, 코드 진행을 만들고, 코드초견 연습까지.">
+<meta name="twitter:image" content="https://qoqmffh.github.io/guitar-chordviewer/imagedata/strat-sheet.png">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600&display=swap">
 <style>
   :root {
@@ -5194,12 +5207,28 @@ try {
     }
   }
 
+  // 주소창 해시(#code, #scale 등)로 직접 들어오거나 뒤로/앞으로가기 했을 때
+  // 인식할 공개 뷰 목록 — 해시 자체는 구글 색인에 안 잡히지만(검색 노출은
+  // 별도 정적 도어웨이 페이지가 담당), 링크 공유·뒤로가기가 자연스러워지는
+  // UX 개선으로 같이 넣는다. admin은 기존 #admin 1회성 진입 로직을 그대로
+  // 쓰므로 여기 목록에 넣지 않는다(충돌 없음 — 서로 다른 해시 값 검사).
+  var HASH_VIEWS = ['home', 'code', 'scale', 'progression', 'majorEdu'];
+  function viewFromHash() {
+    var h = window.location.hash.replace(/^#/, '');
+    return HASH_VIEWS.indexOf(h) !== -1 ? h : null;
+  }
+
   // 목적지로 이동 + 열려 있던 모바일 드릴다운 메뉴를 완전히 닫는다 — 메뉴에서
   // 뭔가 고르고 나면 메뉴가 내용을 계속 가리고 있을 이유가 없으므로.
   function goToView(view) {
     state.activeView = view;
     state.mobileNavLevel = 0;
     state.mobileNavActiveParent = null;
+    if (HASH_VIEWS.indexOf(view) !== -1) {
+      // home은 해시를 아예 비워서 주소를 깔끔하게 유지한다.
+      var newUrl = view === 'home' ? (window.location.pathname + window.location.search) : ('#' + view);
+      try { window.history.pushState(null, '', newUrl); } catch (e) { /* 무시 — file:// 등 일부 환경에서 pushState가 막힐 수 있음 */ }
+    }
     renderApp();
   }
 
@@ -5304,7 +5333,19 @@ try {
   if (window.location.hash === '#admin') {
     tryOpenAdminEntry();
     try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* 무시 */ }
+  } else {
+    // 도어웨이 페이지(code.html 등)의 "지금 사용해보기" 버튼이나 공유된
+    // 링크로 #code, #scale 같은 해시를 달고 들어왔으면 그 화면으로 바로 연다.
+    var hashView = viewFromHash();
+    if (hashView) { state.activeView = hashView; }
   }
+  // 뒤로/앞으로가기 버튼으로 해시가 바뀌면 그 화면으로 다시 맞춘다.
+  window.addEventListener('popstate', function () {
+    state.activeView = viewFromHash() || 'home';
+    state.mobileNavLevel = 0;
+    state.mobileNavActiveParent = null;
+    renderApp();
+  });
   document.addEventListener('keydown', function (e) {
     if (e.ctrlKey && e.altKey && (e.key === 'a' || e.key === 'A')) { tryOpenAdminEntry(); }
   });

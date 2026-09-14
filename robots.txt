@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://qoqmffh.github.io/guitar-chordviewer/sitemap.xml
