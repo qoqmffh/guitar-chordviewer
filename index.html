@@ -5158,6 +5158,7 @@ try {
   }
 
   function renderApp() {
+    updateSeoMeta();
     renderTopNav();
     renderAdRails();
     var isWip = WIP_VIEWS.indexOf(state.activeView) !== -1;
@@ -5216,6 +5217,57 @@ try {
   function viewFromHash() {
     var h = window.location.hash.replace(/^#/, '');
     return HASH_VIEWS.indexOf(h) !== -1 ? h : null;
+  }
+
+  // 뷰별 브라우저 탭 제목 + meta description. 검색엔진용 색인 자체는 정적
+  // 도어웨이 페이지(code.html 등)가 담당하지만, 실제로 이 화면들을 열어본
+  // 사람이 탭을 여러 개 띄워놓거나 북마크할 때 구분되게, 그리고 공유 링크
+  // 미리보기(og:title 등)에도 지금 보고 있는 화면이 반영되게 앱 안에서도
+  // 동적으로 바꿔준다.
+  var VIEW_SEO = {
+    home: {
+      title: 'board-labs — 기타 코드/스케일 무료 웹앱',
+      titleEn: 'board-labs — Free Guitar Chord & Scale Web App',
+      desc: '기타 코드와 스케일을 지판 위에서 바로 확인하고, 코드 진행을 만들고, 코드초견 연습까지 — 회원가입 없이 무료로 쓰는 기타 학습 도구 board-labs.',
+      descEn: 'See guitar chords and scales on the fretboard instantly, build chord progressions, and practice chord sight-reading — a free guitar learning tool with no sign-up.'
+    },
+    code: {
+      title: '기타 코드 지판 보기 — board-labs',
+      titleEn: 'Guitar Chord Fretboard — board-labs',
+      desc: '바레코드·오픈코드 기본 코드부터 멜로디 보이싱까지, 코드 하나를 고르면 지판 위 자리를 바로 보여줍니다.',
+      descEn: 'Pick a chord and see exactly where to put your fingers on the fretboard — from basic barre/open chords to melody voicings.'
+    },
+    scale: {
+      title: '기타 스케일 다이어그램 — board-labs',
+      titleEn: 'Guitar Scale Diagrams — board-labs',
+      desc: '21개 기타 스케일과 다이아토닉 코드 위치를 지판 다이어그램으로 바로 확인합니다.',
+      descEn: 'See 21 guitar scales and diatonic chord positions on a full fretboard diagram.'
+    },
+    progression: {
+      title: '기타 코드 진행 보이싱 찾기 — board-labs',
+      titleEn: 'Guitar Chord Progression Voicings — board-labs',
+      desc: '코드 진행을 입력하면 원하는 프렛 범위 안에서 손 이동 없이 이어칠 보이싱을 찾아줍니다.',
+      descEn: 'Enter a chord progression and find voicings you can play in sequence within one fret range, without jumping around the neck.'
+    },
+    majorEdu: {
+      title: '기타 코드초견 연습 — Major Edu | board-labs',
+      titleEn: 'Guitar Chord Sight-Reading — Major Edu | board-labs',
+      desc: '실용음악과 입시 코드초견 연습용 리듬 차트를 매번 새로 생성하거나, 실제 재즈 스탠다드로 연습합니다.',
+      descEn: 'Generate a fresh chord sight-reading rhythm chart every time, or practice with real jazz standard changes.'
+    }
+  };
+  function updateSeoMeta() {
+    var meta = VIEW_SEO[state.activeView] || VIEW_SEO.home;
+    var isEn = state.lang === 'en';
+    var title = (isEn && meta.titleEn) ? meta.titleEn : meta.title;
+    var desc = (isEn && meta.descEn) ? meta.descEn : meta.desc;
+    document.title = title;
+    var descEl = document.querySelector('meta[name="description"]');
+    if (descEl) { descEl.setAttribute('content', desc); }
+    var ogTitleEl = document.querySelector('meta[property="og:title"]');
+    if (ogTitleEl) { ogTitleEl.setAttribute('content', title); }
+    var ogDescEl = document.querySelector('meta[property="og:description"]');
+    if (ogDescEl) { ogDescEl.setAttribute('content', desc); }
   }
 
   // 목적지로 이동 + 열려 있던 모바일 드릴다운 메뉴를 완전히 닫는다 — 메뉴에서
