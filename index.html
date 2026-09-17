@@ -366,6 +366,42 @@
   .gt-grip-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.005em; margin: 0 0 6px; }
   .gt-row { display: flex; justify-content: space-between; color: var(--text-secondary); padding: 2px 0; }
   .gt-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 6px; }
+  /* 코드/스케일/메이저에듀 페이지 상단 헤더 — 홈 히어로(.bl-tag/.bl-headline)와
+     같은 Chakra Petch 톤으로 맞추고, 기존 sr-only 설명문을 실제로 보이게 승격. */
+  .tool-page-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+  .tool-page-tag {
+    display: block;
+    font-family: var(--font-chakra);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.4);
+    margin-bottom: 10px;
+  }
+  h1.tool-page-title {
+    font-family: var(--font-chakra);
+    font-weight: 600;
+    font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    color: #1a1a1a;
+    margin: 0 0 10px;
+  }
+  .tool-page-desc {
+    font-family: var(--font-chakra);
+    font-weight: 400;
+    font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+    line-height: 1.55;
+    color: rgba(0, 0, 0, 0.6);
+    margin: 0;
+    max-width: 640px;
+  }
+  @media (max-width: 720px) {
+    .tool-page-header { margin-bottom: 20px; padding-bottom: 16px; }
+    h1.tool-page-title { font-size: 1.5rem; }
+    .tool-page-desc { font-size: 0.875rem; }
+  }
   .ts { font-size: 0.6875rem; letter-spacing: 0.01em; fill: var(--text-secondary); font-family: var(--font-sans); }
   #gt-error {
     display: none;
@@ -1149,8 +1185,11 @@
 </div>
 
 <div id="app">
-  <h1 id="code-h1">기타 코드 지판 뷰어</h1>
-  <h2 class="sr-only" id="code-sr-desc">기타 지판 위 바레코드/오픈코드 기본코드와 멜로디 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</h2>
+  <div class="tool-page-header">
+    <span class="tool-page-tag">TOOLS</span>
+    <h1 id="code-h1" class="tool-page-title">기타 코드 지판 뷰어</h1>
+    <p class="tool-page-desc" id="code-sr-desc">기타 지판 위 바레코드/오픈코드 기본코드와 멜로디 보이싱, 프렛 묶기 기능을 제공하는 인터랙티브 다이어그램</p>
+  </div>
 
   <div id="gt-error"></div>
 
@@ -1217,7 +1256,11 @@
 </div>
 
 <div id="app-scale" style="display:none;">
-  <h1 id="scale-h1">스케일</h1>
+  <div class="tool-page-header">
+    <span class="tool-page-tag">TOOLS</span>
+    <h1 id="scale-h1" class="tool-page-title">스케일</h1>
+    <p class="tool-page-desc" id="scale-sr-desc"></p>
+  </div>
 
   <div style="margin-bottom:12px;">
     <div class="gt-label" id="label-scale-view">보기 모드</div>
@@ -1256,7 +1299,11 @@
 </div>
 
 <div id="app-major-edu" style="display:none;">
-  <h1 id="major-edu-h1">Major Edu — 코드초견</h1>
+  <div class="tool-page-header">
+    <span class="tool-page-tag">TOOLS</span>
+    <h1 id="major-edu-h1" class="tool-page-title">Major Edu — 코드초견</h1>
+    <p class="tool-page-desc" id="major-edu-sr-desc"></p>
+  </div>
 
   <div id="major-edu-root-group" style="margin-bottom:16px;">
     <div class="gt-label" id="label-major-edu-root">루트음</div>
@@ -1504,6 +1551,7 @@ try {
       svgMajorEduTitle: '코드초견 출제지',
       svgMajorEduDesc: '선택한 조성·난이도로 생성한 8마디 코드초견 연습용 리듬 차트',
       majorEduTitle: 'Major Edu — 코드초견',
+      majorEduSrDesc: '코드 초견 실력을 기르는 실용음악 입시 대비 출제지 생성기 — 난이도별 코드와 리듬을 랜덤으로 조합해 매번 새로운 악보를 만들어줍니다',
       labelMajorEduRoot: '루트음',
       labelMajorEduChordTier: '코드 난이도',
       labelMajorEduRhythmTier: '리듬 난이도',
@@ -1599,6 +1647,7 @@ try {
       progRemoveChord: '이 코드 삭제',
 
       scaleTitle: '스케일',
+      scaleSrDesc: '기타 지판 위에서 다이아토닉 스케일, 코드톤, 펜타토닉/블루스까지 한눈에 확인하는 인터랙티브 스케일 다이어그램',
       labelScaleRoot: '루트음',
       scaleUsageTitle: '이 스케일 운용법',
       usageDiatonicFn: '다이아토닉 코드 (화성 기능별)',
@@ -1683,6 +1732,7 @@ try {
       svgMajorEduTitle: 'Chord sight-reading sheet',
       svgMajorEduDesc: 'An 8-bar chord sight-reading rhythm chart generated for the selected key and difficulty',
       majorEduTitle: 'Major Edu — Chord Sight-Reading',
+      majorEduSrDesc: 'A sight-reading worksheet generator for music-college audition prep — mixes chords and rhythms at your chosen difficulty into a fresh sheet every time',
       labelMajorEduRoot: 'Root',
       labelMajorEduChordTier: 'Chord Difficulty',
       labelMajorEduRhythmTier: 'Rhythm Difficulty',
@@ -1778,6 +1828,7 @@ try {
       progRemoveChord: 'Remove this chord',
 
       scaleTitle: 'Scale',
+      scaleSrDesc: 'An interactive scale diagram covering diatonic scales, chord tones, and pentatonic/blues shapes across the guitar fretboard',
       labelScaleRoot: 'Root',
       scaleUsageTitle: 'How to use this scale',
       usageDiatonicFn: 'Diatonic Chords (by function)',
@@ -2385,6 +2436,7 @@ try {
 
   function renderMajorEduStatic() {
     document.getElementById('major-edu-h1').textContent = t('majorEduTitle');
+    document.getElementById('major-edu-sr-desc').textContent = t('majorEduSrDesc');
     document.getElementById('label-major-edu-root').textContent = t('labelMajorEduRoot');
     document.getElementById('label-major-edu-chord-tier').textContent = t('labelMajorEduChordTier');
     document.getElementById('label-major-edu-rhythm-tier').textContent = t('labelMajorEduRhythmTier');
@@ -4883,6 +4935,7 @@ try {
 
   function renderScaleStatic() {
     document.getElementById('scale-h1').textContent = t('scaleTitle');
+    document.getElementById('scale-sr-desc').textContent = t('scaleSrDesc');
     document.getElementById('label-scale-view').textContent = t('labelModes');
     document.getElementById('label-scale-root').textContent = t('labelScaleRoot');
     document.getElementById('label-chordtone-root').textContent = t('labelScaleRoot');
