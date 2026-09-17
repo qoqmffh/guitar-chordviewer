@@ -2496,7 +2496,9 @@ try {
   function scaleChordName(rootPC, offset, qualKey) {
     var pc = (rootPC + offset) % 12;
     var q = QUALITIES[qualKey] || SCALE_CHORD_EXTRA[qualKey];
-    var shortLabel = QUALITY_SHORT[qualKey] || q.label;
+    // '||'는 빈 문자열(메이저 코드는 접미사가 없어야 함, 예: "C")을 falsy로
+    // 취급해서 걸러버리므로, "그 키가 있는지" 자체로 판단해야 한다.
+    var shortLabel = (qualKey in QUALITY_SHORT) ? QUALITY_SHORT[qualKey] : q.label;
     return NOTES[pc] + shortLabel;
   }
 
@@ -3888,7 +3890,7 @@ try {
     el.appendChild(b);
   }
 
-  var QUALITY_SHORT = { maj7: 'maj7', min7: 'm7', dom7: '7', halfdim7: 'm7♭5', aug7: 'maj7#5', dim7: 'dim7' };
+  var QUALITY_SHORT = { major: '', minor: 'm', maj7: 'maj7', min7: 'm7', dom7: '7', halfdim7: 'm7♭5', aug7: 'maj7#5', dim7: 'dim7' };
 
   // 기본코드 모드 안의 형태 선택: 바레코드(클로즈드) / 오픈코드.
   function renderBasicTypeToggle() {
