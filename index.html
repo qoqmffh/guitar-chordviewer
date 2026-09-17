@@ -66,6 +66,15 @@
     font-style: normal;
     font-display: swap;
   }
+  /* Major Edu 전용 손글씨 폰트 — 제목과 출제지 코드기호 딱 2곳에만 씀 */
+  @font-face {
+    font-family: 'SSVeryBadHandwritingRegular';
+    src: url('fonts/SSVeryBadHandwritingRegular_otf.otf') format('opentype'),
+         url('fonts/SSVeryBadHandwritingRegular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
   * { box-sizing: border-box; }
   html { font-size: 100%; } /* 사용자 브라우저 글자크기 설정 존중 (rem 기준) */
   body {
@@ -416,6 +425,11 @@
     .tool-page-header { margin-bottom: 20px; padding-bottom: 16px; }
     h1.tool-page-title { font-size: 1.5rem; }
     .tool-page-desc { font-size: 0.875rem; }
+  }
+  /* Major Edu 제목만 손글씨 폰트로 — 위 내비게이션 메뉴/다른 페이지 제목은 그대로 둠 */
+  #major-edu-h1 {
+    font-family: 'SSVeryBadHandwritingRegular', var(--font-chakra);
+    font-weight: 400;
   }
   .ts { font-size: 0.6875rem; letter-spacing: 0.01em; fill: var(--text-secondary); font-family: var(--font-sans); }
   #gt-error {
@@ -2428,7 +2442,7 @@ try {
             labelFontSize = 16;
           }
 
-          svg += '<text x="' + cx + '" y="' + (y0 + 16) + '" text-anchor="' + anchor + '" font-size="' + labelFontSize + '" font-weight="800" fill="' + INK + '">' + hit.chordLabel + '</text>';
+          svg += '<text x="' + cx + '" y="' + (y0 + 16) + '" text-anchor="' + anchor + '" font-family="\'SSVeryBadHandwritingRegular\', ' + FONT + '" font-size="' + labelFontSize + '" font-weight="800" fill="' + INK + '">' + hit.chordLabel + '</text>';
           // 슬래시 노트헤드 — 항상 가운데 줄 위, 음높이 없는 리듬 전용 표기.
           svg += '<line x1="' + (cx - 6) + '" y1="' + (staffMidY + 6) + '" x2="' + (cx + 6) + '" y2="' + (staffMidY - 6) + '" stroke="' + INK + '" stroke-width="3.5" stroke-linecap="round"/>';
 
