@@ -306,15 +306,15 @@
     overflow: hidden; clip: rect(0,0,0,0);
   }
   .gt-btn {
-    padding: 6px 14px;
+    padding: 8px 16px;
     font-size: 0.8125rem;
     white-space: nowrap; /* 라벨이 두 줄로 쪼개져 마지막 글자만 남는 것 방지 */
-    border-radius: var(--radius-pill);
+    border-radius: 10px;
     border: 1px solid var(--border-strong);
     background: var(--surface-2);
     color: var(--text-primary);
     cursor: pointer;
-    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
   }
   @media (hover: hover) and (pointer: fine) {
     .gt-btn:hover { background: var(--surface-1); }
@@ -337,6 +337,7 @@
     flex: 1 1 0;
     text-align: center;
     border: none;
+    border-radius: var(--radius-pill); /* 트랙(캡슐)과 안쪽 알약 모양을 통일 */
   }
   .gt-segmented .gt-btn.active {
     background: var(--surface-2);
@@ -366,6 +367,20 @@
   .gt-grip-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.005em; margin: 0 0 6px; }
   .gt-row { display: flex; justify-content: space-between; color: var(--text-secondary); padding: 2px 0; }
   .gt-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text-secondary); margin-bottom: 6px; }
+  /* 코드/스케일/메이저에듀 페이지의 컨트롤 그룹(라벨+버튼 줄)을 흰 카드로
+     감싸서 "정리된 도구 패널" 느낌을 준다 — 사용자가 고른 리디자인 방향(B안). */
+  .gt-group {
+    background: var(--surface-2);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+  .gt-group:last-child { margin-bottom: 0; }
+  @media (max-width: 720px) {
+    .gt-group { padding: 14px 16px; border-radius: 14px; }
+  }
   /* 코드/스케일/메이저에듀 페이지 상단 헤더 — 홈 히어로(.bl-tag/.bl-headline)와
      같은 Chakra Petch 톤으로 맞추고, 기존 sr-only 설명문을 실제로 보이게 승격. */
   .tool-page-header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
@@ -1193,33 +1208,33 @@
 
   <div id="gt-error"></div>
 
-  <div style="margin-bottom:12px;">
+  <div class="gt-group">
     <div class="gt-label" id="label-modes">보기 모드</div>
     <div id="gt-modes" class="gt-flex gt-segmented"></div>
   </div>
 
   <div id="gt-standard-controls">
-    <div style="margin-bottom:12px;">
+    <div class="gt-group">
       <div class="gt-label" id="label-root-top">루트음 / 탑노트</div>
       <div id="gt-roots" class="gt-flex gt-grid-fixed"></div>
     </div>
 
-    <div id="gt-basictype-wrap" style="margin-bottom:12px;">
+    <div id="gt-basictype-wrap" class="gt-group">
       <div class="gt-label" id="label-basic-type">코드 형태</div>
       <div id="gt-basictypes" class="gt-flex gt-segmented"></div>
     </div>
 
-    <div id="gt-topstring-wrap" style="margin-bottom:12px;">
+    <div id="gt-topstring-wrap" class="gt-group">
       <div class="gt-label" id="label-topstring">탑노트가 있는 줄</div>
       <div id="gt-topstrings" class="gt-flex gt-grid-fixed"></div>
     </div>
 
-    <div id="gt-fretgroup-wrap" style="margin-bottom:12px;">
+    <div id="gt-fretgroup-wrap" class="gt-group">
       <div class="gt-label" id="label-fretgroup">프렛 묶기</div>
       <div id="gt-fretgroup" class="gt-flex"></div>
     </div>
 
-    <div style="margin-bottom:16px;">
+    <div class="gt-group">
       <div class="gt-label" id="label-quality">코드 종류</div>
       <div id="gt-qualities" class="gt-flex"></div>
     </div>
@@ -1262,27 +1277,27 @@
     <p class="tool-page-desc" id="scale-sr-desc"></p>
   </div>
 
-  <div style="margin-bottom:12px;">
+  <div class="gt-group">
     <div class="gt-label" id="label-scale-view">보기 모드</div>
     <div id="scale-view-modes" class="gt-flex gt-segmented"></div>
   </div>
 
   <div id="scale-view-scale-controls">
-    <div style="margin-bottom:16px;">
+    <div class="gt-group">
       <div class="gt-label" id="label-scale-root">루트음</div>
       <div id="scale-roots" class="gt-flex gt-grid-fixed"></div>
     </div>
 
-    <div id="scale-groups" style="margin-bottom:16px;"></div>
+    <div id="scale-groups"></div>
   </div>
 
   <div id="scale-view-chordtone-controls" style="display:none;">
-    <div style="margin-bottom:16px;">
+    <div class="gt-group">
       <div class="gt-label" id="label-chordtone-root">루트음</div>
       <div id="scale-chordtone-roots" class="gt-flex gt-grid-fixed"></div>
     </div>
 
-    <div style="margin-bottom:16px;">
+    <div class="gt-group">
       <div class="gt-label" id="label-chordtone-quality">코드 종류</div>
       <div id="scale-chordtone-qualities" class="gt-flex"></div>
     </div>
@@ -1305,17 +1320,17 @@
     <p class="tool-page-desc" id="major-edu-sr-desc"></p>
   </div>
 
-  <div id="major-edu-root-group" style="margin-bottom:16px;">
+  <div id="major-edu-root-group" class="gt-group">
     <div class="gt-label" id="label-major-edu-root">루트음</div>
     <div id="major-edu-roots" class="gt-flex gt-grid-fixed"></div>
   </div>
 
-  <div style="margin-bottom:16px;">
+  <div class="gt-group">
     <div class="gt-label" id="label-major-edu-chord-tier">코드 난이도</div>
     <div id="major-edu-chord-tiers" class="gt-flex gt-tiles"></div>
   </div>
 
-  <div id="major-edu-rhythm-group" style="margin-bottom:20px;">
+  <div id="major-edu-rhythm-group" class="gt-group">
     <div class="gt-label" id="label-major-edu-rhythm-tier">리듬 난이도</div>
     <div id="major-edu-rhythm-tiers" class="gt-flex gt-tiles"></div>
   </div>
@@ -1662,13 +1677,13 @@ try {
       groupPentatonic: '펜타토닉 / 블루스', groupSymmetric: '심메트릭',
 
       scaleNames: {
-        ionian: '아이오니안 (메이저)', dorian: '도리안', phrygian: '프리지안', lydian: '리디안',
-        mixolydian: '믹소리디안', aeolian: '에올리안 (내추럴 마이너)', locrian: '로크리안',
+        ionian: '아이오니안', dorian: '도리안', phrygian: '프리지안', lydian: '리디안',
+        mixolydian: '믹소리디안', aeolian: '에올리안', locrian: '로크리안',
         harmonicMinor: '하모닉 마이너', melodicMinor: '멜로딕 마이너',
         dorianB2: '도리안 b2', lydianAug: '리디안 어그먼트', lydianDominant: '리디안 도미넌트',
         mixolydianB6: '믹소리디안 b6', locrianSharp2: '로크리안 #2', altered: '알터드',
         majorPent: '메이저 펜타토닉', minorPent: '마이너 펜타토닉', blues: '블루스',
-        wholeTone: '홀톤', dimWH: '디미니쉬 (온-반)', dimHW: '디미니쉬 (반-온)'
+        wholeTone: '홀톤', dimWH: '온-반 디미니쉬', dimHW: '반-온 디미니쉬'
       },
       qualityNames: {
         major: '메이저 트라이어드', minor: '마이너 트라이어드', dom7: '도미넌트7', maj7: '메이저7',
@@ -1843,13 +1858,13 @@ try {
       groupPentatonic: 'Pentatonic / Blues', groupSymmetric: 'Symmetric',
 
       scaleNames: {
-        ionian: 'Ionian (Major)', dorian: 'Dorian', phrygian: 'Phrygian', lydian: 'Lydian',
-        mixolydian: 'Mixolydian', aeolian: 'Aeolian (Natural Minor)', locrian: 'Locrian',
+        ionian: 'Ionian', dorian: 'Dorian', phrygian: 'Phrygian', lydian: 'Lydian',
+        mixolydian: 'Mixolydian', aeolian: 'Aeolian', locrian: 'Locrian',
         harmonicMinor: 'Harmonic Minor', melodicMinor: 'Melodic Minor',
         dorianB2: 'Dorian b2', lydianAug: 'Lydian Augmented', lydianDominant: 'Lydian Dominant',
         mixolydianB6: 'Mixolydian b6', locrianSharp2: 'Locrian #2', altered: 'Altered',
         majorPent: 'Major Pentatonic', minorPent: 'Minor Pentatonic', blues: 'Blues',
-        wholeTone: 'Whole Tone', dimWH: 'Diminished (Whole-Half)', dimHW: 'Diminished (Half-Whole)'
+        wholeTone: 'Whole Tone', dimWH: 'Whole-Half Diminished', dimHW: 'Half-Whole Diminished'
       },
       qualityNames: {
         major: 'Major Triad', minor: 'Minor Triad', dom7: 'Dominant7', maj7: 'Major7',
@@ -4709,7 +4724,7 @@ try {
     for (var gi = 0; gi < SCALE_GROUPS.length; gi++) {
       var group = SCALE_GROUPS[gi];
       var wrap = document.createElement('div');
-      wrap.style.marginBottom = '12px';
+      wrap.className = 'gt-group';
       var label = document.createElement('div');
       label.className = 'gt-label';
       label.textContent = t(group.groupKey);
